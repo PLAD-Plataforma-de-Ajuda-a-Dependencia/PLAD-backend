@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pladBack.DTO.RegisterRequestDTO;
 import pladBack.DTO.UserResponseDTO;
 import pladBack.entity.User;
+import pladBack.exception.EmailAlreadyInUseException;
 import pladBack.repositories.userRepository;
 
 @Service
@@ -21,8 +22,8 @@ public class AuthService {
 
     public UserResponseDTO register(RegisterRequestDTO request) {
 
-        if (userRepository.existsByEmail((request.email()))) {
-            throw new IllegalArgumentException("Email already in use");
+        if (userRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyInUseException("Email already in use");
         }
 
         User user = new User();
