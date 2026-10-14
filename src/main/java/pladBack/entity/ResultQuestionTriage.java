@@ -3,7 +3,8 @@ package pladBack.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "result_questions_triages")
+@Table(name = "result_questions_triages",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"triage_id", "question_id", "value_result"}))
 public class ResultQuestionTriage {
 
     @Id
@@ -18,8 +19,10 @@ public class ResultQuestionTriage {
     @JoinColumn(name = "question_id", nullable = false)
     private QuestionTriage question;
 
-    @Column(name = "value_result")
+    @Column(name = "value_result", nullable = false)
     private String valueResult;
+
+
 
     //getters n setters
 

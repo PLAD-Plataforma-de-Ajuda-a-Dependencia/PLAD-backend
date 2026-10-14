@@ -5,9 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pladBack.DTO.ErrorResponseDTO;
-import pladBack.exception.EmailAlreadyInUseException;
-import pladBack.exception.InvalidCredentialsException;
-import pladBack.exception.TooManyRequestException;
+import pladBack.exception.*;
 
 import java.time.Instant;
 
@@ -30,6 +28,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleTooManyRequests(TooManyRequestException ex) {
         ErrorResponseDTO error = new ErrorResponseDTO(ex.getMessage(), Instant.now());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error); // 429
+    }
+
+    @ExceptionHandler(InvalidRegistrationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidRegistration(InvalidRegistrationException ex) {
+        ErrorResponseDTO error = new ErrorResponseDTO(ex.getMessage(), Instant.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error); // 400
+    }
+
+    @ExceptionHandler(InvalidTriageException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidTriage(InvalidTriageException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDTO(ex.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(TriageAlreadyExistException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTriageExists(TriageAlreadyExistException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponseDTO(ex.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(TriageNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTriageNotFound(TriageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDTO(ex.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(ForbiddenActionException.class)
+    public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenActionException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponseDTO(ex.getMessage(), Instant.now()));
     }
 
 }

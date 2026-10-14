@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface triageRepository extends JpaRepository<Triage,Long> {
     Optional<Triage> findByDependentUserId(Long dependentUserId);
+    boolean existsByDependentUserId(Long dependentUserId);
 }

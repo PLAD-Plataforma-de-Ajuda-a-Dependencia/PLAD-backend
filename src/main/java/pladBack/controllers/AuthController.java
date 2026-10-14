@@ -1,6 +1,7 @@
 package pladBack.controllers;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody RegisterRequestDTO request) {
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         UserResponseDTO response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
