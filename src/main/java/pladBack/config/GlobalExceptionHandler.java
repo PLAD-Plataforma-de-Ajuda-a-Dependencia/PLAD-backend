@@ -2,12 +2,14 @@ package pladBack.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pladBack.DTO.ErrorResponseDTO;
 import pladBack.exception.*;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -54,6 +56,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenActionException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenActionException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponseDTO(ex.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDTO> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        if (message.isEmpty()) {
+            message = "Validation failed";
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDTO(message, Instant.now())); // 400
     }
 
 }

@@ -65,6 +65,30 @@ public class QuestionTriage {
         this.createdAt = createdAt;
     }
 
+    public QuestionType getQuestionType() {
+        return questionType;
+    }
+
+    public void setQuestionType(QuestionType questionType) {
+        this.questionType = questionType;
+    }
+
+    public List<Map<String, String>> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Map<String, String>> options) {
+        this.options = options;
+    }
+
+    public short getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(short displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
     //empty constructor
     public QuestionTriage() {}
 
