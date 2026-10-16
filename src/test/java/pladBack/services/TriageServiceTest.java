@@ -230,7 +230,7 @@ class TriageServiceTest {
     @Test
     void resubmitReplacesAnswersOfExistingTriage() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
-        when(triageRepository.findByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
         when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
 
         TriageResponseDTO response = triageService.resubmit(USER_ID, request(answer(age, "AGE_25_39")));
@@ -246,7 +246,7 @@ class TriageServiceTest {
     @Test
     void resubmitWithEmptyAnswersClearsTriage() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
-        when(triageRepository.findByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
         when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
 
         TriageResponseDTO response = triageService.resubmit(USER_ID, request());
@@ -260,7 +260,7 @@ class TriageServiceTest {
     @Test
     void resubmitRequiresExistingTriage() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
-        when(triageRepository.findByDependentUserId(USER_ID)).thenReturn(Optional.empty());
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answer(age, "AGE_18_24"))))
                 .isInstanceOf(TriageNotFoundException.class);
@@ -279,7 +279,7 @@ class TriageServiceTest {
     @Test
     void resubmitWithInvalidAnswerKeepsPreviousAnswers() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
-        when(triageRepository.findByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
         when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
 
         assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answer(age, "AGE_99"))))
