@@ -1,8 +1,8 @@
 package pladBack.services;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,10 @@ import java.util.Date;
 @Service
 public class JwtService {
 
+    private static final String USER_ID_CLAIM = "userId";
+
     private final SecretKey secretKey;
+    private final JwtParser parser;
     private final long expirationMs;
 
     public JwtService(
@@ -22,6 +25,7 @@ public class JwtService {
             @Value("${jwt.expiration-ms}") long expirationMs
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.parser = Jwts.parser().verifyWith(secretKey).build();
         this.expirationMs = expirationMs;
     }
 
@@ -29,32 +33,22 @@ public class JwtService {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
+        // the subject is the user id, not the email: JWT payloads are only base64, so no personal data in them
         return Jwts.builder()
-                .subject(user.getEmail())
-                .claim("userId", user.getId())
+                .subject(String.valueOf(user.getId()))
+                .claim(USER_ID_CLAIM, user.getId())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
                 .compact();
     }
 
-    public Claims validateAndExtractClaims(String token) {
+    // null when the token is valid but has no userId claim
+    public Long extractUserId(String token) {
         try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            return parser.parseSignedClaims(token).getPayload().get(USER_ID_CLAIM, Long.class);
         } catch (JwtException e) {
-            throw new IllegalArgumentException("Invalid or expired token");
+            throw new IllegalArgumentException("Invalid or expired token", e);
         }
     }
-
-    public Long extractUserId(String token) {
-        Claims claims = validateAndExtractClaims(token);
-        return claims.get("userId", Long.class);
-    }
 }
-
-
-

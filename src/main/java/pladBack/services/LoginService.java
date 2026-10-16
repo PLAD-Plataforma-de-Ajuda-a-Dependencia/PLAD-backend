@@ -29,13 +29,13 @@ public class LoginService {
 
     public LoginResponseDTO login(LoginRequestDTO request) {
 
-        Optional<User> userOpt = userRepository.findByEmail(request.email());
+        Optional<User> userOpt = userRepository.findByEmail(Emails.normalize(request.email()));
 
         String hashToCheck = userOpt
                 .map(User::getPassword_hash)
                 .orElse(DUMMY_HASH);
 
-        Boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCheck);
+        boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCheck);
 
         if (userOpt.isEmpty() || !passwordMatches) {
             throw new InvalidCredentialsException("Invalid email or password");

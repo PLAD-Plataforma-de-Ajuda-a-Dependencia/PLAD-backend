@@ -1,7 +1,8 @@
 ### PLAD - fluxo completo da API (HTTP Client do IntelliJ)
 # Rode as requisições de cima para baixo: cada etapa guarda em variáveis o que a próxima usa.
 # E-mails e número de CRP são gerados a cada execução, então o arquivo pode ser rodado várias vezes.
-# Precisa do app rodando (./mvnw spring-boot:run) com o container pladDB de pé.
+# Precisa do app rodando (./mvnw spring-boot:run) com o container pladDB de pé
+# e a variável de ambiente JWT_SECRET definida (32+ caracteres; sem ela o app não sobe).
 
 @baseUrl = http://localhost:8080
 @password = senha-dev-123

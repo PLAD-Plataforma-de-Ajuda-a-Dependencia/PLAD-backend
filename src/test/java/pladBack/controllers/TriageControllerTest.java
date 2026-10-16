@@ -79,10 +79,9 @@ class TriageControllerTest {
     }
 
     @Test
-    void getQuestionsWithoutTokenIsRejected() throws Exception {
-        // SecurityConfig has no authenticationEntryPoint, so Spring Security answers 403
+    void getQuestionsWithoutTokenIsUnauthorized() throws Exception {
         mockMvc.perform(get("/triage/questions"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // POST /triage
@@ -145,7 +144,7 @@ class TriageControllerTest {
     void submitWithoutQuestionIdIsBadRequest() throws Exception {
         submit(newDependentToken(), "{\"answers\": [{\"values\": [\"AGE_18_24\"]}]}")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("answers[0].questionId")));
+                .andExpect(jsonPath("$.message", containsString("answers[0].question_id")));
     }
 
     @Test

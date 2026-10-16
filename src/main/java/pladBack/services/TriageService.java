@@ -87,7 +87,7 @@ public class TriageService {
     public TriageResponseDTO resubmit(Long userId, TriageRequestDTO request) {
         findDependent(userId);
 
-        Triage triage = triageRepository.findByDependentUserId(userId)
+        Triage triage = triageRepository.findForUpdateByDependentUserId(userId)
                 .orElseThrow(() -> new TriageNotFoundException("Triage not found"));
 
         List<ValidatedAnswer> answers = validate(request);

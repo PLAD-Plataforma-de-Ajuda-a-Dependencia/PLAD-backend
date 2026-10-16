@@ -12,7 +12,7 @@ public class Triage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dependent_id", nullable = false, unique = true)
     private Dependent dependent;
 
