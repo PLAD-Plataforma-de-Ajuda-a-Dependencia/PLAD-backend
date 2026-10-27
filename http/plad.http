@@ -1,0 +1,107 @@
+### PLAD - fluxo completo da API (HTTP Client do IntelliJ)
+# Rode as requisições de cima para baixo: cada etapa guarda em variáveis o que a próxima usa.
+# E-mails e número de CRP são gerados a cada execução, então o arquivo pode ser rodado várias vezes.
+# Precisa do app rodando (./mvnw spring-boot:run) com o container pladDB de pé
+# e a variável de ambiente JWT_SECRET definida (32+ caracteres; sem ela o app não sobe).
+
+@baseUrl = http://localhost:8080
+@password = senha-dev-123
+
+### Registro de dependente
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "real_name": "Dependente de Teste",
+  "email": "dependente-{{$uuid}}@plad.dev",
+  "password": "{{password}}",
+  "birth_date": "2000-05-20",
+  "gender": "nao_binario",
+  "type_user": "dependente"
+}
+
+> {%
+    client.test("Dependente registrado", () => client.assert(response.status === 201, "status " + response.status));
+    client.global.set("dependent_email", response.body.email);
+%}
+
+### Registro de psicólogo
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "real_name": "Psicóloga de Teste",
+  "email": "psicologo-{{$uuid}}@plad.dev",
+  "password": "{{password}}",
+  "birth_date": "1985-03-10",
+  "gender": "feminino",
+  "type_user": "psicologo",
+  "credential_type": "CRP",
+  "crm_crp_number": "06/{{$timestamp}}",
+  "graduate": "Psicologia - USP"
+}
+
+> {%
+    client.test("Psicólogo registrado", () => client.assert(response.status === 201, "status " + response.status));
+%}
+
+### Login do dependente (guarda o token)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{dependent_email}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Login ok", () => client.assert(response.status === 200, "status " + response.status));
+    client.global.set("token", response.body.token);
+%}
+
+### Buscar perguntas da triagem (guarda os ids usados no envio)
+GET {{baseUrl}}/triage/questions
+Authorization: Bearer {{token}}
+
+> {%
+    client.test("Perguntas carregadas", () => client.assert(response.status === 200, "status " + response.status));
+    // os ids vêm de BIGSERIAL, então busca pela ordem de exibição em vez de fixar no arquivo
+    const idByOrder = order => response.body.find(q => q.display_order === order).id;
+    client.global.set("q_age_id", idByOrder(1));
+    client.global.set("q_reason_id", idByOrder(2));
+    client.global.set("q_notes_id", idByOrder(10));
+%}
+
+### Enviar triagem
+POST {{baseUrl}}/triage
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "answers": [
+    { "question_id": {{q_age_id}}, "values": ["AGE_18_24"] },
+    { "question_id": {{q_reason_id}}, "values": ["REDUCE_OR_STOP", "TALK_NO_JUDGMENT"] },
+    { "question_id": {{q_notes_id}}, "values": ["Prefiro atendimento no período da noite."] }
+  ]
+}
+
+> {%
+    client.test("Triagem criada", () => client.assert(response.status === 201, "status " + response.status));
+%}
+
+### Enviar triagem de novo (deve dar 409, cada dependente só tem uma triagem)
+POST {{baseUrl}}/triage
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "answers": [
+    { "question_id": {{q_age_id}}, "values": ["AGE_18_24"] },
+    { "question_id": {{q_reason_id}}, "values": ["REDUCE_OR_STOP", "TALK_NO_JUDGMENT"] },
+    { "question_id": {{q_notes_id}}, "values": ["Prefiro atendimento no período da noite."] }
+  ]
+}
+
+> {%
+    client.test("Triagem repetida é rejeitada", () => client.assert(response.status === 409, "status " + response.status));
+%}

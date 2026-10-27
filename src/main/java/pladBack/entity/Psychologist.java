@@ -15,7 +15,7 @@ public class Psychologist {
     @Column(name = "user_id")
     private Long userId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
@@ -37,10 +37,6 @@ public class Psychologist {
     @Column(name = "validate_time")
     private Instant validateTime;
 
-    @PrePersist
-    protected void onCreate() {
-        this.isValidate = true;
-    }
 
     //getters n setters
 
@@ -89,7 +85,7 @@ public class Psychologist {
     }
 
     public void setValidate(boolean validate) {
-        this.isValidate = isValidate;
+        this.isValidate = validate;
     }
 
     public Instant getValidateTime() {

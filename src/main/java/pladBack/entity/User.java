@@ -2,7 +2,6 @@ package pladBack.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -10,7 +9,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Data
 @Table(name = "users")
 public class User {
     @Id

@@ -3,23 +3,26 @@ package pladBack.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "result_questions_triages")
+@Table(name = "result_questions_triages",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"triage_id", "question_id", "value_result"}))
 public class ResultQuestionTriage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "triage_id", nullable = false)
     private Triage triage;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
     private QuestionTriage question;
 
-    @Column(name = "value_result")
+    @Column(name = "value_result", nullable = false)
     private String valueResult;
+
+
 
     //getters n setters
 

@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Database console scratch files ###
+/console.sql
+
+### Local secrets (credentials come from env vars, see application.properties) ###
+.env
+.env.*
+
+### Claude Code (personal; .claude/settings.json and .claude/agents/ stay shared) ###
+.claude/settings.local.json
+CLAUDE.local.md
+
+### OS ###
+.DS_Store
+Thumbs.db
+desktop.ini

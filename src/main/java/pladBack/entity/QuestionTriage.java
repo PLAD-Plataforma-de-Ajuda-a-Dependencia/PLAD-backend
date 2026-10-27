@@ -2,8 +2,12 @@ package pladBack.entity;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "questions_triages")
@@ -23,6 +27,17 @@ public class QuestionTriage {
     public void onCreate() {
         this.createdAt = Instant.now();
     }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "question_type", nullable = false)
+    private QuestionType questionType;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "options", columnDefinition = "jsonb")
+    private List<Map<String, String>> options;
+
+    @Column(name = "display_order", nullable = false)
+    private short displayOrder;
 
     //getters n setters
 
@@ -48,6 +63,30 @@ public class QuestionTriage {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public QuestionType getQuestionType() {
+        return questionType;
+    }
+
+    public void setQuestionType(QuestionType questionType) {
+        this.questionType = questionType;
+    }
+
+    public List<Map<String, String>> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Map<String, String>> options) {
+        this.options = options;
+    }
+
+    public short getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(short displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     //empty constructor
