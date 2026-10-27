@@ -39,6 +39,9 @@ public class QuestionTriage {
     @Column(name = "display_order", nullable = false)
     private short displayOrder;
 
+    @Column(name = "required", nullable = false)
+    private boolean required = true;
+
     //getters n setters
 
     public Long getId() {
@@ -87,6 +90,14 @@ public class QuestionTriage {
 
     public void setDisplayOrder(short displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 
     //empty constructor

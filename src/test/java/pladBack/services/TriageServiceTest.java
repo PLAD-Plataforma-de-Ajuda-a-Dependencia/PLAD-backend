@@ -66,7 +66,7 @@ class TriageServiceTest {
 
     private final QuestionTriage age = question(1L, QuestionType.single_choice, 1, "AGE_18_24", "AGE_25_39");
     private final QuestionTriage reasons = question(2L, QuestionType.multi_choice, 2, "REDUCE_OR_STOP", "CONCERNED_USE", "OTHER");
-    private final QuestionTriage notes = question(10L, QuestionType.free_text, 10);
+    private final QuestionTriage notes = optional(question(10L, QuestionType.free_text, 10));
 
     // getQuestions
 
@@ -83,6 +83,8 @@ class TriageServiceTest {
         assertThat(first.options()).extracting("code").containsExactly("AGE_18_24", "AGE_25_39");
         assertThat(first.options()).extracting("label").containsExactly("label AGE_18_24", "label AGE_25_39");
         assertThat(questions.get(1).options()).isEmpty();
+        assertThat(first.required()).isTrue();
+        assertThat(questions.get(1).required()).isFalse();
     }
 
     // submit: success
@@ -109,28 +111,17 @@ class TriageServiceTest {
     }
 
     @Test
-    void submitOnlySavesAnsweredQuestions() {
+    void submitAcceptsOnlyRequiredQuestions() {
         givenDependentWithoutTriage();
         givenSaveAssignsId();
 
-        TriageResponseDTO response = triageService.submit(USER_ID, request(answer(age, "AGE_25_39")));
+        TriageResponseDTO response = triageService.submit(USER_ID, request(
+                answer(age, "AGE_25_39"),
+                answer(reasons, "OTHER")));
 
-        assertThat(response.answers()).hasSize(1);
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionId).containsExactly(1L, 2L);
         verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
-        assertThat(rowsCaptor.getValue()).hasSize(1);
-    }
-
-    @Test
-    void submitAcceptsEmptyTriage() {
-        givenDependentWithoutTriage();
-        givenSaveAssignsId();
-
-        TriageResponseDTO response = triageService.submit(USER_ID, request());
-
-        assertThat(response.id()).isEqualTo(TRIAGE_ID);
-        assertThat(response.answers()).isEmpty();
-        verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
-        assertThat(rowsCaptor.getValue()).isEmpty();
+        assertThat(rowsCaptor.getValue()).hasSize(2);
     }
 
     @Test
@@ -138,9 +129,12 @@ class TriageServiceTest {
         givenDependentWithoutTriage();
         givenSaveAssignsId();
 
-        TriageResponseDTO response = triageService.submit(USER_ID, request(answer(notes, "a".repeat(1000))));
+        TriageResponseDTO response = triageService.submit(USER_ID, request(
+                answer(age, "AGE_18_24"),
+                answer(reasons, "OTHER"),
+                answer(notes, "a".repeat(1000))));
 
-        assertThat(response.answers().get(0).values().get(0)).hasSize(1000);
+        assertThat(response.answers().get(2).values().get(0)).hasSize(1000);
     }
 
     // submit: rejected
@@ -170,8 +164,24 @@ class TriageServiceTest {
         givenDependentWithoutTriage();
         when(triageRepository.saveAndFlush(any(Triage.class))).thenThrow(new DataIntegrityViolationException("dependent_id"));
 
-        assertThatThrownBy(() -> triageService.submit(USER_ID, request(answer(age, "AGE_18_24"))))
+        assertThatThrownBy(() -> triageService.submit(USER_ID, request(answer(age, "AGE_18_24"), answer(reasons, "OTHER"))))
                 .isInstanceOf(TriageAlreadyExistException.class);
+        verifyNoInteractions(resultQuestionTriageRepository);
+    }
+
+    @Test
+    void submitRejectsEmptyAnswers() {
+        assertSubmitInvalid();
+    }
+
+    @Test
+    void submitRejectsMissingRequiredQuestionAndNamesIt() {
+        givenDependentWithoutTriage();
+
+        assertThatThrownBy(() -> triageService.submit(USER_ID, request(answer(age, "AGE_18_24"), answer(notes, "oi"))))
+                .isInstanceOf(InvalidTriageException.class)
+                .hasMessage("Missing required questions: 2");
+        verify(triageRepository, never()).saveAndFlush(any());
         verifyNoInteractions(resultQuestionTriageRepository);
     }
 
@@ -233,28 +243,27 @@ class TriageServiceTest {
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
         when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
 
-        TriageResponseDTO response = triageService.resubmit(USER_ID, request(answer(age, "AGE_25_39")));
+        TriageResponseDTO response = triageService.resubmit(USER_ID, request(
+                answer(age, "AGE_25_39"),
+                answer(reasons, "OTHER")));
 
         assertThat(response.id()).isEqualTo(TRIAGE_ID);
-        assertThat(response.answers()).extracting(AnswerResponseDTO::values).containsExactly(List.of("AGE_25_39"));
+        assertThat(response.answers()).extracting(AnswerResponseDTO::values)
+                .containsExactly(List.of("AGE_25_39"), List.of("OTHER"));
         InOrder order = inOrder(resultQuestionTriageRepository);
         order.verify(resultQuestionTriageRepository).deleteByTriageId(TRIAGE_ID);
         order.verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
-        assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult).containsExactly("AGE_25_39");
+        assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult).containsExactly("AGE_25_39", "OTHER");
     }
 
     @Test
-    void resubmitWithEmptyAnswersClearsTriage() {
-        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
-        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+    void resubmitWithEmptyAnswersKeepsPreviousAnswers() {
+        assertResubmitInvalid();
+    }
 
-        TriageResponseDTO response = triageService.resubmit(USER_ID, request());
-
-        assertThat(response.answers()).isEmpty();
-        verify(resultQuestionTriageRepository).deleteByTriageId(TRIAGE_ID);
-        verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
-        assertThat(rowsCaptor.getValue()).isEmpty();
+    @Test
+    void resubmitWithMissingRequiredQuestionKeepsPreviousAnswers() {
+        assertResubmitInvalid(answer(age, "AGE_25_39"), answer(notes, "oi"));
     }
 
     @Test
@@ -278,17 +287,21 @@ class TriageServiceTest {
 
     @Test
     void resubmitWithInvalidAnswerKeepsPreviousAnswers() {
+        assertResubmitInvalid(answer(age, "AGE_99"), answer(reasons, "OTHER"));
+    }
+
+    // helpers
+
+    private void assertResubmitInvalid(AnswerRequestDTO... answers) {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
         when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
 
-        assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answer(age, "AGE_99"))))
+        assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answers)))
                 .isInstanceOf(InvalidTriageException.class);
         verify(resultQuestionTriageRepository, never()).deleteByTriageId(anyLong());
         verify(resultQuestionTriageRepository, never()).saveAll(any());
     }
-
-    // helpers
 
     private void assertSubmitInvalid(AnswerRequestDTO... answers) {
         givenDependentWithoutTriage();
@@ -335,6 +348,11 @@ class TriageServiceTest {
         question.setOptions(codes.length == 0 ? null : Arrays.stream(codes)
                 .map(code -> Map.of("code", code, "label", "label " + code))
                 .toList());
+        return question;
+    }
+
+    private static QuestionTriage optional(QuestionTriage question) {
+        question.setRequired(false);
         return question;
     }
 

@@ -9,6 +9,7 @@ public record QuestionResponseDTO(
         String questionText,
         QuestionType questionType,
         List<OptionDTO> options,
-        short displayOrder
+        short displayOrder,
+        boolean required
 ) {
 }

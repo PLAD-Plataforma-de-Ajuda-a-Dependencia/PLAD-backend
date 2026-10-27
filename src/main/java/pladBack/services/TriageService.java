@@ -120,6 +120,16 @@ public class TriageService {
             validated.add(new ValidatedAnswer(question, validateValues(question, answer.values())));
         }
 
+        String missing = questions.values().stream()
+                .filter(QuestionTriage::isRequired)
+                .filter(question -> !answered.contains(question.getId()))
+                .sorted(Comparator.comparingInt(QuestionTriage::getDisplayOrder))
+                .map(question -> String.valueOf(question.getId()))
+                .collect(Collectors.joining(", "));
+        if (!missing.isEmpty()) {
+            throw new InvalidTriageException("Missing required questions: " + missing);
+        }
+
         validated.sort(Comparator.comparingInt(a -> a.question().getDisplayOrder()));
         return validated;
     }
@@ -187,7 +197,7 @@ public class TriageService {
                 : question.getOptions().stream()
                         .map(option -> new OptionDTO(option.get("code"), option.get("label")))
                         .toList();
-        return new QuestionResponseDTO(question.getId(), question.getQuestionText(), question.getQuestionType(), options, question.getDisplayOrder());
+        return new QuestionResponseDTO(question.getId(), question.getQuestionText(), question.getQuestionType(), options, question.getDisplayOrder(), question.isRequired());
     }
 
     private TriageResponseDTO toTriageResponse(Triage triage, List<ValidatedAnswer> answers) {
