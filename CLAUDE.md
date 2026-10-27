@@ -48,8 +48,9 @@ Package root is `pladBack` (layers: `controllers` → `services` → `repositori
 
 ## Database
 
-PostgreSQL runs in a Docker container that I start manually in Docker Desktop
-(container name: `pladDB`). The app and all tests need it at
+PostgreSQL 16 runs in a Docker container defined in `docker-compose.yml` at the
+repo root (container name: `pladDB`, named volume `pladdb_data`). Start it with
+`docker compose up -d`. The app and all tests need it at
 `localhost:5432/dbtest` (dev-only credentials `postgres`/`postgres`).
 
 If tests or the app fail with a connection error (e.g. "Connection refused"),
