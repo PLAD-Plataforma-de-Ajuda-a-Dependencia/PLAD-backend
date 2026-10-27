@@ -17,19 +17,26 @@ public class LoginService {
     private final userRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RateLimiterService rateLimiterService;
 
     private static final String DUMMY_HASH =
             "$2a$10$DowJonesXXXXXXXXXXXXXuY1P0k9y2sZ3wq7vRr8tGZzL4mN5cWe6";
 
-    public LoginService(userRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public LoginService(userRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
+                        RateLimiterService rateLimiterService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.rateLimiterService = rateLimiterService;
     }
 
     public LoginResponseDTO login(LoginRequestDTO request) {
 
-        Optional<User> userOpt = userRepository.findByEmail(Emails.normalize(request.email()));
+        String email = Emails.normalize(request.email());
+        // on top of the per-IP limit, so attempts spread over many IPs still hit one budget per account
+        rateLimiterService.consume("login-email:" + email);
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
 
         String hashToCheck = userOpt
                 .map(User::getPassword_hash)

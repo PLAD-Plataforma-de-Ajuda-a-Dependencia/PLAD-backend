@@ -100,6 +100,29 @@ class LoginControllerTest {
     }
 
     @Test
+    void sixthAttemptOnSameEmailIsTooManyRequestsEvenFromDifferentClients() throws Exception {
+        String email = newUser();
+        for (int i = 0; i < 5; i++) {
+            login(nextClient(), email, "wrong-password").andExpect(status().isUnauthorized());
+        }
+
+        login(nextClient(), email, PASSWORD)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"));
+    }
+
+    @Test
+    void emailLimitIgnoresCaseAndSurroundingSpaces() throws Exception {
+        String email = newUser();
+        for (int i = 0; i < 5; i++) {
+            String variant = i % 2 == 0 ? email.toUpperCase(Locale.ROOT) : "  " + email + " ";
+            login(nextClient(), variant, "wrong-password").andExpect(status().isUnauthorized());
+        }
+
+        login(nextClient(), email, "wrong-password").andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void loginLimitDoesNotUseUpRegistrations() throws Exception {
         String client = nextClient();
         for (int i = 0; i < 5; i++) {
