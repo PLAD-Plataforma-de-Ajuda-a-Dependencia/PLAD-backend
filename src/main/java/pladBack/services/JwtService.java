@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pladBack.entity.User;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
@@ -24,7 +25,7 @@ public class JwtService {
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms}") long expirationMs
     ) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.parser = Jwts.parser().verifyWith(secretKey).build();
         this.expirationMs = expirationMs;
     }

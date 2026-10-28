@@ -1,5 +1,6 @@
 package pladBack.config;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,7 +75,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // safety net for unique constraints a service did not translate; never echo constraint names
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(DataIntegrityViolationException ex) {
-        log.warn("Unhandled data integrity violation", ex);
+        // the Postgres message carries the offending value (e.g. a duplicated e-mail): log the constraint name only
+        log.warn("Unhandled data integrity violation (constraint: {})", violatedConstraint(ex));
         return error(HttpStatus.CONFLICT, "Request conflicts with existing data"); // 409
     }
 
@@ -113,6 +115,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static ResponseEntity<ErrorResponseDTO> error(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(new ErrorResponseDTO(message, Instant.now()));
+    }
+
+    private static String violatedConstraint(Throwable ex) {
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException violation && violation.getConstraintName() != null) {
+                return violation.getConstraintName();
+            }
+        }
+        return "unknown";
     }
 
     private static String reasonPhrase(HttpStatusCode statusCode) {
