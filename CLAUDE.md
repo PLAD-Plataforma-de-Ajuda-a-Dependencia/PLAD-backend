@@ -30,6 +30,7 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 - **User subtypes**: `users` is the base table; `dependents` and `psychologists` share its PK via `@OneToOne @MapsId` on `user_id`. `AuthService.register` creates the `User` plus the matching subtype row in one transaction. A `Triage` is one-to-one with a `Dependent` (`dependent_id` unique); answers live in `result_questions_triages`, which allows multiple rows per question (unique on `triage_id, question_id, value_result`) to support multi-choice.
 - **Auth**: stateless JWT (jjwt). `SecurityConfig` permits `POST /auth/login`, `POST /auth/register` and `/error` by name and requires auth for everything else; a missing or invalid token gets 401. `JwtAuthenticationFilter` reads `Authorization: Bearer <token>` and sets the principal to the `userId` (Long) claim — controllers get the current user's ID from the principal, not an entity. Invalid tokens are ignored (request proceeds unauthenticated). `config/RateLimitInterceptor` rate-limits `/auth/login` and `/auth/register` per endpoint and client IP via Bucket4j (5/min, in-memory) in `RateLimiterService`; the IP is `getRemoteAddr()` as resolved by Tomcat (`server.forward-headers-strategy=native`), which honors `X-Forwarded-For` only from peers in `TRUSTED_PROXIES` (CIDR list, default private ranges). `LoginService` adds a second bucket per normalized email. Emails are stored lowercased.
 - **Errors**: services throw custom exceptions from `plad.exception`; `config/GlobalExceptionHandler` maps each to an HTTP status and an `ErrorResponseDTO(message, timestamp)`. New exceptions need a handler there.
+- **Timestamps**: every date/time column is `TIMESTAMPTZ` (V10 converted the old `TIMESTAMP` ones, reading them as `America/Sao_Paulo`) and maps to `Instant`. `spring.jpa.properties.hibernate.jdbc.time_zone=UTC` keeps Hibernate independent of the JVM zone, and surefire runs the test JVM with `-Duser.timezone=America/Sao_Paulo` so zone bugs show up (`InstantRoundTripTest` fails if the JVM isn't in that zone). `@PrePersist` overwrites `createdAt` with `Instant.now()`, so tests can't set it.
 - **JSON uses snake_case** globally (`spring.jackson.property-naming-strategy=SNAKE_CASE`), so camelCase record DTO fields serialize as snake_case.
 
 ## Conventions
@@ -45,6 +46,7 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 - Never change `ddl-auto` or disable Flyway to make something work.
 - Ask before adding Maven dependencies.
 - Never hardcode secrets; use env vars
+- New date/time columns are always `TIMESTAMPTZ`, never `TIMESTAMP`.
 - After any change, run `./mvnw test` and fix failures before saying it's done.
 - Every new custom exception needs a handler in `GlobalExceptionHandler`.
 
