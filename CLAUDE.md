@@ -21,18 +21,18 @@ Running the app also needs a `JWT_SECRET` env var (at least 32 bytes, e.g. from 
 
 ## Architecture
 
-Package root is `pladBack` (layers: `controllers` → `services` → `repositories` → `entity`, plus `DTO`, `exception`, `config`).
+Package root is `plad` (layers: `controllers` → `services` → `repositories` → `entity`, plus `dto`, `exception`, `config`).
 
 - **Schema is owned by Flyway**, not Hibernate: `spring.jpa.hibernate.ddl-auto=validate`. Any entity change requires a new migration `src/main/resources/db/migration/V{n}__description.sql`; never edit an already-applied migration. Triage questions are seeded via migration (V5), with `options` stored as JSONB `[{code, label}]` and `question_type` in `single_choice | multi_choice | free_text`.
-- **Postgres native enums** (`user_type`, `sex`, `crm_crp_type`) map to Java enums via `@Enumerated(EnumType.STRING)` + `@JdbcTypeCode(SqlTypes.NAMED_ENUM)`. Java enum constant names must match the DB enum labels exactly (e.g. `userType.dependente`, `sex.nao_binario`).
+- **Postgres native enums** (`user_type`, `sex`, `crm_crp_type`) map to Java enums via `@Enumerated(EnumType.STRING)` + `@JdbcTypeCode(SqlTypes.NAMED_ENUM)`. Java enum constant names must match the DB enum labels exactly (e.g. `UserType.dependente`, `Sex.nao_binario`).
 - **User subtypes**: `users` is the base table; `dependents` and `psychologists` share its PK via `@OneToOne @MapsId` on `user_id`. `AuthService.register` creates the `User` plus the matching subtype row in one transaction. A `Triage` is one-to-one with a `Dependent` (`dependent_id` unique); answers live in `result_questions_triages`, which allows multiple rows per question (unique on `triage_id, question_id, value_result`) to support multi-choice.
 - **Auth**: stateless JWT (jjwt). `SecurityConfig` permits `POST /auth/login`, `POST /auth/register` and `/error` by name and requires auth for everything else; a missing or invalid token gets 401. `JwtAuthenticationFilter` reads `Authorization: Bearer <token>` and sets the principal to the `userId` (Long) claim — controllers get the current user's ID from the principal, not an entity. Invalid tokens are ignored (request proceeds unauthenticated). `config/RateLimitInterceptor` rate-limits `/auth/login` and `/auth/register` per endpoint and client IP via Bucket4j (5/min, in-memory) in `RateLimiterService`; the IP is `getRemoteAddr()` as resolved by Tomcat (`server.forward-headers-strategy=native`), which honors `X-Forwarded-For` only from peers in `TRUSTED_PROXIES` (CIDR list, default private ranges). `LoginService` adds a second bucket per normalized email. Emails are stored lowercased.
-- **Errors**: services throw custom exceptions from `pladBack.exception`; `config/GlobalExceptionHandler` maps each to an HTTP status and an `ErrorResponseDTO(message, timestamp)`. New exceptions need a handler there.
+- **Errors**: services throw custom exceptions from `plad.exception`; `config/GlobalExceptionHandler` maps each to an HTTP status and an `ErrorResponseDTO(message, timestamp)`. New exceptions need a handler there.
 - **JSON uses snake_case** globally (`spring.jackson.property-naming-strategy=SNAKE_CASE`), so camelCase record DTO fields serialize as snake_case.
 
 ## Conventions
 
-- Repository interfaces and some enums use lowercase-initial names (`userRepository`, `userType`, `sex`); keep consistent with existing names rather than renaming.
+- Standard Java naming: PascalCase types (`UserRepository`, `UserType`, `Sex`), camelCase fields and methods (`realName`, `getRealName`), lowercase package names (`dto`). Column names stay snake_case via `@Column(name = "...")`. Only enum *constants* stay lowercase/snake_case (`dependente`, `nao_binario`, `single_choice`), since they must match the DB enum labels and the JSON values.
 - DTOs are Java records with Jakarta Validation annotations; controllers use `@Valid @RequestBody`.
 - Constructor injection (no `@Autowired` on fields) in main code.
 
