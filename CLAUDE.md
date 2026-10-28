@@ -15,7 +15,9 @@ Use the Maven wrapper (`./mvnw` in bash, `.\mvnw.cmd` in PowerShell):
 - All tests: `./mvnw test`
 - Single test class / method: `./mvnw test -Dtest=TestDataRunner` / `./mvnw test -Dtest=TestDataRunner#savesAndFindsUserByEmail`
 
-The app and **all tests** need a running PostgreSQL at `localhost:5432/dbtest` (user/password `postgres`/`postgres`, see `src/main/resources/application.properties`). There is no in-memory test DB: `@DataJpaTest` tests use `@AutoConfigureTestDatabase(replace = NONE)`, so they hit the real Postgres with Flyway migrations applied.
+The app needs a running PostgreSQL at `localhost:5432/dbtest` (user/password `postgres`/`postgres`, see `src/main/resources/application.properties`). **Tests only need Docker running**: they start their own throwaway `postgres:16` via Testcontainers and never touch `pladDB` or `dbtest`. There is no in-memory test DB: `@DataJpaTest` tests use `@AutoConfigureTestDatabase(replace = NONE)`, so they hit a real Postgres with Flyway migrations applied.
+
+Every test that loads a Spring context (`@SpringBootTest`, `@DataJpaTest`) must add `@Import(TestcontainersConfig.class)` (`src/test/java/plad/config`). It declares a single `@ServiceConnection` Postgres container shared by all contexts in the JVM, and its connection replaces `spring.datasource.*`. Unit tests with Mockito don't need it.
 
 Running the app also needs a `JWT_SECRET` env var (at least 32 bytes, e.g. from `openssl rand -base64 48`). There is no default on purpose, so the app refuses to start without it. Tests don't need it: the surefire config in `pom.xml` sets a throwaway `jwt.secret`.
 
@@ -50,9 +52,12 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 
 PostgreSQL 16 runs in a Docker container defined in `docker-compose.yml` at the
 repo root (container name: `pladDB`, named volume `pladdb_data`). Start it with
-`docker compose up -d`. The app and all tests need it at
-`localhost:5432/dbtest` (dev-only credentials `postgres`/`postgres`).
+`docker compose up -d`. Only the app needs it, at `localhost:5432/dbtest`
+(dev-only credentials `postgres`/`postgres`); tests use their own Testcontainers
+Postgres and work with `pladDB` stopped.
 
-If tests or the app fail with a connection error (e.g. "Connection refused"),
-the container is probably stopped: stop and tell me. Do not change code,
-config or credentials to work around it.
+If the app fails with a connection error (e.g. "Connection refused"), the
+container is probably stopped. If tests fail because Docker isn't running or
+reachable (Testcontainers "Could not find a valid Docker environment"), Docker
+Desktop is probably stopped. In either case: stop and tell me. Do not change
+code, config or credentials to work around it.

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
+import plad.config.TestcontainersConfig;
 import plad.entity.Dependent;
 import plad.entity.QuestionTriage;
 import plad.entity.QuestionType;
@@ -23,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(TestcontainersConfig.class)
 class TriageRepositoryTest {
 
     @Autowired

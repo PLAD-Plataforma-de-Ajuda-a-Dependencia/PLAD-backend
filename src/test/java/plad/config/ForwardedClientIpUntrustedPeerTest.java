@@ -3,6 +3,7 @@ package plad.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "server.tomcat.remoteip.internal-proxies=192.0.2.1/32")
+@Import(TestcontainersConfig.class)
 class ForwardedClientIpUntrustedPeerTest {
 
     private final HttpClient http = HttpClient.newHttpClient();
