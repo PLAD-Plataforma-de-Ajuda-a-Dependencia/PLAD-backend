@@ -41,6 +41,65 @@ class RateLimiterServiceTest {
         assertThat(rateLimiterService.trackedKeys()).isZero();
     }
 
+    @Test
+    void loginEmailKeysAllowTenThenReject() {
+        String emailKey = RateLimiterService.LOGIN_EMAIL_PREFIX + "a@example.com";
+        for (int i = 0; i < 10; i++) {
+            rateLimiterService.consume(emailKey);
+        }
+
+        // 10 tokens per 15 minutes refill one every 90 seconds
+        assertThatThrownBy(() -> rateLimiterService.consume(emailKey))
+                .isInstanceOfSatisfying(TooManyRequestException.class,
+                        ex -> assertThat(ex.getRetryAfterSeconds()).isBetween(1L, 90L));
+
+        consumeFiveTimes("client-a");
+        assertThatThrownBy(() -> rateLimiterService.consume("client-a"))
+                .isInstanceOf(TooManyRequestException.class);
+    }
+
+    @Test
+    void evictsEmailBucketsOnlyAfterTheirOwnRefillPeriod() {
+        rateLimiterService.consume("client-a");
+        rateLimiterService.consume(RateLimiterService.LOGIN_EMAIL_PREFIX + "a@example.com");
+        long now = System.nanoTime();
+
+        rateLimiterService.evictIdleBuckets(now + Duration.ofMinutes(1).toNanos());
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(1);
+
+        rateLimiterService.evictIdleBuckets(now + Duration.ofMinutes(14).toNanos());
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(1);
+
+        rateLimiterService.evictIdleBuckets(now + Duration.ofMinutes(15).toNanos());
+        assertThat(rateLimiterService.trackedKeys()).isZero();
+    }
+
+    @Test
+    void refundGivesBackOneTokenButNeverBeyondCapacity() {
+        consumeFiveTimes("client-a");
+        rateLimiterService.refund("client-a");
+
+        assertThatCode(() -> rateLimiterService.consume("client-a")).doesNotThrowAnyException();
+        assertThatThrownBy(() -> rateLimiterService.consume("client-a"))
+                .isInstanceOf(TooManyRequestException.class);
+
+        // refunding a full bucket must not stack extra tokens
+        rateLimiterService.consume("client-b");
+        for (int i = 0; i < 3; i++) {
+            rateLimiterService.refund("client-b");
+        }
+        consumeFiveTimes("client-b");
+        assertThatThrownBy(() -> rateLimiterService.consume("client-b"))
+                .isInstanceOf(TooManyRequestException.class);
+    }
+
+    @Test
+    void refundOfUnknownKeyCreatesNoBucket() {
+        rateLimiterService.refund("client-a");
+
+        assertThat(rateLimiterService.trackedKeys()).isZero();
+    }
+
     private void consumeFiveTimes(String key) {
         for (int i = 0; i < 5; i++) {
             rateLimiterService.consume(key);

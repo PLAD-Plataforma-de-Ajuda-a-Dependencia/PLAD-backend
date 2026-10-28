@@ -77,6 +77,7 @@ class TriageServiceTest {
         List<QuestionResponseDTO> questions = triageService.getQuestions();
 
         assertThat(questions).extracting(QuestionResponseDTO::id).containsExactly(1L, 10L);
+        assertThat(questions).extracting(QuestionResponseDTO::code).containsExactly("Q_1", "Q_10");
         QuestionResponseDTO first = questions.get(0);
         assertThat(first.questionType()).isEqualTo(QuestionType.single_choice);
         assertThat(first.displayOrder()).isEqualTo((short) 1);
@@ -108,6 +109,46 @@ class TriageServiceTest {
         assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult)
                 .containsExactly("AGE_18_24", "REDUCE_OR_STOP", "OTHER", "quero apoio");
         assertThat(rowsCaptor.getValue()).allSatisfy(row -> assertThat(row.getTriage().getId()).isEqualTo(TRIAGE_ID));
+    }
+
+    @Test
+    void submitAcceptsQuestionsIdentifiedByCode() {
+        givenDependentWithoutTriage();
+        givenSaveAssignsId();
+
+        TriageResponseDTO response = triageService.submit(USER_ID, request(
+                answerByCode(notes, "oi"),
+                answerByCode(reasons, "OTHER"),
+                answerByCode(age, "AGE_18_24")));
+
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionId).containsExactly(1L, 2L, 10L);
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionCode).containsExactly("Q_1", "Q_2", "Q_10");
+        verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
+        assertThat(rowsCaptor.getValue()).extracting(row -> row.getQuestion().getId()).containsExactly(1L, 2L, 10L);
+    }
+
+    @Test
+    void submitAcceptsMixOfIdsAndCodes() {
+        givenDependentWithoutTriage();
+        givenSaveAssignsId();
+
+        TriageResponseDTO response = triageService.submit(USER_ID, request(
+                answer(age, "AGE_18_24"),
+                answerByCode(reasons, "OTHER")));
+
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionId).containsExactly(1L, 2L);
+    }
+
+    @Test
+    void submitAcceptsIdAndCodeOfTheSameQuestion() {
+        givenDependentWithoutTriage();
+        givenSaveAssignsId();
+
+        TriageResponseDTO response = triageService.submit(USER_ID, request(
+                new AnswerRequestDTO(age.getId(), age.getCode(), List.of("AGE_18_24")),
+                answer(reasons, "OTHER")));
+
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionId).containsExactly(1L, 2L);
     }
 
     @Test
@@ -187,7 +228,32 @@ class TriageServiceTest {
 
     @Test
     void submitRejectsUnknownQuestion() {
-        assertSubmitInvalid(new AnswerRequestDTO(999L, List.of("X")));
+        assertSubmitInvalid(new AnswerRequestDTO(999L, null, List.of("X")));
+    }
+
+    @Test
+    void submitRejectsUnknownQuestionCode() {
+        assertSubmitInvalid(new AnswerRequestDTO(null, "NOT_A_QUESTION", List.of("X")));
+    }
+
+    @Test
+    void submitRejectsAnswerWithoutIdAndCode() {
+        assertSubmitInvalid(new AnswerRequestDTO(null, null, List.of("AGE_18_24")));
+    }
+
+    @Test
+    void submitRejectsAnswerWithBlankCodeAndNoId() {
+        assertSubmitInvalid(new AnswerRequestDTO(null, "  ", List.of("AGE_18_24")));
+    }
+
+    @Test
+    void submitRejectsIdAndCodeOfDifferentQuestions() {
+        assertSubmitInvalid(new AnswerRequestDTO(age.getId(), reasons.getCode(), List.of("AGE_18_24")));
+    }
+
+    @Test
+    void submitRejectsSameQuestionTwiceByIdAndByCode() {
+        assertSubmitInvalid(answer(age, "AGE_18_24"), answerByCode(age, "AGE_25_39"));
     }
 
     @Test
@@ -254,6 +320,20 @@ class TriageServiceTest {
         order.verify(resultQuestionTriageRepository).deleteByTriageId(TRIAGE_ID);
         order.verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
         assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult).containsExactly("AGE_25_39", "OTHER");
+    }
+
+    @Test
+    void resubmitAcceptsQuestionsIdentifiedByCode() {
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
+        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+
+        TriageResponseDTO response = triageService.resubmit(USER_ID, request(
+                answerByCode(age, "AGE_25_39"),
+                answerByCode(reasons, "OTHER")));
+
+        assertThat(response.answers()).extracting(AnswerResponseDTO::questionCode).containsExactly("Q_1", "Q_2");
+        verify(resultQuestionTriageRepository).deleteByTriageId(TRIAGE_ID);
     }
 
     @Test
@@ -342,6 +422,7 @@ class TriageServiceTest {
     private static QuestionTriage question(Long id, QuestionType type, int displayOrder, String... codes) {
         QuestionTriage question = new QuestionTriage();
         question.setId(id);
+        question.setCode("Q_" + id);
         question.setQuestionText("question " + id);
         question.setQuestionType(type);
         question.setDisplayOrder((short) displayOrder);
@@ -357,7 +438,11 @@ class TriageServiceTest {
     }
 
     private static AnswerRequestDTO answer(QuestionTriage question, String... values) {
-        return new AnswerRequestDTO(question.getId(), List.of(values));
+        return new AnswerRequestDTO(question.getId(), null, List.of(values));
+    }
+
+    private static AnswerRequestDTO answerByCode(QuestionTriage question, String... values) {
+        return new AnswerRequestDTO(null, question.getCode(), List.of(values));
     }
 
     private static TriageRequestDTO request(AnswerRequestDTO... answers) {

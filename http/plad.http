@@ -72,16 +72,16 @@ Authorization: Bearer {{token}}
     client.global.set("q_notes_id", idByOrder(10));
 %}
 
-### Enviar triagem
+### Enviar triagem (identifica as perguntas pelo question_code, estável entre ambientes)
 POST {{baseUrl}}/triage
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "answers": [
-    { "question_id": {{q_age_id}}, "values": ["AGE_18_24"] },
-    { "question_id": {{q_reason_id}}, "values": ["REDUCE_OR_STOP", "TALK_NO_JUDGMENT"] },
-    { "question_id": {{q_notes_id}}, "values": ["Prefiro atendimento no período da noite."] }
+    { "question_code": "AGE_RANGE", "values": ["AGE_18_24"] },
+    { "question_code": "REASON", "values": ["REDUCE_OR_STOP", "TALK_NO_JUDGMENT"] },
+    { "question_code": "NOTES_FOR_TEAM", "values": ["Prefiro atendimento no período da noite."] }
   ]
 }
 

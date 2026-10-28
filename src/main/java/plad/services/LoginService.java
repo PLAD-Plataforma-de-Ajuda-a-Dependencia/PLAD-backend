@@ -33,8 +33,11 @@ public class LoginService {
     public LoginResponseDTO login(LoginRequestDTO request) {
 
         String email = Emails.normalize(request.email());
-        // on top of the per-IP limit, so attempts spread over many IPs still hit one budget per account
-        rateLimiterService.consume("login-email:" + email);
+        // on top of the per-IP limit, so attempts spread over many IPs still hit one budget per account.
+        // The slot is taken before the password check (an exhausted budget answers 429 without revealing whether
+        // the password was right) and handed back on success, so only failed attempts count.
+        String emailKey = RateLimiterService.LOGIN_EMAIL_PREFIX + email;
+        rateLimiterService.consume(emailKey);
 
         Optional<User> userOpt = userRepository.findByEmail(email);
 
@@ -47,6 +50,8 @@ public class LoginService {
         if (userOpt.isEmpty() || !passwordMatches) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
+
+        rateLimiterService.refund(emailKey);
 
         User user = userOpt.get();
         String token = jwtService.generateToken(user);

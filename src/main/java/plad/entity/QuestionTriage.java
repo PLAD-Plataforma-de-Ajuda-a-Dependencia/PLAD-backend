@@ -17,6 +17,9 @@ public class QuestionTriage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "code", nullable = false, unique = true, length = 50)
+    private String code;
+
     @Column(name = "question_text", nullable = false)
     private String questionText;
 
@@ -50,6 +53,14 @@ public class QuestionTriage {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getQuestionText() {

@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -79,6 +80,9 @@ class TriageControllerTest {
         mockMvc.perform(get("/triage/questions").header("Authorization", bearer(newDependentToken())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(singleChoiceId))
+                .andExpect(jsonPath("$[0].code").value("AGE_RANGE"))
+                .andExpect(jsonPath("$[1].code").value("REASON"))
+                .andExpect(jsonPath("$[9].code").value("NOTES_FOR_TEAM"))
                 .andExpect(jsonPath("$[0].question_text").isNotEmpty())
                 .andExpect(jsonPath("$[0].question_type").value("single_choice"))
                 .andExpect(jsonPath("$[0].display_order").value(1))
@@ -92,7 +96,10 @@ class TriageControllerTest {
     @Test
     void getQuestionsWithoutTokenIsUnauthorized() throws Exception {
         mockMvc.perform(get("/triage/questions"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
     // POST /triage
@@ -111,13 +118,94 @@ class TriageControllerTest {
                 .andExpect(jsonPath("$.created_at").isNotEmpty())
                 .andExpect(jsonPath("$.answers.length()").value(10))
                 .andExpect(jsonPath("$.answers[0].question_id").value(singleChoiceId))
+                .andExpect(jsonPath("$.answers[0].question_code").value("AGE_RANGE"))
                 .andExpect(jsonPath("$.answers[1].values.length()").value(2))
                 .andExpect(jsonPath("$.answers[9].values[0]").value("quero apoio"));
 
         submit(token, body)
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("TRIAGE_ALREADY_EXISTS"))
                 .andExpect(jsonPath("$.message").isNotEmpty())
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void submitIdentifyingQuestionsOnlyByCodeIsCreated() throws Exception {
+        submit(newDependentToken(), bodyByCode(Map.of(
+                "AGE_RANGE", "\"AGE_25_39\"",
+                "REASON", "\"REDUCE_OR_STOP\", \"OTHER\"",
+                "NOTES_FOR_TEAM", "\"quero apoio\"")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(10))
+                .andExpect(jsonPath("$.answers[0].question_id").value(singleChoiceId))
+                .andExpect(jsonPath("$.answers[0].question_code").value("AGE_RANGE"))
+                .andExpect(jsonPath("$.answers[0].values[0]").value("AGE_25_39"))
+                .andExpect(jsonPath("$.answers[1].values.length()").value(2))
+                .andExpect(jsonPath("$.answers[9].question_code").value("NOTES_FOR_TEAM"));
+    }
+
+    @Test
+    void submitIdentifyingQuestionsOnlyByIdIsCreated() throws Exception {
+        submit(newDependentToken(), body())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers[0].question_id").value(singleChoiceId))
+                .andExpect(jsonPath("$.answers[0].question_code").value("AGE_RANGE"));
+    }
+
+    @Test
+    void submitMixingIdAndCodeAcrossAnswersIsCreated() throws Exception {
+        String rest = questions.stream()
+                .filter(q -> q.isRequired() && !q.getCode().equals("AGE_RANGE"))
+                .map(q -> "{\"question_code\": \"%s\", \"values\": [\"%s\"]}".formatted(q.getCode(), q.getOptions().get(0).get("code")))
+                .collect(Collectors.joining(","));
+        String body = "{\"answers\": [{\"question_id\": %d, \"values\": [\"AGE_18_24\"]},%s]}".formatted(singleChoiceId, rest);
+
+        submit(newDependentToken(), body)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(requiredCount()));
+    }
+
+    @Test
+    void submitWithMatchingIdAndCodeIsCreated() throws Exception {
+        String body = body().replace("{\"question_id\": %d,".formatted(singleChoiceId),
+                "{\"question_id\": %d, \"question_code\": \"AGE_RANGE\",".formatted(singleChoiceId));
+
+        submit(newDependentToken(), body)
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void submitWithIdAndCodeOfDifferentQuestionsIsBadRequestAndDoesNotUseTheSingleSubmission() throws Exception {
+        String token = newDependentToken();
+        String body = "{\"answers\": [{\"question_id\": %d, \"question_code\": \"REASON\", \"values\": [\"AGE_18_24\"]}]}"
+                .formatted(singleChoiceId);
+
+        submit(token, body)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("does not match")));
+
+        submit(token, body())
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void submitWithUnknownQuestionCodeIsBadRequest() throws Exception {
+        submit(newDependentToken(), "{\"answers\": [{\"question_code\": \"NOT_A_QUESTION\", \"values\": [\"X\"]}]}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("NOT_A_QUESTION")));
+    }
+
+    @Test
+    void submitAnsweringTheSameQuestionByIdAndByCodeIsBadRequest() throws Exception {
+        String body = "{\"answers\": [{\"question_id\": %d, \"values\": [\"AGE_18_24\"]},{\"question_code\": \"AGE_RANGE\", \"values\": [\"AGE_25_39\"]}]}"
+                .formatted(singleChoiceId);
+
+        submit(newDependentToken(), body)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("Duplicate answer")));
     }
 
     @Test
@@ -133,6 +221,7 @@ class TriageControllerTest {
 
         submit(token, "{\"answers\": []}")
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message", containsString("answers")));
 
         submit(token, body())
@@ -145,6 +234,7 @@ class TriageControllerTest {
 
         submit(token, bodyWithout(multiChoiceId))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
                 .andExpect(jsonPath("$.message", containsString("Missing required questions")))
                 .andExpect(jsonPath("$.message", containsString(String.valueOf(multiChoiceId))));
 
@@ -159,6 +249,7 @@ class TriageControllerTest {
 
         submit(newDependentToken(), body)
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message", containsString("answers")));
     }
 
@@ -168,6 +259,8 @@ class TriageControllerTest {
 
         submit(newDependentToken(), answerBody(multiChoiceId, values))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("answers[0].values"))
                 .andExpect(jsonPath("$.message", containsString("answers[0].values")));
     }
 
@@ -175,6 +268,7 @@ class TriageControllerTest {
     void submitAsPsychologistIsForbidden() throws Exception {
         submit(newPsychologistToken(), body())
                 .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
@@ -182,6 +276,7 @@ class TriageControllerTest {
     void submitWithInvalidOptionIsBadRequest() throws Exception {
         submit(newDependentToken(), answerBody(singleChoiceId, "\"NOT_AN_OPTION\""))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
                 .andExpect(jsonPath("$.message", containsString("NOT_AN_OPTION")));
     }
 
@@ -189,21 +284,25 @@ class TriageControllerTest {
     void submitWithoutAnswersFieldIsBadRequest() throws Exception {
         submit(newDependentToken(), "{}")
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message", containsString("answers")))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test
-    void submitWithoutQuestionIdIsBadRequest() throws Exception {
+    void submitWithoutQuestionIdAndCodeIsBadRequest() throws Exception {
         submit(newDependentToken(), "{\"answers\": [{\"values\": [\"AGE_18_24\"]}]}")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("answers[0].question_id")));
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("question_id or question_code")));
     }
 
     @Test
     void submitWithEmptyValuesIsBadRequest() throws Exception {
         submit(newDependentToken(), answerBody(singleChoiceId, ""))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("answers[0].values"))
                 .andExpect(jsonPath("$.message", containsString("answers[0].values")));
     }
 
@@ -213,6 +312,7 @@ class TriageControllerTest {
     void resubmitWithoutTriageIsNotFound() throws Exception {
         resubmit(newDependentToken(), body())
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("TRIAGE_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
@@ -227,12 +327,24 @@ class TriageControllerTest {
     }
 
     @Test
+    void resubmitIdentifyingQuestionsOnlyByCodeReplacesAnswers() throws Exception {
+        String token = newDependentToken();
+        submit(token, body()).andExpect(status().isCreated());
+
+        resubmit(token, bodyByCode(Map.of("AGE_RANGE", "\"AGE_60_PLUS\"")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.answers[0].question_code").value("AGE_RANGE"))
+                .andExpect(jsonPath("$.answers[0].values[0]").value("AGE_60_PLUS"));
+    }
+
+    @Test
     void resubmitWithEmptyAnswersIsBadRequest() throws Exception {
         String token = newDependentToken();
         submit(token, body()).andExpect(status().isCreated());
 
         resubmit(token, "{\"answers\": []}")
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message", containsString("answers")));
     }
 
@@ -243,6 +355,7 @@ class TriageControllerTest {
 
         resubmit(token, bodyWithout(singleChoiceId))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
                 .andExpect(jsonPath("$.message", containsString("Missing required questions")))
                 .andExpect(jsonPath("$.message", containsString(String.valueOf(singleChoiceId))));
     }
@@ -300,6 +413,20 @@ class TriageControllerTest {
 
     private String body() {
         return body(Map.of(), null);
+    }
+
+    // like body(), but every answer names its question by code; overrides replace or add answers by question code
+    private String bodyByCode(Map<String, String> overrides) {
+        Map<String, String> values = new LinkedHashMap<>();
+        for (QuestionTriage question : questions) {
+            if (question.isRequired()) {
+                values.put(question.getCode(), "\"" + question.getOptions().get(0).get("code") + "\"");
+            }
+        }
+        values.putAll(overrides);
+        return "{\"answers\": [" + values.entrySet().stream()
+                .map(e -> "{\"question_code\": \"%s\", \"values\": [%s]}".formatted(e.getKey(), e.getValue()))
+                .collect(Collectors.joining(",")) + "]}";
     }
 
     private String bodyWithout(Long questionId) {

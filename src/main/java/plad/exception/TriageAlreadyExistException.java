@@ -1,7 +1,7 @@
 package plad.exception;
 
-public class TriageAlreadyExistException extends RuntimeException {
+public class TriageAlreadyExistException extends ApiException {
     public TriageAlreadyExistException(String message) {
-        super(message);
+        super(ErrorCode.TRIAGE_ALREADY_EXISTS, message);
     }
 }

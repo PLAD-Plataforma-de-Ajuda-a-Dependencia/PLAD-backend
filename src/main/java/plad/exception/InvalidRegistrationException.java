@@ -1,7 +1,7 @@
 package plad.exception;
 
-public class InvalidRegistrationException extends RuntimeException {
+public class InvalidRegistrationException extends ApiException {
     public InvalidRegistrationException(String message) {
-        super(message);
+        super(ErrorCode.INVALID_REGISTRATION, message);
     }
 }
