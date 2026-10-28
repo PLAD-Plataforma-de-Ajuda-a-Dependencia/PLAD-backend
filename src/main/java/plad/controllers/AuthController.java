@@ -40,7 +40,7 @@ public class AuthController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body, or a psychologist without credentials or with a credential number already registered",
+                    description = "Invalid body (including a birth date under 18 years old), or a psychologist without credentials or with a credential number already registered",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "409", description = "E-mail already in use",

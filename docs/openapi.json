@@ -232,7 +232,7 @@
       "RegisterRequestDTO": {
         "properties": {
           "birth_date": {
-            "description": "Must be in the past",
+            "description": "Date of birth (yyyy-MM-dd). The platform is only for adults: the person must be at least 18 years old on today's date in America/Sao_Paulo, turning 18 on the same day and month of birth (born on Feb 29: Mar 1 in non-leap years), and at most 120. Otherwise 400 VALIDATION_ERROR on birth_date",
             "example": "1990-05-20",
             "format": "date",
             "type": "string"
@@ -508,7 +508,7 @@
                 }
               }
             },
-            "description": "Invalid body, or a psychologist without credentials or with a credential number already registered"
+            "description": "Invalid body (including a birth date under 18 years old), or a psychologist without credentials or with a credential number already registered"
           },
           "409": {
             "content": {

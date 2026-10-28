@@ -111,6 +111,7 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.errors[0].field").value("birth_date"))
+                .andExpect(jsonPath("$.errors[0].message").value("must be at least 18 years old"))
                 .andExpect(jsonPath("$.message", containsString("birth_date")));
     }
 

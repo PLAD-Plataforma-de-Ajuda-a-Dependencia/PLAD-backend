@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import plad.entity.UserType;
 import plad.entity.Sex;
 import plad.entity.CrmCrpType;
 import plad.validation.MaxBytes;
+import plad.validation.MinAge;
 
 import java.time.LocalDate;
 
@@ -21,8 +21,11 @@ public record RegisterRequestDTO(
         @NotBlank @Email @Size(max = 255) String email,
         @Schema(description = "At least 8 characters and at most 72 bytes in UTF-8", example = "senha-segura-123")
         @NotBlank @Size(min = 8) @MaxBytes(value = 72) String password,
-        @Schema(description = "Must be in the past", example = "1990-05-20")
-        @NotNull @Past LocalDate birthDate,
+        @Schema(description = "Date of birth (yyyy-MM-dd). The platform is only for adults: the person must be at least "
+                + "18 years old on today's date in America/Sao_Paulo, turning 18 on the same day and month of birth "
+                + "(born on Feb 29: Mar 1 in non-leap years), and at most 120. Otherwise 400 VALIDATION_ERROR on birth_date",
+                example = "1990-05-20")
+        @NotNull @MinAge(value = 18) LocalDate birthDate,
         @NotNull Sex gender,
         @Schema(description = "Account type; psicologo also requires credential_type and crm_crp_number")
         @NotNull UserType typeUser,
