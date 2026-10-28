@@ -6,10 +6,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import plad.dto.AnswerRequestDTO;
+import plad.dto.AnswerResponseDTO;
 import plad.dto.ErrorResponseDTO;
+import plad.dto.LoginRequestDTO;
+import plad.dto.LoginResponseDTO;
 import plad.dto.OptionDTO;
 import plad.dto.QuestionResponseDTO;
 import plad.dto.RegisterRequestDTO;
+import plad.dto.TriageRequestDTO;
+import plad.dto.TriageResponseDTO;
+import plad.dto.UserResponseDTO;
 import plad.entity.CrmCrpType;
 import plad.entity.QuestionType;
 import plad.entity.Sex;
@@ -28,7 +35,9 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,13 +99,60 @@ class OpenApiContractTest {
     void schemaPropertiesMatchRuntimeSerialization() throws Exception {
         JsonNode schemas = jsonMapper.readTree(fetchApiDocs()).path("components").path("schemas");
 
-        assertSchemaMatches(schemas, "ErrorResponseDTO", new ErrorResponseDTO("message", Instant.now()));
-        assertSchemaMatches(schemas, "OptionDTO", new OptionDTO("code", "label"));
-        assertSchemaMatches(schemas, "QuestionResponseDTO", new QuestionResponseDTO(
-                1L, "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
-        assertSchemaMatches(schemas, "RegisterRequestDTO", new RegisterRequestDTO(
+        requestSamples().forEach((name, dto) -> assertSchemaMatches(schemas, name, dto));
+        responseSamples().forEach((name, dto) -> assertSchemaMatches(schemas, name, dto));
+    }
+
+    // a new DTO must not skip the check above: its schema needs a sample in requestSamples() or responseSamples()
+    @Test
+    void everySchemaHasARuntimeSample() throws Exception {
+        JsonNode schemas = jsonMapper.readTree(fetchApiDocs()).path("components").path("schemas");
+
+        Set<String> withoutSample = new TreeSet<>(schemas.propertyNames());
+        withoutSample.removeAll(requestSamples().keySet());
+        withoutSample.removeAll(responseSamples().keySet());
+        assertThat(withoutSample)
+                .as("schemas sem amostra: adicione o DTO em requestSamples() ou responseSamples() de OpenApiContractTest")
+                .isEmpty();
+    }
+
+    // the API sends every key of a response DTO, so the contract must say so (openapi-typescript reads "required")
+    @Test
+    void responseSchemasRequireEveryProperty() throws Exception {
+        JsonNode schemas = jsonMapper.readTree(fetchApiDocs()).path("components").path("schemas");
+
+        responseSamples().forEach((name, dto) -> {
+            Set<String> required = new TreeSet<>();
+            schemas.path(name).path("required").forEach(property -> required.add(property.asString()));
+            Set<String> serialized = new TreeSet<>(jsonMapper.valueToTree(dto).propertyNames());
+            assertThat(required).as("required properties of schema %s", name).isEqualTo(serialized);
+        });
+    }
+
+    // fully populated on purpose: a null field would still be serialized, but a sample should show every key
+    private static Map<String, Object> requestSamples() {
+        Map<String, Object> samples = new TreeMap<>();
+        samples.put("AnswerRequestDTO", new AnswerRequestDTO(1L, List.of("AGE_25_39")));
+        samples.put("LoginRequestDTO", new LoginRequestDTO("a@b.com", "password-123"));
+        samples.put("RegisterRequestDTO", new RegisterRequestDTO(
                 "name", "a@b.com", "password-123", LocalDate.of(1990, 5, 20), Sex.nao_binario,
                 UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia"));
+        samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, List.of("AGE_25_39")))));
+        return samples;
+    }
+
+    private static Map<String, Object> responseSamples() {
+        Map<String, Object> samples = new TreeMap<>();
+        AnswerResponseDTO answer = new AnswerResponseDTO(1L, "text", List.of("AGE_25_39"));
+        samples.put("AnswerResponseDTO", answer);
+        samples.put("ErrorResponseDTO", new ErrorResponseDTO("message", Instant.now()));
+        samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
+        samples.put("OptionDTO", new OptionDTO("code", "label"));
+        samples.put("QuestionResponseDTO", new QuestionResponseDTO(
+                1L, "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
+        samples.put("TriageResponseDTO", new TriageResponseDTO(1L, Instant.now(), List.of(answer)));
+        samples.put("UserResponseDTO", new UserResponseDTO(1L, "name", "a@b.com"));
+        return samples;
     }
 
     private void assertSchemaMatches(JsonNode schemas, String name, Object dto) {

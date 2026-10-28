@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 // springdoc switches its whole configuration off (ObjectMapperProvider included) when the docs are disabled, so
 // these beans must go with it or the app would not start in prod
@@ -65,6 +68,58 @@ public class OpenApiConfig {
                 openApi.getTags().sort(Comparator.comparing(Tag::getName));
             }
         };
+    }
+
+    // A response always carries every key of its DTO (nulls are serialized, not omitted), but springdoc only fills
+    // "required" from Bean Validation, so openapi-typescript would type every response field as optional. A field that
+    // can be null stays required and gets @Schema(nullable = true) on the DTO, which swagger-core renders as a
+    // type with "null". A DTO used as both request and response would come out all required.
+    @Bean
+    public OpenApiCustomizer requiredResponseProperties() {
+        return openApi -> {
+            if (openApi.getPaths() == null || openApi.getComponents() == null
+                    || openApi.getComponents().getSchemas() == null) {
+                return;
+            }
+            Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+            Set<String> responseSchemas = new TreeSet<>();
+            openApi.getPaths().values().forEach(path -> path.readOperations().forEach(operation -> {
+                if (operation.getResponses() == null) {
+                    return;
+                }
+                operation.getResponses().values().forEach(response -> {
+                    if (response.getContent() != null) {
+                        response.getContent().values()
+                                .forEach(media -> collectSchemaRefs(media.getSchema(), schemas, responseSchemas));
+                    }
+                });
+            }));
+            responseSchemas.forEach(name -> {
+                Schema<?> schema = schemas.get(name);
+                if (schema != null && schema.getProperties() != null) {
+                    schema.getProperties().keySet().forEach(schema::addRequiredItem);
+                }
+            });
+        };
+    }
+
+    // follows $ref, array items and properties, so nested DTOs (OptionDTO, AnswerResponseDTO) are found too
+    private static void collectSchemaRefs(Schema<?> schema, Map<String, Schema> schemas, Set<String> found) {
+        if (schema == null) {
+            return;
+        }
+        String ref = schema.get$ref();
+        if (ref != null) {
+            String name = ref.substring(ref.lastIndexOf('/') + 1);
+            if (found.add(name)) {
+                collectSchemaRefs(schemas.get(name), schemas, found);
+            }
+            return;
+        }
+        collectSchemaRefs(schema.getItems(), schemas, found);
+        if (schema.getProperties() != null) {
+            schema.getProperties().values().forEach(property -> collectSchemaRefs(property, schemas, found));
+        }
     }
 
     // GlobalExceptionHandler.handleUnexpected answers any unhandled failure, so every operation can return it

@@ -51,7 +51,12 @@
             },
             "type": "array"
           }
-        }
+        },
+        "required": [
+          "question_id",
+          "question_text",
+          "values"
+        ]
       },
       "ErrorResponseDTO": {
         "properties": {
@@ -66,7 +71,11 @@
             "format": "date-time",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "message",
+          "timestamp"
+        ]
       },
       "LoginRequestDTO": {
         "properties": {
@@ -97,7 +106,10 @@
             "example": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.c2lnbmF0dXJl",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "token"
+        ]
       },
       "OptionDTO": {
         "properties": {
@@ -111,7 +123,11 @@
             "example": "25 to 39",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "code",
+          "label"
+        ]
       },
       "QuestionResponseDTO": {
         "properties": {
@@ -153,7 +169,15 @@
             "example": true,
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "display_order",
+          "id",
+          "options",
+          "question_text",
+          "question_type",
+          "required"
+        ]
       },
       "RegisterRequestDTO": {
         "properties": {
@@ -273,7 +297,12 @@
             "format": "int64",
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "answers",
+          "created_at",
+          "id"
+        ]
       },
       "UserResponseDTO": {
         "properties": {
@@ -293,7 +322,12 @@
             "example": "Maria Silva",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "email",
+          "id",
+          "real_name"
+        ]
       }
     },
     "securitySchemes": {
