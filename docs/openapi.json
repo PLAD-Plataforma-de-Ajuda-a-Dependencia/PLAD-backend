@@ -1,0 +1,682 @@
+{
+  "components": {
+    "schemas": {
+      "AnswerRequestDTO": {
+        "properties": {
+          "question_id": {
+            "description": "Id of a question from GET /triage/questions",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "values": {
+            "description": "Option codes for single_choice and multi_choice questions (single_choice takes exactly one); the text itself, as the only item, for free_text",
+            "example": [
+              "AGE_25_39"
+            ],
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "question_id",
+          "values"
+        ]
+      },
+      "AnswerResponseDTO": {
+        "properties": {
+          "question_id": {
+            "description": "Question id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "question_text": {
+            "description": "Question text",
+            "example": "What is your age range?",
+            "type": "string"
+          },
+          "values": {
+            "description": "Stored option codes, or the free text",
+            "example": [
+              "AGE_25_39"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      },
+      "ErrorResponseDTO": {
+        "properties": {
+          "message": {
+            "description": "What went wrong; validation errors list field: reason pairs separated by \"; \"",
+            "example": "email: must be a well-formed email address",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "When the error was produced (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequestDTO": {
+        "properties": {
+          "email": {
+            "description": "Login e-mail; case and surrounding spaces are ignored",
+            "example": "maria@example.com",
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "password": {
+            "description": "At most 72 bytes in UTF-8",
+            "example": "senha-segura-123",
+            "maxLength": 72,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginResponseDTO": {
+        "properties": {
+          "token": {
+            "description": "JWT for the Authorization: Bearer header",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.c2lnbmF0dXJl",
+            "type": "string"
+          }
+        }
+      },
+      "OptionDTO": {
+        "properties": {
+          "code": {
+            "description": "Value to send in answers[].values",
+            "example": "AGE_25_39",
+            "type": "string"
+          },
+          "label": {
+            "description": "Text to show to the user",
+            "example": "25 to 39",
+            "type": "string"
+          }
+        }
+      },
+      "QuestionResponseDTO": {
+        "properties": {
+          "display_order": {
+            "description": "Position in the questionnaire, ascending",
+            "example": 1,
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Question id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "options": {
+            "description": "Selectable options; empty for free_text",
+            "items": {
+              "$ref": "#/components/schemas/OptionDTO"
+            },
+            "type": "array"
+          },
+          "question_text": {
+            "description": "Question text",
+            "example": "What is your age range?",
+            "type": "string"
+          },
+          "question_type": {
+            "description": "single_choice takes one option, multi_choice several, free_text a text",
+            "enum": [
+              "single_choice",
+              "multi_choice",
+              "free_text"
+            ],
+            "type": "string"
+          },
+          "required": {
+            "description": "Whether the question must be answered",
+            "example": true,
+            "type": "boolean"
+          }
+        }
+      },
+      "RegisterRequestDTO": {
+        "properties": {
+          "birth_date": {
+            "description": "Must be in the past",
+            "example": "1990-05-20",
+            "format": "date",
+            "type": "string"
+          },
+          "credential_type": {
+            "description": "Professional council; required when type_user is psicologo",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": "string"
+          },
+          "crm_crp_number": {
+            "description": "Council registration number, unique; required when type_user is psicologo",
+            "example": "06/123456",
+            "maxLength": 30,
+            "minLength": 0,
+            "type": "string"
+          },
+          "email": {
+            "description": "Login e-mail; stored lowercased and unique",
+            "example": "maria@example.com",
+            "format": "email",
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "gender": {
+            "enum": [
+              "masculino",
+              "feminino",
+              "nao_binario",
+              "transexual",
+              "outro"
+            ],
+            "type": "string"
+          },
+          "graduate": {
+            "description": "Graduation, only stored for psicologo",
+            "example": "Psicologia - USP",
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "password": {
+            "description": "At least 8 characters and at most 72 bytes in UTF-8",
+            "example": "senha-segura-123",
+            "maxLength": 2147483647,
+            "minLength": 8,
+            "type": "string"
+          },
+          "real_name": {
+            "description": "Full name",
+            "example": "Maria Silva",
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "type_user": {
+            "description": "Account type; psicologo also requires credential_type and crm_crp_number",
+            "enum": [
+              "dependente",
+              "psicologo"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "birth_date",
+          "email",
+          "gender",
+          "password",
+          "real_name",
+          "type_user"
+        ]
+      },
+      "TriageRequestDTO": {
+        "properties": {
+          "answers": {
+            "description": "One entry per question; every required question must be answered exactly once",
+            "items": {
+              "$ref": "#/components/schemas/AnswerRequestDTO"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "answers"
+        ]
+      },
+      "TriageResponseDTO": {
+        "properties": {
+          "answers": {
+            "description": "Stored answers, one entry per question",
+            "items": {
+              "$ref": "#/components/schemas/AnswerResponseDTO"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "description": "When the triage was first submitted (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Triage id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          }
+        }
+      },
+      "UserResponseDTO": {
+        "properties": {
+          "email": {
+            "description": "Normalized (lowercase) e-mail",
+            "example": "maria@example.com",
+            "type": "string"
+          },
+          "id": {
+            "description": "User id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "real_name": {
+            "description": "Full name",
+            "example": "Maria Silva",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Backend of the Plataforma de Ajuda a Dependência. JSON fields are snake_case. Errors use ErrorResponseDTO, except a missing or invalid token, which gets a bare 401.",
+    "title": "PLAD API",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              }
+            },
+            "description": "Logged in"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid e-mail or password"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Too many attempts, per client IP or per e-mail",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "security": [ ],
+        "summary": "Log in and get a JWT",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDTO"
+                }
+              }
+            },
+            "description": "User created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, or a psychologist without credentials or with a credential number already registered"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "E-mail already in use"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Too many requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "security": [ ],
+        "summary": "Register a dependent or a psychologist",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/triage": {
+      "post": {
+        "description": "A dependent can submit once; use PUT to change it afterwards",
+        "operationId": "submit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriageRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriageResponseDTO"
+                }
+              }
+            },
+            "description": "Triage stored"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, unknown or repeated question, missing required question or invalid option"
+          },
+          "401": {
+            "description": "Missing or invalid token (empty body)"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Triage already submitted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Submit the triage",
+        "tags": [
+          "Triage"
+        ]
+      },
+      "put": {
+        "operationId": "resubmit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriageRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriageResponseDTO"
+                }
+              }
+            },
+            "description": "Triage replaced"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, unknown or repeated question, missing required question or invalid option"
+          },
+          "401": {
+            "description": "Missing or invalid token (empty body)"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "No triage submitted yet"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Replace the submitted triage",
+        "tags": [
+          "Triage"
+        ]
+      }
+    },
+    "/triage/questions": {
+      "get": {
+        "operationId": "getQuestions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionResponseDTO"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Questions"
+          },
+          "401": {
+            "description": "Missing or invalid token (empty body)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "List the triage questions in display order",
+        "tags": [
+          "Triage"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": [ ]
+    }
+  ],
+  "servers": [
+    {
+      "description": "Generated server url",
+      "url": "http://localhost"
+    }
+  ],
+  "tags": [
+    {
+      "description": "Public endpoints, rate limited to 5 requests per minute per client IP",
+      "name": "Auth"
+    },
+    {
+      "description": "Dependents' one-time triage questionnaire; requires a Bearer token",
+      "name": "Triage"
+    }
+  ]
+}
