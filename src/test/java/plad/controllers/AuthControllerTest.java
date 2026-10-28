@@ -60,6 +60,7 @@ class AuthControllerTest {
 
         register(client, dependentBody(email.toUpperCase(Locale.ROOT)))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_IN_USE"))
                 .andExpect(jsonPath("$.message").value("Email already in use"));
     }
 
@@ -67,6 +68,7 @@ class AuthControllerTest {
     void psychologistWithoutCredentialsIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("dependente", "psicologo"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
                 .andExpect(jsonPath("$.message").value("Psychologist must provide credentials"));
     }
 
@@ -74,6 +76,7 @@ class AuthControllerTest {
     void psychologistWithBlankCredentialNumberIsBadRequest() throws Exception {
         register(nextClient(), psychologistBody(newEmail(), "   "))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
                 .andExpect(jsonPath("$.message").value("Psychologist must provide credentials"));
     }
 
@@ -81,6 +84,8 @@ class AuthControllerTest {
     void nameLongerThanTheColumnIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("Ana Teste", "a".repeat(151)))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("real_name"))
                 .andExpect(jsonPath("$.message", containsString("real_name")));
     }
 
@@ -89,6 +94,8 @@ class AuthControllerTest {
         // 40 chars but 80 UTF-8 bytes: used to pass @Size(max = 72) and blow up in BCrypt
         register(nextClient(), dependentBody(newEmail()).replace("senha-dev-123", "ç".repeat(40)))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("password"))
                 .andExpect(jsonPath("$.message", containsString("password must be at most 72 bytes")));
     }
 
@@ -102,6 +109,8 @@ class AuthControllerTest {
     void futureBirthDateIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("2000-05-20", LocalDate.now().plusDays(1).toString()))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("birth_date"))
                 .andExpect(jsonPath("$.message", containsString("birth_date")));
     }
 
@@ -109,6 +118,7 @@ class AuthControllerTest {
     void unknownEnumValueIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("nao_binario", "not_a_gender"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").isNotEmpty())
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
@@ -117,6 +127,7 @@ class AuthControllerTest {
     void malformedJsonIsBadRequest() throws Exception {
         register(nextClient(), "{")
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
@@ -129,7 +140,8 @@ class AuthControllerTest {
 
         register(client, "{}")
                 .andExpect(status().isTooManyRequests())
-                .andExpect(header().exists("Retry-After"));
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"));
     }
 
     // helpers

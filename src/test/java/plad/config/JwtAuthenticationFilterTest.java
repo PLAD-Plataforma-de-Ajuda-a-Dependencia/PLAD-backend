@@ -8,12 +8,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import plad.entity.User;
 import plad.services.JwtService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -37,19 +40,25 @@ class JwtAuthenticationFilterTest {
     @Test
     void missingTokenIsUnauthorized() throws Exception {
         mockMvc.perform(get("/triage/questions"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
     void nonBearerSchemeIsUnauthorized() throws Exception {
         getQuestions("Basic dXNlcjpwYXNz")
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
     void malformedTokenIsUnauthorized() throws Exception {
         getQuestions("Bearer not-a-jwt")
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
@@ -58,7 +67,9 @@ class JwtAuthenticationFilterTest {
                 .generateToken(userWithId(1L));
 
         getQuestions("Bearer " + token)
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
@@ -66,7 +77,9 @@ class JwtAuthenticationFilterTest {
         String token = Jwts.builder().subject("1").signWith(Keys.hmacShaKeyFor(secret.getBytes())).compact();
 
         getQuestions("Bearer " + token)
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     private ResultActions getQuestions(String authorization) throws Exception {

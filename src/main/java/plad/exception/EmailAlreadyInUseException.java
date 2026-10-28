@@ -1,7 +1,7 @@
 package plad.exception;
 
-public class EmailAlreadyInUseException extends RuntimeException {
+public class EmailAlreadyInUseException extends ApiException {
     public EmailAlreadyInUseException(String message) {
-        super(message);
+        super(ErrorCode.EMAIL_IN_USE, message);
     }
 }

@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -74,9 +75,11 @@ class LoginControllerTest {
 
         login(client, newUser(), "wrong-password")
                 .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                 .andExpect(jsonPath("$.message").value(INVALID_CREDENTIALS));
         login(client, "nobody-" + UUID.randomUUID() + "@example.com", PASSWORD)
                 .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                 .andExpect(jsonPath("$.message").value(INVALID_CREDENTIALS));
     }
 
@@ -84,6 +87,8 @@ class LoginControllerTest {
     void loginWithoutFieldsIsBadRequest() throws Exception {
         perform(nextClient(), "{}")
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[*].field", containsInAnyOrder("email", "password")))
                 .andExpect(jsonPath("$.message", allOf(containsString("email"), containsString("password"))));
     }
 
@@ -92,6 +97,8 @@ class LoginControllerTest {
         // 40 chars but 80 UTF-8 bytes
         login(nextClient(), "nobody-" + UUID.randomUUID() + "@example.com", "ç".repeat(40))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("password"))
                 .andExpect(jsonPath("$.message", containsString("password must be at most 72 bytes")));
     }
 
@@ -116,6 +123,7 @@ class LoginControllerTest {
         login(client, email, PASSWORD)
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
                 .andExpect(jsonPath("$.message", containsString("Too many requests")));
     }
 
@@ -130,6 +138,7 @@ class LoginControllerTest {
         login(nextClient(), email, PASSWORD)
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
                 .andExpect(jsonPath("$.message", containsString("Too many requests")));
     }
 

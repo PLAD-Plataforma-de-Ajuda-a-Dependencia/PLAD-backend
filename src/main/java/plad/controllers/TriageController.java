@@ -26,7 +26,7 @@ import plad.services.TriageService;
 
 import java.util.List;
 
-// a missing or invalid token gets a bare 401 (no body) from SecurityConfig, before reaching these methods
+// a missing or invalid token gets a 401 ErrorResponseDTO from SecurityErrorHandler, before reaching these methods
 @Tag(name = "Triage", description = "Dependents' one-time triage questionnaire; requires a Bearer token")
 @RestController
 @RequestMapping("/triage")
@@ -43,7 +43,9 @@ public class TriageController {
             @ApiResponse(responseCode = "200", description = "Questions",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = QuestionResponseDTO.class)))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid token (empty body)", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/questions")
     public ResponseEntity<List<QuestionResponseDTO>> getQuestions() {
@@ -59,7 +61,9 @@ public class TriageController {
                     description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid token (empty body)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "403", description = "The user is not a dependent",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
@@ -82,7 +86,9 @@ public class TriageController {
                     description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid token (empty body)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "403", description = "The user is not a dependent",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),

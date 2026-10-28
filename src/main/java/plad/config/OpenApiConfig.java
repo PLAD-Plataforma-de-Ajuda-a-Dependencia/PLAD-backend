@@ -40,7 +40,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("PLAD API")
                         .description("Backend of the Plataforma de Ajuda a Dependência. JSON fields are snake_case. "
-                                + "Errors use ErrorResponseDTO, except a missing or invalid token, which gets a bare 401.")
+                                + "Every error, including a missing or invalid token (401), uses ErrorResponseDTO.")
                         .version("v1"))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME, new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)

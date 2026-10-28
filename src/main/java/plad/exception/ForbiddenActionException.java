@@ -1,7 +1,7 @@
 package plad.exception;
 
-public class ForbiddenActionException extends RuntimeException {
+public class ForbiddenActionException extends ApiException {
     public ForbiddenActionException(String message) {
-        super(message);
+        super(ErrorCode.FORBIDDEN, message);
     }
 }

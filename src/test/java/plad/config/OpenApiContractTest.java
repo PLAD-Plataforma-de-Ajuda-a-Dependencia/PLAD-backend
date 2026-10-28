@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import plad.dto.AnswerRequestDTO;
 import plad.dto.AnswerResponseDTO;
 import plad.dto.ErrorResponseDTO;
+import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
 import plad.dto.LoginResponseDTO;
 import plad.dto.OptionDTO;
@@ -145,7 +146,9 @@ class OpenApiContractTest {
         Map<String, Object> samples = new TreeMap<>();
         AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
         samples.put("AnswerResponseDTO", answer);
-        samples.put("ErrorResponseDTO", new ErrorResponseDTO("message", Instant.now()));
+        samples.put("ErrorResponseDTO", new ErrorResponseDTO("CODE", "message", Instant.now(),
+                List.of(new FieldErrorDTO("field", "message"))));
+        samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("QuestionResponseDTO", new QuestionResponseDTO(

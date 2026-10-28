@@ -1,11 +1,11 @@
 package plad.exception;
 
-public class TooManyRequestException extends RuntimeException {
+public class TooManyRequestException extends ApiException {
 
     private final long retryAfterSeconds;
 
     public TooManyRequestException(String message, long retryAfterSeconds) {
-        super(message);
+        super(ErrorCode.RATE_LIMITED, message);
         this.retryAfterSeconds = retryAfterSeconds;
     }
 

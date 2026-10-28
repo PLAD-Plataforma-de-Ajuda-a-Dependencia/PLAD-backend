@@ -48,14 +48,17 @@ class GlobalExceptionHandlerTest {
     void unknownRouteIsNotFound() throws Exception {
         mockMvc.perform(get("/does-not-exist").header("Authorization", bearer()))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.message").isNotEmpty())
-                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.errors").isEmpty());
     }
 
     @Test
     void wrongMethodIsMethodNotAllowed() throws Exception {
         mockMvc.perform(delete("/triage/questions").header("Authorization", bearer()))
                 .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
@@ -66,6 +69,7 @@ class GlobalExceptionHandlerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"answers\": ["))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("Failed to read request"));
     }
 
@@ -82,6 +86,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleDataIntegrity(new DataIntegrityViolationException(pgMessage, hibernateCause));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().code()).isEqualTo("DATA_CONFLICT");
         assertThat(output).contains("users_email_key");
         assertThat(output).doesNotContain(EMAIL);
     }
@@ -96,6 +101,16 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(output).contains("unknown");
         assertThat(output).doesNotContain(EMAIL);
+    }
+
+    @Test
+    void unexpectedExceptionIsInternalErrorWithoutItsMessage() {
+        ResponseEntity<ErrorResponseDTO> response = handler.handleUnexpected(new RuntimeException("secret detail"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody().code()).isEqualTo("INTERNAL_ERROR");
+        assertThat(response.getBody().message()).doesNotContain("secret detail");
+        assertThat(response.getBody().errors()).isEmpty();
     }
 
     private String bearer() {

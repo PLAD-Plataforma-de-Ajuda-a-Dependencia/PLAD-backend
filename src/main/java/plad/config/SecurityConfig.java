@@ -4,14 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,15 +24,18 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final SecurityErrorHandler securityErrorHandler;
     private final List<String> allowedOrigins;
     private final boolean apiDocsEnabled;
 
     public SecurityConfig(
             JwtService jwtService,
+            SecurityErrorHandler securityErrorHandler,
             @Value("${cors.allowed-origins}") String allowedOrigins,
             @Value("${springdoc.api-docs.enabled:false}") boolean apiDocsEnabled
     ) {
         this.jwtService = jwtService;
+        this.securityErrorHandler = securityErrorHandler;
         this.allowedOrigins = parseOrigins(allowedOrigins);
         this.apiDocsEnabled = apiDocsEnabled;
     }
@@ -75,9 +76,11 @@ public class SecurityConfig {
                     }
                     auth.anyRequest().authenticated();
                 })
-                // missing or invalid token: 401 so the client knows to log in again (403 stays "not allowed")
+                // missing or invalid token: 401 so the client knows to log in again (403 stays "not allowed");
+                // both answer with the same ErrorResponseDTO JSON as GlobalExceptionHandler
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                        .authenticationEntryPoint(securityErrorHandler)
+                        .accessDeniedHandler(securityErrorHandler))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

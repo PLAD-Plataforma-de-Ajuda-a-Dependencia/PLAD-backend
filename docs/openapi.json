@@ -72,6 +72,18 @@
       },
       "ErrorResponseDTO": {
         "properties": {
+          "code": {
+            "description": "Stable identifier of the error, safe to switch on (see the error code list in CLAUDE.md)",
+            "example": "VALIDATION_ERROR",
+            "type": "string"
+          },
+          "errors": {
+            "description": "Per-field details; empty unless the code is VALIDATION_ERROR",
+            "items": {
+              "$ref": "#/components/schemas/FieldErrorDTO"
+            },
+            "type": "array"
+          },
           "message": {
             "description": "What went wrong; validation errors list field: reason pairs separated by \"; \"",
             "example": "email: must be a well-formed email address",
@@ -85,8 +97,28 @@
           }
         },
         "required": [
+          "code",
+          "errors",
           "message",
           "timestamp"
+        ]
+      },
+      "FieldErrorDTO": {
+        "properties": {
+          "field": {
+            "description": "Request field that failed validation, in snake_case",
+            "example": "answers[0].values",
+            "type": "string"
+          },
+          "message": {
+            "description": "Why the field was rejected",
+            "example": "must not be empty",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "message"
         ]
       },
       "LoginRequestDTO": {
@@ -357,7 +389,7 @@
     }
   },
   "info": {
-    "description": "Backend of the Plataforma de Ajuda a Dependência. JSON fields are snake_case. Errors use ErrorResponseDTO, except a missing or invalid token, which gets a bare 401.",
+    "description": "Backend of the Plataforma de Ajuda a Dependência. JSON fields are snake_case. Every error, including a missing or invalid token (401), uses ErrorResponseDTO.",
     "title": "PLAD API",
     "version": "v1"
   },
@@ -561,7 +593,14 @@
             "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
           },
           "401": {
-            "description": "Missing or invalid token (empty body)"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
           },
           "403": {
             "content": {
@@ -633,7 +672,14 @@
             "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
           },
           "401": {
-            "description": "Missing or invalid token (empty body)"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
           },
           "403": {
             "content": {
@@ -690,7 +736,14 @@
             "description": "Questions"
           },
           "401": {
-            "description": "Missing or invalid token (empty body)"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
           },
           "500": {
             "content": {
