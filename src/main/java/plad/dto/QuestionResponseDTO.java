@@ -9,6 +9,8 @@ import java.util.List;
 public record QuestionResponseDTO(
         @Schema(description = "Question id", example = "1")
         Long id,
+        @Schema(description = "Stable question code, the same in every environment", example = "AGE_RANGE")
+        String code,
         @Schema(description = "Question text", example = "What is your age range?")
         String questionText,
         @Schema(description = "single_choice takes one option, multi_choice several, free_text a text")

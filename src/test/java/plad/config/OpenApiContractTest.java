@@ -132,24 +132,24 @@ class OpenApiContractTest {
     // fully populated on purpose: a null field would still be serialized, but a sample should show every key
     private static Map<String, Object> requestSamples() {
         Map<String, Object> samples = new TreeMap<>();
-        samples.put("AnswerRequestDTO", new AnswerRequestDTO(1L, List.of("AGE_25_39")));
+        samples.put("AnswerRequestDTO", new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")));
         samples.put("LoginRequestDTO", new LoginRequestDTO("a@b.com", "password-123"));
         samples.put("RegisterRequestDTO", new RegisterRequestDTO(
                 "name", "a@b.com", "password-123", LocalDate.of(1990, 5, 20), Sex.nao_binario,
                 UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia"));
-        samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, List.of("AGE_25_39")))));
+        samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
     }
 
     private static Map<String, Object> responseSamples() {
         Map<String, Object> samples = new TreeMap<>();
-        AnswerResponseDTO answer = new AnswerResponseDTO(1L, "text", List.of("AGE_25_39"));
+        AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
         samples.put("AnswerResponseDTO", answer);
         samples.put("ErrorResponseDTO", new ErrorResponseDTO("message", Instant.now()));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("QuestionResponseDTO", new QuestionResponseDTO(
-                1L, "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
+                1L, "AGE_RANGE", "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
         samples.put("TriageResponseDTO", new TriageResponseDTO(1L, Instant.now(), List.of(answer)));
         samples.put("UserResponseDTO", new UserResponseDTO(1L, "name", "a@b.com"));
         return samples;

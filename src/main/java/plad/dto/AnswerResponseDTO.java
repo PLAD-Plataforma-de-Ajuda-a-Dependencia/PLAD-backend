@@ -8,6 +8,8 @@ import java.util.List;
 public record AnswerResponseDTO(
         @Schema(description = "Question id", example = "1")
         Long questionId,
+        @Schema(description = "Stable question code", example = "AGE_RANGE")
+        String questionCode,
         @Schema(description = "Question text", example = "What is your age range?")
         String questionText,
         @ArraySchema(arraySchema = @Schema(description = "Stored option codes, or the free text", example = "[\"AGE_25_39\"]"))

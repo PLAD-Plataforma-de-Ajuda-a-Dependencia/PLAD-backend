@@ -3,8 +3,15 @@
     "schemas": {
       "AnswerRequestDTO": {
         "properties": {
+          "question_code": {
+            "description": "Stable code of a question from GET /triage/questions; send this or question_id (if both, they must match)",
+            "example": "AGE_RANGE",
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
           "question_id": {
-            "description": "Id of a question from GET /triage/questions",
+            "description": "Id of a question from GET /triage/questions; send this or question_code (if both, they must match)",
             "example": 1,
             "format": "int64",
             "type": "integer"
@@ -24,12 +31,16 @@
           }
         },
         "required": [
-          "question_id",
           "values"
         ]
       },
       "AnswerResponseDTO": {
         "properties": {
+          "question_code": {
+            "description": "Stable question code",
+            "example": "AGE_RANGE",
+            "type": "string"
+          },
           "question_id": {
             "description": "Question id",
             "example": 1,
@@ -53,6 +64,7 @@
           }
         },
         "required": [
+          "question_code",
           "question_id",
           "question_text",
           "values"
@@ -131,6 +143,11 @@
       },
       "QuestionResponseDTO": {
         "properties": {
+          "code": {
+            "description": "Stable question code, the same in every environment",
+            "example": "AGE_RANGE",
+            "type": "string"
+          },
           "display_order": {
             "description": "Position in the questionnaire, ascending",
             "example": 1,
@@ -171,6 +188,7 @@
           }
         },
         "required": [
+          "code",
           "display_order",
           "id",
           "options",
@@ -540,7 +558,7 @@
                 }
               }
             },
-            "description": "Invalid body, unknown or repeated question, missing required question or invalid option"
+            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
           },
           "401": {
             "description": "Missing or invalid token (empty body)"
@@ -612,7 +630,7 @@
                 }
               }
             },
-            "description": "Invalid body, unknown or repeated question, missing required question or invalid option"
+            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
           },
           "401": {
             "description": "Missing or invalid token (empty body)"

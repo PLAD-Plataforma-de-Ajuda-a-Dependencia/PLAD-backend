@@ -57,6 +57,15 @@ class TriageRepositoryTest {
     }
 
     @Test
+    void seededQuestionsHaveStableUniqueCodes() {
+        List<QuestionTriage> questions = questionTriageRepository.findAllByOrderByDisplayOrderAsc();
+
+        assertThat(questions).extracting(QuestionTriage::getCode).containsExactly(
+                "AGE_RANGE", "REASON", "USE_FREQUENCY_30D", "CONTROL_DIFFICULTY", "SUPPORT_NETWORK",
+                "PREVIOUS_TREATMENT", "GROUP_EXPERIENCE", "PREFERRED_FORMAT", "FOLLOWUP_STYLE", "NOTES_FOR_TEAM");
+    }
+
+    @Test
     void existsByDependentUserIdOnlyMatchesThatDependent() {
         Dependent withTriage = newDependent();
         Dependent withoutTriage = newDependent();
