@@ -120,21 +120,48 @@ class LoginControllerTest {
     }
 
     @Test
-    void sixthAttemptOnSameEmailIsTooManyRequestsEvenFromDifferentClients() throws Exception {
+    void eleventhFailedAttemptOnSameEmailIsTooManyRequestsEvenFromDifferentClients() throws Exception {
         String email = newUser();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             login(nextClient(), email, "wrong-password").andExpect(status().isUnauthorized());
         }
 
+        // the budget is checked before the password, so the right one gets no answer either
         login(nextClient(), email, PASSWORD)
                 .andExpect(status().isTooManyRequests())
-                .andExpect(header().exists("Retry-After"));
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.message", containsString("Too many requests")));
+    }
+
+    @Test
+    void successfulLoginsDoNotCountTowardsEmailLimit() throws Exception {
+        String email = newUser();
+
+        // more than the 10-attempt budget, each from its own address
+        for (int i = 0; i < 12; i++) {
+            login(nextClient(), email, PASSWORD).andExpect(status().isOk());
+        }
+    }
+
+    @Test
+    void successAfterFailuresKeepsTheRemainingBudget() throws Exception {
+        String email = newUser();
+        for (int i = 0; i < 9; i++) {
+            login(nextClient(), email, "wrong-password").andExpect(status().isUnauthorized());
+        }
+        for (int i = 0; i < 3; i++) {
+            login(nextClient(), email, PASSWORD).andExpect(status().isOk());
+        }
+
+        // the 10th failure still gets its answer, the next attempt does not
+        login(nextClient(), email, "wrong-password").andExpect(status().isUnauthorized());
+        login(nextClient(), email, PASSWORD).andExpect(status().isTooManyRequests());
     }
 
     @Test
     void emailLimitIgnoresCaseAndSurroundingSpaces() throws Exception {
         String email = newUser();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             String variant = i % 2 == 0 ? email.toUpperCase(Locale.ROOT) : "  " + email + " ";
             login(nextClient(), variant, "wrong-password").andExpect(status().isUnauthorized());
         }
