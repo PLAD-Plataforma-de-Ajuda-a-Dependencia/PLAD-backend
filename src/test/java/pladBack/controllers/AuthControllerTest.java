@@ -82,6 +82,20 @@ class AuthControllerTest {
     }
 
     @Test
+    void passwordOverBcryptByteLimitIsBadRequest() throws Exception {
+        // 40 chars but 80 UTF-8 bytes: used to pass @Size(max = 72) and blow up in BCrypt
+        register(nextClient(), dependentBody(newEmail()).replace("senha-dev-123", "ç".repeat(40)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("password must be at most 72 bytes")));
+    }
+
+    @Test
+    void passwordOf72AsciiBytesIsAccepted() throws Exception {
+        register(nextClient(), dependentBody(newEmail()).replace("senha-dev-123", "a".repeat(72)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
     void futureBirthDateIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("2000-05-20", LocalDate.now().plusDays(1).toString()))
                 .andExpect(status().isBadRequest())

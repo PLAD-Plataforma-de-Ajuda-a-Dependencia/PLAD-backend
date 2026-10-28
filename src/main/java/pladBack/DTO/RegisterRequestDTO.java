@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import pladBack.entity.userType;
 import pladBack.entity.sex;
 import pladBack.entity.CrmCrpType;
+import pladBack.validation.MaxBytes;
 
 import java.time.LocalDate;
 
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 public record RegisterRequestDTO(
         @NotBlank @Size(max = 150) String realName,
         @NotBlank @Email @Size(max = 255) String email,
-        @NotBlank @Size(min = 8, max = 72) String password,
+        @NotBlank @Size(min = 8) @MaxBytes(value = 72) String password,
         @NotNull @Past LocalDate birthDate,
         @NotNull sex gender,
         @NotNull userType typeUser,

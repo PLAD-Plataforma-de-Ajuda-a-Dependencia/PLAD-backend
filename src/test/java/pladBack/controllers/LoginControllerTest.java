@@ -85,6 +85,23 @@ class LoginControllerTest {
     }
 
     @Test
+    void passwordOverBcryptByteLimitIsBadRequest() throws Exception {
+        // 40 chars but 80 UTF-8 bytes
+        login(nextClient(), "nobody-" + UUID.randomUUID() + "@example.com", "ç".repeat(40))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("password must be at most 72 bytes")));
+    }
+
+    @Test
+    void passwordOf72AsciiBytesIsAccepted() throws Exception {
+        String password = "a".repeat(72);
+
+        login(nextClient(), newUser(password), password)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
     void sixthAttemptFromSameClientIsTooManyRequests() throws Exception {
         String client = nextClient();
         String email = newUser();
@@ -163,10 +180,14 @@ class LoginControllerTest {
     }
 
     private String newUser() {
+        return newUser(PASSWORD);
+    }
+
+    private String newUser(String password) {
         User user = new User();
         user.setReal_name("login test");
         user.setEmail("login-" + UUID.randomUUID() + "@example.com");
-        user.setPassword_hash(passwordEncoder.encode(PASSWORD));
+        user.setPassword_hash(passwordEncoder.encode(password));
         user.setBirth_date(LocalDate.of(2000, 1, 1));
         user.setGender(sex.outro);
         user.setTypeUser(userType.dependente);
