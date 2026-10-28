@@ -87,7 +87,8 @@ class TriageControllerTest {
                 .andExpect(jsonPath("$[0].question_type").value("single_choice"))
                 .andExpect(jsonPath("$[0].display_order").value(1))
                 .andExpect(jsonPath("$[0].required").value(true))
-                .andExpect(jsonPath("$[0].options[0].code").value("AGE_UNDER_18"))
+                .andExpect(jsonPath("$[0].options.length()").value(4))
+                .andExpect(jsonPath("$[0].options[0].code").value("AGE_18_24"))
                 .andExpect(jsonPath("$[0].options[0].label").isNotEmpty())
                 .andExpect(jsonPath("$[9].question_type").value("free_text"))
                 .andExpect(jsonPath("$[9].required").value(false));
@@ -195,6 +196,14 @@ class TriageControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
                 .andExpect(jsonPath("$.message", containsString("NOT_A_QUESTION")));
+    }
+
+    @Test
+    void submitWithTheRemovedUnder18OptionIsBadRequest() throws Exception {
+        submit(newDependentToken(), bodyByCode(Map.of("AGE_RANGE", "\"AGE_UNDER_18\"")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("AGE_UNDER_18")));
     }
 
     @Test

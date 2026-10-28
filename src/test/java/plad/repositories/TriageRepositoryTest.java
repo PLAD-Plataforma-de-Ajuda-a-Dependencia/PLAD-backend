@@ -48,8 +48,9 @@ class TriageRepositoryTest {
 
         QuestionTriage first = questions.get(0);
         assertThat(first.getQuestionType()).isEqualTo(QuestionType.single_choice);
-        assertThat(first.getOptions()).hasSize(5);
-        assertThat(first.getOptions().get(0)).containsEntry("code", "AGE_UNDER_18");
+        // V12 removed AGE_UNDER_18 (adults only) and kept the order of the rest
+        assertThat(first.getOptions()).extracting(option -> option.get("code"))
+                .containsExactly("AGE_18_24", "AGE_25_39", "AGE_40_59", "AGE_60_PLUS");
 
         assertThat(questions).filteredOn(q -> q.getQuestionType() == QuestionType.free_text)
                 .isNotEmpty()
