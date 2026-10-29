@@ -28,7 +28,7 @@ class OpenApiConfigTest {
         return new Content().addMediaType("application/json", new MediaType().schema(schema));
     }
 
-    // no real DTO has a nullable field, so this is the only place that exercises the nullable rule
+    // ErrorResponseDTO.trace is the only real nullable field, so this stays the place that exercises the rule in isolation
     @Test
     void requiresEveryPropertyOfResponseSchemasAndLeavesRequestSchemasAlone() {
         Schema<?> nested = new ObjectSchema().addProperty("code", new StringSchema());
@@ -56,6 +56,8 @@ class OpenApiConfigTest {
 
         assertThat(response.getRequired()).containsExactly("items", "name", "note");
         assertThat(response.getProperties().get("note").getNullable()).isTrue();
+        assertThat(response.getProperties().get("note").getTypes()).containsExactly("string", "null");
+        assertThat(response.getProperties().get("name").getTypes()).containsExactly("string");
         assertThat(nested.getRequired()).containsExactly("code");
         assertThat(request.getRequired()).containsExactly("x");
     }

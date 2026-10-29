@@ -147,7 +147,7 @@ class OpenApiContractTest {
         AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
         samples.put("AnswerResponseDTO", answer);
         samples.put("ErrorResponseDTO", new ErrorResponseDTO("CODE", "message", Instant.now(),
-                List.of(new FieldErrorDTO("field", "message"))));
+                List.of(new FieldErrorDTO("field", "message")), "trace-id"));
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));

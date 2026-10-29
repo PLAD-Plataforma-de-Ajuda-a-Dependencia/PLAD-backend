@@ -1,9 +1,15 @@
 package plad.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.QueryTimeoutException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,9 +24,12 @@ import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.exception.*;
 
+import java.sql.SQLTimeoutException;
+import java.sql.SQLTransientConnectionException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +40,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final Pattern CAMEL_CASE_BOUNDARY = Pattern.compile("([a-z0-9])([A-Z])");
+    private static final int DB_RETRY_AFTER_SECONDS = 5;
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidCredentials(InvalidCredentialsException ex) {
@@ -82,10 +92,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.CONFLICT, ErrorCode.DATA_CONFLICT, "Request conflicts with existing data"); // 409
     }
 
+    // database unreachable or too slow: the client can try again shortly
+    @ExceptionHandler({CannotGetJdbcConnectionException.class, CannotCreateTransactionException.class,
+            QueryTimeoutException.class, DataAccessResourceFailureException.class})
+    public ResponseEntity<ErrorResponseDTO> handleDatabaseUnavailable(Exception ex) {
+        log.warn("Database unavailable ({})", ex.getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE) // 503
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(DB_RETRY_AFTER_SECONDS))
+                .body(new ErrorResponseDTO(ErrorCode.SERVICE_UNAVAILABLE.name(),
+                        "Service temporarily unavailable, try again shortly", Instant.now()));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleUnexpected(Exception ex) {
-        log.error("Unhandled exception", ex);
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR, "Internal server error"); // 500
+    public ResponseEntity<ErrorResponseDTO> handleUnexpected(Exception ex, HttpServletRequest request) {
+        if (isPoolOrConnectionTimeout(ex)) {
+            // Hikari's timeout is not always wrapped in a Spring exception handled above
+            return handleDatabaseUnavailable(ex);
+        }
+        String requestId = MDC.get(RequestIdFilter.MDC_KEY);
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString(); // outside RequestIdFilter: keep log and response consistent
+        }
+        log.error("Unhandled exception requestId={} method={} route={}",
+                requestId, request.getMethod(), request.getRequestURI(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // 500
+                .body(new ErrorResponseDTO(ErrorCode.INTERNAL_ERROR.name(),
+                        "Erro interno. Informe o código " + requestId + " ao suporte.",
+                        Instant.now(), List.of(), requestId));
     }
 
     @Override
@@ -126,6 +159,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static ResponseEntity<ErrorResponseDTO> error(HttpStatus status, ErrorCode code, String message) {
         return ResponseEntity.status(status).body(new ErrorResponseDTO(code.name(), message, Instant.now()));
+    }
+
+    private static boolean isPoolOrConnectionTimeout(Throwable ex) {
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLTransientConnectionException || cause instanceof SQLTimeoutException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String violatedConstraint(Throwable ex) {

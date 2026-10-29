@@ -13,5 +13,6 @@ public enum ErrorCode {
     RATE_LIMITED,
     UNAUTHORIZED,
     DATA_CONFLICT,
+    SERVICE_UNAVAILABLE,
     INTERNAL_ERROR
 }
