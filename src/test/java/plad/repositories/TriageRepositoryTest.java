@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import plad.config.TestcontainersConfig;
 import plad.entity.Dependent;
 import plad.entity.QuestionTriage;
@@ -18,10 +19,13 @@ import plad.entity.UserType;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -89,6 +93,35 @@ class TriageRepositoryTest {
         assertThat(resultQuestionTriageRepository.findByTriageId(target.getId())).isEmpty();
         assertThat(resultQuestionTriageRepository.findByTriageId(other.getId())).hasSize(1);
         assertThatCode(() -> newResult(target, question, "AGE_18_24")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void freeTextWith1000EmojisIsSaved() {
+        QuestionTriage question = questionTriageRepository.findAllByOrderByDisplayOrderAsc().stream()
+                .filter(q -> q.getQuestionType() == QuestionType.free_text)
+                .findFirst().orElseThrow();
+        Triage triage = newTriage(newDependent());
+        // varied emojis (4 bytes each, ~4000 bytes) so the value can't be compressed below the btree entry limit
+        Random random = new Random(42);
+        String emojis = random.ints(1000, 0x1F300, 0x1F650)
+                .mapToObj(Character::toString)
+                .collect(Collectors.joining());
+
+        assertThatCode(() -> newResult(triage, question, emojis)).doesNotThrowAnyException();
+
+        assertThat(resultQuestionTriageRepository.findByTriageId(triage.getId()))
+                .singleElement()
+                .satisfies(row -> assertThat(row.getValueResult()).isEqualTo(emojis));
+    }
+
+    @Test
+    void sameValueTwiceForTheSameQuestionIsStillRejected() {
+        QuestionTriage question = questionTriageRepository.findAllByOrderByDisplayOrderAsc().get(0);
+        Triage triage = newTriage(newDependent());
+        newResult(triage, question, "AGE_18_24");
+
+        assertThatThrownBy(() -> newResult(triage, question, "AGE_18_24"))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     private Dependent newDependent() {

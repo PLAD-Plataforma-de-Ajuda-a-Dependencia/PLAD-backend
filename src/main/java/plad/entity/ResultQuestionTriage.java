@@ -3,8 +3,9 @@ package plad.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "result_questions_triages",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"triage_id", "question_id", "value_result"}))
+// Uniqueness of (triage_id, question_id, md5(value_result)) is a functional unique index created by
+// Flyway (V14); @UniqueConstraint only takes column names, so it can't be declared here.
+@Table(name = "result_questions_triages")
 public class ResultQuestionTriage {
 
     @Id
