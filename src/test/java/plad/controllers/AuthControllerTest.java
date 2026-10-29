@@ -53,6 +53,25 @@ class AuthControllerTest {
     }
 
     @Test
+    void credentialNumberDifferingOnlyInFormattingIsRejected() throws Exception {
+        String client = nextClient();
+        register(client, psychologistBody(newEmail(), "06/12345")).andExpect(status().isCreated());
+
+        register(client, psychologistBody(newEmail(), "06 / 12345"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
+                .andExpect(jsonPath("$.message").value("Credential number already registered"));
+    }
+
+    @Test
+    void credentialNumberWithoutLettersOrDigitsIsBadRequest() throws Exception {
+        register(nextClient(), psychologistBody(newEmail(), "// --"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
+                .andExpect(jsonPath("$.message").value("Psychologist must provide credentials"));
+    }
+
+    @Test
     void sameEmailWithDifferentCaseIsConflict() throws Exception {
         String client = nextClient();
         String email = newEmail();

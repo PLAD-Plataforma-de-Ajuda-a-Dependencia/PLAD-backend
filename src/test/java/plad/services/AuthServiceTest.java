@@ -2,6 +2,7 @@ package plad.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,6 +76,19 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.register(psychologistRequest("06/12345")))
                 .isInstanceOf(InvalidRegistrationException.class)
                 .hasMessageContaining("Credential number");
+    }
+
+    @Test
+    void registerChecksAndStoresNormalizedCredentialNumber() {
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
+
+        authService.register(psychologistRequest(" 06 / 12345-sp "));
+
+        verify(psychologistRepository).existsByCrmCrpNumber("0612345SP");
+        ArgumentCaptor<Psychologist> saved = ArgumentCaptor.forClass(Psychologist.class);
+        verify(psychologistRepository).saveAndFlush(saved.capture());
+        assertThat(saved.getValue().getCrmCrpNumber()).isEqualTo("0612345SP");
     }
 
     @Test

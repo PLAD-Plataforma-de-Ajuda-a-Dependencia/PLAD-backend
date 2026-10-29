@@ -41,11 +41,16 @@ public class AuthService {
             throw new EmailAlreadyInUseException("Email already in use");
         }
 
+        String crmCrpNumber = null;
         if (request.typeUser() == UserType.psicologo) {
-            if (request.credentialType() == null || request.crmCrpNumber() == null || request.crmCrpNumber().isBlank()) {
+            // a number with no letters or digits ("///") normalizes to empty and counts as missing
+            if (request.crmCrpNumber() != null) {
+                crmCrpNumber = CrmCrpNumbers.normalize(request.crmCrpNumber());
+            }
+            if (request.credentialType() == null || crmCrpNumber == null || crmCrpNumber.isEmpty()) {
                 throw new InvalidRegistrationException("Psychologist must provide credentials");
             }
-            if (psychologistRepository.existsByCrmCrpNumber(request.crmCrpNumber())) {
+            if (psychologistRepository.existsByCrmCrpNumber(crmCrpNumber)) {
                 throw new InvalidRegistrationException("Credential number already registered");
             }
         }
@@ -73,7 +78,7 @@ public class AuthService {
             Psychologist psychologist = new  Psychologist();
             psychologist.setUser(savedUser);
             psychologist.setCredentialType(request.credentialType());
-            psychologist.setCrmCrpNumber(request.crmCrpNumber());
+            psychologist.setCrmCrpNumber(crmCrpNumber);
             psychologist.setGraduate(request.graduate());
             try {
                 psychologistRepository.saveAndFlush(psychologist);
