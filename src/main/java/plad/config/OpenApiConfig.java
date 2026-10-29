@@ -6,7 +6,9 @@ import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -98,9 +100,21 @@ public class OpenApiConfig {
                 Schema<?> schema = schemas.get(name);
                 if (schema != null && schema.getProperties() != null) {
                     schema.getProperties().keySet().forEach(schema::addRequiredItem);
+                    schema.getProperties().values().forEach(OpenApiConfig::renderNullable);
                 }
             });
         };
+    }
+
+    // The document is OpenAPI 3.1, whose serializer drops "nullable"; there a nullable field is a type list with
+    // "null". Our ModelResolver builds 3.0-style schemas (single "type"), so the list is assembled here.
+    private static void renderNullable(Schema<?> property) {
+        if (Boolean.TRUE.equals(property.getNullable())) {
+            if (property.getTypes() == null && property.getType() != null) {
+                property.addType(property.getType());
+            }
+            property.addType("null");
+        }
     }
 
     // follows $ref, array items and properties, so nested DTOs (OptionDTO, AnswerResponseDTO) are found too
@@ -129,6 +143,23 @@ public class OpenApiConfig {
             if (operation.getResponses() != null && !operation.getResponses().containsKey("500")) {
                 operation.getResponses().addApiResponse("500", new ApiResponse()
                         .description("Unexpected error")
+                        .content(new Content().addMediaType("application/json", new MediaType()
+                                .schema(new Schema<>().$ref("#/components/schemas/ErrorResponseDTO")))));
+            }
+            return operation;
+        };
+    }
+
+    // GlobalExceptionHandler.handleDatabaseUnavailable answers a database that is down or too slow, on any operation
+    @Bean
+    public OperationCustomizer serviceUnavailableResponse() {
+        return (operation, handlerMethod) -> {
+            if (operation.getResponses() != null && !operation.getResponses().containsKey("503")) {
+                operation.getResponses().addApiResponse("503", new ApiResponse()
+                        .description("Database unavailable, try again after Retry-After")
+                        .addHeaderObject("Retry-After", new Header()
+                                .description("Seconds until the next attempt")
+                                .schema(new IntegerSchema()))
                         .content(new Content().addMediaType("application/json", new MediaType()
                                 .schema(new Schema<>().$ref("#/components/schemas/ErrorResponseDTO")))));
             }

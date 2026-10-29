@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import plad.dto.ErrorResponseDTO;
 import plad.entity.User;
@@ -105,12 +106,16 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void unexpectedExceptionIsInternalErrorWithoutItsMessage() {
-        ResponseEntity<ErrorResponseDTO> response = handler.handleUnexpected(new RuntimeException("secret detail"));
+        ResponseEntity<ErrorResponseDTO> response =
+                handler.handleUnexpected(new RuntimeException("secret detail"), new MockHttpServletRequest());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().code()).isEqualTo("INTERNAL_ERROR");
         assertThat(response.getBody().message()).doesNotContain("secret detail");
         assertThat(response.getBody().errors()).isEmpty();
+        assertThat(response.getBody().trace()).isNotBlank();
+        assertThat(response.getBody().message())
+                .isEqualTo("Erro interno. Informe o código " + response.getBody().trace() + " ao suporte.");
     }
 
     private String bearer() {
