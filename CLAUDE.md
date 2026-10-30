@@ -70,6 +70,7 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 - After any change, run `./mvnw test` and fix failures before saying it's done.
 - Every new custom exception extends `ApiException` with its own `ErrorCode`, needs a handler in `GlobalExceptionHandler` and a row in the error code table.
 - Every API contract change (endpoint, DTO field, status code, validation constraint) updates `docs/openapi.json` in the same PR: run `./mvnw test -Dopenapi.update=true`, review the diff and commit it. `OpenApiContractTest` fails until you do.
+- Every PR that changes the status of a requirement (RF/RNF) updates `docs/matriz-de-requisitos.md` in the same PR: status, code location, test, and the count table at the top.
 
 ## Database
 
