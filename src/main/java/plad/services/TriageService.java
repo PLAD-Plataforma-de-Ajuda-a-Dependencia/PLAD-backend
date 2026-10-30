@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,8 +61,9 @@ public class TriageService {
                 .toList();
     }
 
+    // empty when nothing was answered: no triage is stored, so the dependent can still do it later
     @Transactional
-    public TriageResponseDTO submit(Long userId, TriageRequestDTO request) {
+    public Optional<TriageResponseDTO> submit(Long userId, TriageRequestDTO request) {
         Dependent dependent = findDependent(userId);
 
         if (triageRepository.existsByDependentUserId(userId)) {
@@ -69,6 +71,9 @@ public class TriageService {
         }
 
         List<ValidatedAnswer> answers = validate(request);
+        if (answers.isEmpty()) {
+            return Optional.empty();
+        }
 
         Triage triage = new Triage();
         triage.setDependent(dependent);
@@ -80,7 +85,7 @@ public class TriageService {
         }
 
         saveResults(triage, answers);
-        return toTriageResponse(triage, answers);
+        return Optional.of(toTriageResponse(triage, answers));
     }
 
     @Transactional
@@ -91,6 +96,9 @@ public class TriageService {
                 .orElseThrow(() -> new TriageNotFoundException("Triage not found"));
 
         List<ValidatedAnswer> answers = validate(request);
+        if (answers.isEmpty()) {
+            throw new InvalidTriageException("At least one question must be answered");
+        }
 
         resultQuestionTriageRepository.deleteByTriageId(triage.getId());
         saveResults(triage, answers);
@@ -117,16 +125,6 @@ public class TriageService {
                 throw new InvalidTriageException("Duplicate answer for question " + question.getId());
             }
             validated.add(new ValidatedAnswer(question, validateValues(question, answer.values())));
-        }
-
-        String missing = questions.values().stream()
-                .filter(QuestionTriage::isRequired)
-                .filter(question -> !answered.contains(question.getId()))
-                .sorted(Comparator.comparingInt(QuestionTriage::getDisplayOrder))
-                .map(question -> String.valueOf(question.getId()))
-                .collect(Collectors.joining(", "));
-        if (!missing.isEmpty()) {
-            throw new InvalidTriageException("Missing required questions: " + missing);
         }
 
         validated.sort(Comparator.comparingInt(a -> a.question().getDisplayOrder()));

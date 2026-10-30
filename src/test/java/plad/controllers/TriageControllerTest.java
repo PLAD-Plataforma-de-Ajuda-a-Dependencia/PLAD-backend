@@ -86,7 +86,7 @@ class TriageControllerTest {
                 .andExpect(jsonPath("$[0].question_text").isNotEmpty())
                 .andExpect(jsonPath("$[0].question_type").value("single_choice"))
                 .andExpect(jsonPath("$[0].display_order").value(1))
-                .andExpect(jsonPath("$[0].required").value(true))
+                .andExpect(jsonPath("$[0].required").value(false))
                 .andExpect(jsonPath("$[0].options.length()").value(4))
                 .andExpect(jsonPath("$[0].options[0].code").value("AGE_18_24"))
                 .andExpect(jsonPath("$[0].options[0].label").isNotEmpty())
@@ -156,14 +156,14 @@ class TriageControllerTest {
     @Test
     void submitMixingIdAndCodeAcrossAnswersIsCreated() throws Exception {
         String rest = questions.stream()
-                .filter(q -> q.isRequired() && !q.getCode().equals("AGE_RANGE"))
+                .filter(q -> isChoice(q) && !q.getCode().equals("AGE_RANGE"))
                 .map(q -> "{\"question_code\": \"%s\", \"values\": [\"%s\"]}".formatted(q.getCode(), q.getOptions().get(0).get("code")))
                 .collect(Collectors.joining(","));
         String body = "{\"answers\": [{\"question_id\": %d, \"values\": [\"AGE_18_24\"]},%s]}".formatted(singleChoiceId, rest);
 
         submit(newDependentToken(), body)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.answers.length()").value(requiredCount()));
+                .andExpect(jsonPath("$.answers.length()").value(choiceCount()));
     }
 
     @Test
@@ -218,37 +218,41 @@ class TriageControllerTest {
     }
 
     @Test
-    void submitWithOnlyRequiredQuestionsIsCreated() throws Exception {
+    void submitWithOnlyChoiceQuestionsIsCreated() throws Exception {
         submit(newDependentToken(), body())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.answers.length()").value(requiredCount()));
+                .andExpect(jsonPath("$.answers.length()").value(choiceCount()));
     }
 
     @Test
-    void submitWithEmptyAnswersIsBadRequestAndDoesNotUseTheSingleSubmission() throws Exception {
+    void submitWithEmptyAnswersStoresNothingAndDoesNotUseTheSingleSubmission() throws Exception {
         String token = newDependentToken();
 
         submit(token, "{\"answers\": []}")
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.message", containsString("answers")));
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        // nothing was stored: there is no triage to replace, and the dependent can still submit
+        resubmit(token, body())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("TRIAGE_NOT_FOUND"));
 
         submit(token, body())
                 .andExpect(status().isCreated());
     }
 
     @Test
-    void submitWithMissingRequiredQuestionIsBadRequestAndDoesNotUseTheSingleSubmission() throws Exception {
-        String token = newDependentToken();
+    void submitWithPartialAnswersIsCreated() throws Exception {
+        submit(newDependentToken(), bodyWithout(multiChoiceId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(choiceCount() - 1));
+    }
 
-        submit(token, bodyWithout(multiChoiceId))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
-                .andExpect(jsonPath("$.message", containsString("Missing required questions")))
-                .andExpect(jsonPath("$.message", containsString(String.valueOf(multiChoiceId))));
-
-        submit(token, body())
-                .andExpect(status().isCreated());
+    @Test
+    void submitWithASingleAnswerIsCreated() throws Exception {
+        submit(newDependentToken(), answerBody(freeTextId, "\"so isso\""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(1));
     }
 
     @Test
@@ -326,13 +330,13 @@ class TriageControllerTest {
     }
 
     @Test
-    void resubmitWithOnlyRequiredQuestionsIsOk() throws Exception {
+    void resubmitWithOnlyChoiceQuestionsIsOk() throws Exception {
         String token = newDependentToken();
         submit(token, body()).andExpect(status().isCreated());
 
         resubmit(token, body())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.answers.length()").value(requiredCount()));
+                .andExpect(jsonPath("$.answers.length()").value(choiceCount()));
     }
 
     @Test
@@ -347,26 +351,30 @@ class TriageControllerTest {
     }
 
     @Test
-    void resubmitWithEmptyAnswersIsBadRequest() throws Exception {
+    void resubmitWithEmptyAnswersIsBadRequestAndKeepsTheTriage() throws Exception {
         String token = newDependentToken();
         submit(token, body()).andExpect(status().isCreated());
 
         resubmit(token, "{\"answers\": []}")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.message", containsString("answers")));
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
+                .andExpect(jsonPath("$.message", containsString("At least one question")));
+
+        // the stored triage is still there
+        submit(token, body())
+                .andExpect(status().isConflict());
+        resubmit(token, body())
+                .andExpect(status().isOk());
     }
 
     @Test
-    void resubmitWithMissingRequiredQuestionIsBadRequest() throws Exception {
+    void resubmitWithPartialAnswersReplacesThemAll() throws Exception {
         String token = newDependentToken();
         submit(token, body()).andExpect(status().isCreated());
 
         resubmit(token, bodyWithout(singleChoiceId))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"))
-                .andExpect(jsonPath("$.message", containsString("Missing required questions")))
-                .andExpect(jsonPath("$.message", containsString(String.valueOf(singleChoiceId))));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.answers.length()").value(choiceCount() - 1));
     }
 
     @Test
@@ -405,11 +413,11 @@ class TriageControllerTest {
                 .content(body));
     }
 
-    // an answer (first option) for every required question; overrides replace or add answers by question id
+    // an answer (first option) for every choice question; overrides replace or add answers by question id
     private String body(Map<Long, String> overrides, Long skip) {
         Map<Long, String> values = new LinkedHashMap<>();
         for (QuestionTriage question : questions) {
-            if (question.isRequired()) {
+            if (isChoice(question)) {
                 values.put(question.getId(), "\"" + question.getOptions().get(0).get("code") + "\"");
             }
         }
@@ -428,7 +436,7 @@ class TriageControllerTest {
     private String bodyByCode(Map<String, String> overrides) {
         Map<String, String> values = new LinkedHashMap<>();
         for (QuestionTriage question : questions) {
-            if (question.isRequired()) {
+            if (isChoice(question)) {
                 values.put(question.getCode(), "\"" + question.getOptions().get(0).get("code") + "\"");
             }
         }
@@ -442,8 +450,13 @@ class TriageControllerTest {
         return body(Map.of(), questionId);
     }
 
-    private int requiredCount() {
-        return (int) questions.stream().filter(QuestionTriage::isRequired).count();
+    private int choiceCount() {
+        return (int) questions.stream().filter(TriageControllerTest::isChoice).count();
+    }
+
+    // the questions the helpers answer by default (every question is optional, so the baseline is a choice, never free text)
+    private static boolean isChoice(QuestionTriage question) {
+        return question.getQuestionType() != QuestionType.free_text;
     }
 
     private static String answerBody(Long questionId, String values) {

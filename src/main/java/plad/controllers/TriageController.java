@@ -52,13 +52,14 @@ public class TriageController {
         return ResponseEntity.ok(triageService.getQuestions());
     }
 
-    @Operation(summary = "Submit the triage", description = "A dependent can submit once; use PUT to change it afterwards")
+    @Operation(summary = "Submit the triage", description = "Every question is optional. A dependent can submit once; use PUT to change it afterwards. With no answers nothing is stored, so the dependent can still submit later")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Triage stored",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TriageResponseDTO.class))),
+            @ApiResponse(responseCode = "204", description = "No question answered, nothing stored", content = @Content),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option",
+                    description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",
@@ -74,7 +75,9 @@ public class TriageController {
     @PostMapping
     public ResponseEntity<TriageResponseDTO> submit(@AuthenticationPrincipal Long userId,
                                                     @Valid @RequestBody TriageRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(triageService.submit(userId, request));
+        return triageService.submit(userId, request)
+                .map(triage -> ResponseEntity.status(HttpStatus.CREATED).body(triage))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @Operation(summary = "Replace the submitted triage")
@@ -83,7 +86,7 @@ public class TriageController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TriageResponseDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option",
+                    description = "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",

@@ -105,3 +105,16 @@ Content-Type: application/json
 > {%
     client.test("Triagem repetida é rejeitada", () => client.assert(response.status === 409, "status " + response.status));
 %}
+
+### Enviar triagem sem nenhuma resposta (204, nada é salvo; um dependente sem triagem ainda pode enviar depois)
+POST {{baseUrl}}/triage
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "answers": []
+}
+
+> {%
+    client.test("Triagem vazia não é salva", () => client.assert(response.status === 204 || response.status === 409, "status " + response.status));
+%}

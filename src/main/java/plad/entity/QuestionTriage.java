@@ -43,7 +43,7 @@ public class QuestionTriage {
     private short displayOrder;
 
     @Column(name = "required", nullable = false)
-    private boolean required = true;
+    private boolean required = false;
 
     //getters n setters
 

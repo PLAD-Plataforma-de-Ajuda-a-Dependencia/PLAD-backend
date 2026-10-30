@@ -322,7 +322,7 @@
       "TriageRequestDTO": {
         "properties": {
           "answers": {
-            "description": "One entry per question; every required question must be answered exactly once",
+            "description": "One entry per answered question; every question is optional and can be answered at most once",
             "items": {
               "$ref": "#/components/schemas/AnswerRequestDTO"
             },
@@ -606,7 +606,7 @@
     },
     "/triage": {
       "post": {
-        "description": "A dependent can submit once; use PUT to change it afterwards",
+        "description": "Every question is optional. A dependent can submit once; use PUT to change it afterwards. With no answers nothing is stored, so the dependent can still submit later",
         "operationId": "submit",
         "requestBody": {
           "content": {
@@ -629,6 +629,9 @@
             },
             "description": "Triage stored"
           },
+          "204": {
+            "description": "No question answered, nothing stored"
+          },
           "400": {
             "content": {
               "application/json": {
@@ -637,7 +640,7 @@
                 }
               }
             },
-            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
+            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option"
           },
           "401": {
             "content": {
@@ -735,7 +738,7 @@
                 }
               }
             },
-            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question, missing required question or invalid option"
+            "description": "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option"
           },
           "401": {
             "content": {
