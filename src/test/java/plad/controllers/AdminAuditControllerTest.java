@@ -103,7 +103,7 @@ class AdminAuditControllerTest {
 
     @Test
     void filtersByActionAloneAcrossUsers() throws Exception {
-        call("/admin/audit?action=TRIAGE_READ&size=100", UserType.admin)
+        call("/admin/audit?action=TRIAGE_VIEWED&size=100", UserType.admin)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[?(@.subject_user_id == " + subjectA + ")]").isEmpty());
     }

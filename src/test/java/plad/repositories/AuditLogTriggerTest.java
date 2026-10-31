@@ -36,7 +36,7 @@ class AuditLogTriggerTest {
     void updateIsRejected() {
         long id = insertEntry();
 
-        assertThatThrownBy(() -> jdbcTemplate.update("update audit_log set action = 'TRIAGE_READ' where id = ?", id))
+        assertThatThrownBy(() -> jdbcTemplate.update("update audit_log set action = 'TRIAGE_VIEWED' where id = ?", id))
                 .isInstanceOf(DataAccessException.class)
                 .hasMessageContaining("append-only");
     }

@@ -46,9 +46,9 @@ class MeAccessLogTest {
         me = ThreadLocalRandom.current().nextLong(1_000_000_000L, 2_000_000_000L);
         someoneElse = me + 1;
         auditService.record(AuditAction.TRIAGE_SUBMITTED, me, UserType.dependente, me, "TRIAGE", 1L, null);
-        auditService.record(AuditAction.TRIAGE_READ, PSYCHOLOGIST_ID, UserType.psicologo, me, "TRIAGE", 1L, null);
-        auditService.record(AuditAction.TRIAGE_READ, 1L, UserType.admin, me, "TRIAGE", 1L, null);
-        auditService.record(AuditAction.TRIAGE_READ, PSYCHOLOGIST_ID, UserType.psicologo, someoneElse, "TRIAGE", 2L, null);
+        auditService.record(AuditAction.TRIAGE_VIEWED, PSYCHOLOGIST_ID, UserType.psicologo, me, "TRIAGE", 1L, null);
+        auditService.record(AuditAction.TRIAGE_VIEWED, 1L, UserType.admin, me, "TRIAGE", 1L, null);
+        auditService.record(AuditAction.TRIAGE_VIEWED, PSYCHOLOGIST_ID, UserType.psicologo, someoneElse, "TRIAGE", 2L, null);
     }
 
     @Test
@@ -59,7 +59,7 @@ class MeAccessLogTest {
                 .andExpect(jsonPath("$.items.length()").value(2))
                 .andExpect(jsonPath("$.items[0].actor_role").value("admin"))
                 .andExpect(jsonPath("$.items[1].actor_role").value("psicologo"))
-                .andExpect(jsonPath("$.items[0].action").value("TRIAGE_READ"))
+                .andExpect(jsonPath("$.items[0].action").value("TRIAGE_VIEWED"))
                 .andExpect(jsonPath("$.items[0].occurred_at").isNotEmpty());
     }
 

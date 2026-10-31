@@ -19,6 +19,7 @@ import plad.dto.OptionDTO;
 import plad.dto.PageResponseDTO;
 import plad.dto.QuestionResponseDTO;
 import plad.dto.RegisterRequestDTO;
+import plad.dto.TriageReadResponseDTO;
 import plad.dto.TriageRequestDTO;
 import plad.dto.TriageResponseDTO;
 import plad.dto.UserResponseDTO;
@@ -150,7 +151,8 @@ class OpenApiContractTest {
     private static Map<String, Object> responseSamples() {
         Map<String, Object> samples = new TreeMap<>();
         AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
-        AccessLogEntryDTO accessLogEntry = new AccessLogEntryDTO(Instant.now(), AuditAction.TRIAGE_READ, "psicologo");
+        TriageReadResponseDTO triageRead = new TriageReadResponseDTO(1L, 2L, Instant.now(), List.of(answer));
+        AccessLogEntryDTO accessLogEntry = new AccessLogEntryDTO(Instant.now(), AuditAction.TRIAGE_VIEWED, "psicologo");
         AuditLogResponseDTO auditEntry = new AuditLogResponseDTO(1L, Instant.now(), 2L, AuditAction.TRIAGE_SUBMITTED, 2L, "TRIAGE", 3L,
                 Map.of("actor_role", "dependente"));
         samples.put("AccessLogEntryDTO", accessLogEntry);
@@ -165,8 +167,10 @@ class OpenApiContractTest {
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("PageResponseDTOAccessLogEntryDTO", new PageResponseDTO<>(List.of(accessLogEntry), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAuditLogResponseDTO", new PageResponseDTO<>(List.of(auditEntry), 0, 20, 1L, 1));
+        samples.put("PageResponseDTOTriageReadResponseDTO", new PageResponseDTO<>(List.of(triageRead), 0, 20, 1L, 1));
         samples.put("QuestionResponseDTO", new QuestionResponseDTO(
                 1L, "AGE_RANGE", "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
+        samples.put("TriageReadResponseDTO", triageRead);
         samples.put("TriageResponseDTO", new TriageResponseDTO(1L, Instant.now(), List.of(answer)));
         samples.put("UserResponseDTO", new UserResponseDTO(1L, "name", "a@b.com"));
         return samples;

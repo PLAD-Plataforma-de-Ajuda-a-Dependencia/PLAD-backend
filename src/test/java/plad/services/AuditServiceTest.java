@@ -31,12 +31,12 @@ class AuditServiceTest {
 
     @Test
     void recordSavesIdsAndTheRoleOfTheActor() {
-        auditService.record(AuditAction.TRIAGE_READ, 5L, UserType.psicologo, 7L, "TRIAGE", 3L, Map.of("answers_count", 4));
+        auditService.record(AuditAction.TRIAGE_VIEWED, 5L, UserType.psicologo, 7L, "TRIAGE", 3L, Map.of("answers_count", 4));
 
         ArgumentCaptor<AuditLog> saved = ArgumentCaptor.forClass(AuditLog.class);
         verify(auditLogRepository).save(saved.capture());
         AuditLog entry = saved.getValue();
-        assertThat(entry.getAction()).isEqualTo(AuditAction.TRIAGE_READ);
+        assertThat(entry.getAction()).isEqualTo(AuditAction.TRIAGE_VIEWED);
         assertThat(entry.getActorId()).isEqualTo(5L);
         assertThat(entry.getSubjectUserId()).isEqualTo(7L);
         assertThat(entry.getEntity()).isEqualTo("TRIAGE");
@@ -91,14 +91,14 @@ class AuditServiceTest {
 
     @Test
     void rejectionDoesNotEchoTheOffendingValue() {
-        assertThatThrownBy(() -> auditService.record(AuditAction.TRIAGE_READ, 1L, UserType.admin, 2L, "TRIAGE", 3L,
+        assertThatThrownBy(() -> auditService.record(AuditAction.TRIAGE_VIEWED, 1L, UserType.admin, 2L, "TRIAGE", 3L,
                 Map.of("note", "valor-sensivel-9999")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageNotContaining("valor-sensivel-9999");
     }
 
     private void assertRejected(Map<String, Object> details) {
-        assertThatThrownBy(() -> auditService.record(AuditAction.TRIAGE_READ, 1L, UserType.admin, 2L, "TRIAGE", 3L, details))
+        assertThatThrownBy(() -> auditService.record(AuditAction.TRIAGE_VIEWED, 1L, UserType.admin, 2L, "TRIAGE", 3L, details))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -5,8 +5,8 @@ package plad.entity;
 public enum AuditAction {
     TRIAGE_SUBMITTED(false),
     TRIAGE_RESUBMITTED(false),
-    // someone other than the owner read the triage; shown to the owner in GET /me/access-log
-    TRIAGE_READ(true);
+    // an admin or psychologist read the triage (GET /triages, GET /triages/{id}); shown to the owner in GET /me/access-log
+    TRIAGE_VIEWED(true);
 
     private final boolean thirdPartyRead;
 

@@ -1,6 +1,9 @@
 package plad.repositories;
 
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import plad.entity.Triage;
@@ -13,4 +16,11 @@ public interface TriageRepository extends JpaRepository<Triage,Long> {
     Optional<Triage> findForUpdateByDependentUserId(Long dependentUserId);
 
     boolean existsByDependentUserId(Long dependentUserId);
+
+    // dependent is fetched with the page so reading its id never costs an extra query per row
+    @EntityGraph(attributePaths = "dependent")
+    Page<Triage> findAllBy(Pageable pageable);
+
+    @EntityGraph(attributePaths = "dependent")
+    Optional<Triage> findWithDependentById(Long id);
 }

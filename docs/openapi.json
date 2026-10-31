@@ -8,9 +8,9 @@
             "enum": [
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
-              "TRIAGE_READ"
+              "TRIAGE_VIEWED"
             ],
-            "example": "TRIAGE_READ",
+            "example": "TRIAGE_VIEWED",
             "type": "string"
           },
           "actor_role": {
@@ -110,7 +110,7 @@
             "enum": [
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
-              "TRIAGE_READ"
+              "TRIAGE_VIEWED"
             ],
             "example": "TRIAGE_SUBMITTED",
             "type": "string"
@@ -475,6 +475,49 @@
           "total_pages"
         ]
       },
+      "PageResponseDTOTriageReadResponseDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/TriageReadResponseDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
+        ]
+      },
       "QuestionResponseDTO": {
         "properties": {
           "code": {
@@ -613,6 +656,42 @@
           "type_user"
         ]
       },
+      "TriageReadResponseDTO": {
+        "description": "A triage as read by an admin or psychologist; the dependent is identified by id only",
+        "properties": {
+          "answers": {
+            "description": "Stored answers, one entry per question",
+            "items": {
+              "$ref": "#/components/schemas/AnswerResponseDTO"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "description": "When the triage was first submitted (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dependent_id": {
+            "description": "User id of the dependent who answered; no name or e-mail",
+            "example": 7,
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Triage id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "answers",
+          "created_at",
+          "dependent_id",
+          "id"
+        ]
+      },
       "TriageRequestDTO": {
         "properties": {
           "answers": {
@@ -722,7 +801,7 @@
               "enum": [
                 "TRIAGE_SUBMITTED",
                 "TRIAGE_RESUBMITTED",
-                "TRIAGE_READ"
+                "TRIAGE_VIEWED"
               ],
               "type": "string"
             }
@@ -1463,6 +1542,206 @@
           "Triage"
         ]
       }
+    },
+    "/triages": {
+      "get": {
+        "description": "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id only",
+        "operationId": "listTriages",
+        "parameters": [
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOTriageReadResponseDTO"
+                }
+              }
+            },
+            "description": "One page of triages"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin or psychologist"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List triages, newest first",
+        "tags": [
+          "Triage"
+        ]
+      }
+    },
+    "/triages/{id}": {
+      "get": {
+        "description": "Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read",
+        "operationId": "findTriage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriageReadResponseDTO"
+                }
+              }
+            },
+            "description": "The triage"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin or psychologist"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "No triage with this id (TRIAGE_NOT_FOUND)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Read one triage",
+        "tags": [
+          "Triage"
+        ]
+      }
     }
   },
   "security": [
@@ -1491,6 +1770,10 @@
     },
     {
       "description": "Dependents' one-time triage questionnaire; requires a Bearer token",
+      "name": "Triage"
+    },
+    {
+      "description": "Reading triages; admin and psychologist only",
       "name": "Triage"
     }
   ]

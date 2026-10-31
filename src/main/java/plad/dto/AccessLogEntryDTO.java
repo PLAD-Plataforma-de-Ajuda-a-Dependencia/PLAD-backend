@@ -11,7 +11,7 @@ import java.time.Instant;
 public record AccessLogEntryDTO(
         @Schema(description = "When the data was accessed (UTC)", example = "2026-10-27T21:15:30Z")
         Instant occurredAt,
-        @Schema(description = "What happened", example = "TRIAGE_READ")
+        @Schema(description = "What happened", example = "TRIAGE_VIEWED")
         AuditAction action,
         @Schema(description = "Role of who accessed the data: psicologo or admin", example = "psicologo", nullable = true)
         String actorRole
