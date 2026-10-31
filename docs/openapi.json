@@ -285,6 +285,92 @@
           "token"
         ]
       },
+      "MeResponseDTO": {
+        "properties": {
+          "created_at": {
+            "description": "When the account was created (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "credential_type": {
+            "description": "Psychologists only: CRM or CRP. Null for other types",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "crm_crp_number": {
+            "description": "Psychologists only: normalized credential number. Null for other types",
+            "example": "06123456",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "description": "Normalized (lowercase) e-mail",
+            "example": "maria@example.com",
+            "type": "string"
+          },
+          "has_triage": {
+            "description": "Dependents only: whether the triage was already submitted. Null for other types",
+            "example": false,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "User id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_validated": {
+            "description": "Psychologists only: whether the credential was validated. Null for other types",
+            "example": false,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "real_name": {
+            "description": "Psychologists only: full name. Null for other types",
+            "example": "Maria Silva",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type_user": {
+            "description": "Account type",
+            "enum": [
+              "dependente",
+              "psicologo",
+              "admin"
+            ],
+            "example": "dependente",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "credential_type",
+          "crm_crp_number",
+          "email",
+          "has_triage",
+          "id",
+          "is_validated",
+          "real_name",
+          "type_user"
+        ]
+      },
       "OptionDTO": {
         "properties": {
           "code": {
@@ -941,6 +1027,67 @@
         "summary": "Register a dependent or a psychologist",
         "tags": [
           "Auth"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDTO"
+                }
+              }
+            },
+            "description": "The user's own data"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or the user no longer exists"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "My account",
+        "tags": [
+          "Me"
         ]
       }
     },

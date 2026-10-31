@@ -14,6 +14,7 @@ import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
 import plad.dto.LoginResponseDTO;
+import plad.dto.MeResponseDTO;
 import plad.dto.OptionDTO;
 import plad.dto.PageResponseDTO;
 import plad.dto.QuestionResponseDTO;
@@ -159,6 +160,8 @@ class OpenApiContractTest {
                 List.of(new FieldErrorDTO("field", "message")), "trace-id"));
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
+        samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false,
+                "name", CrmCrpType.CRP, "06123456", false));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("PageResponseDTOAccessLogEntryDTO", new PageResponseDTO<>(List.of(accessLogEntry), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAuditLogResponseDTO", new PageResponseDTO<>(List.of(auditEntry), 0, 20, 1L, 1));
