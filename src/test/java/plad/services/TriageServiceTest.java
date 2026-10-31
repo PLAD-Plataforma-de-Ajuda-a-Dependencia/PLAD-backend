@@ -14,11 +14,13 @@ import plad.dto.AnswerResponseDTO;
 import plad.dto.QuestionResponseDTO;
 import plad.dto.TriageRequestDTO;
 import plad.dto.TriageResponseDTO;
+import plad.entity.AuditAction;
 import plad.entity.Dependent;
 import plad.entity.QuestionTriage;
 import plad.entity.QuestionType;
 import plad.entity.ResultQuestionTriage;
 import plad.entity.Triage;
+import plad.entity.UserType;
 import plad.exception.ForbiddenActionException;
 import plad.exception.InvalidTriageException;
 import plad.exception.TriageAlreadyExistException;
@@ -57,6 +59,8 @@ class TriageServiceTest {
     private ResultQuestionTriageRepository resultQuestionTriageRepository;
     @Mock
     private DependentRepository dependentRepository;
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private TriageService triageService;
@@ -108,6 +112,9 @@ class TriageServiceTest {
         assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult)
                 .containsExactly("AGE_18_24", "REDUCE_OR_STOP", "OTHER", "quero apoio");
         assertThat(rowsCaptor.getValue()).allSatisfy(row -> assertThat(row.getTriage().getId()).isEqualTo(TRIAGE_ID));
+
+        // ids and role only: the answers never reach the audit log
+        verify(auditService).record(AuditAction.TRIAGE_SUBMITTED, USER_ID, UserType.dependente, USER_ID, "TRIAGE", TRIAGE_ID, null);
     }
 
     @Test
@@ -214,7 +221,7 @@ class TriageServiceTest {
         assertThat(triageService.submit(USER_ID, request())).isEmpty();
         verify(triageRepository, never()).saveAndFlush(any());
         verify(triageRepository, never()).save(any());
-        verifyNoInteractions(resultQuestionTriageRepository);
+        verifyNoInteractions(resultQuestionTriageRepository, auditService);
     }
 
     @Test
@@ -311,6 +318,7 @@ class TriageServiceTest {
         order.verify(resultQuestionTriageRepository).deleteByTriageId(TRIAGE_ID);
         order.verify(resultQuestionTriageRepository).saveAll(rowsCaptor.capture());
         assertThat(rowsCaptor.getValue()).extracting(ResultQuestionTriage::getValueResult).containsExactly("AGE_25_39", "OTHER");
+        verify(auditService).record(AuditAction.TRIAGE_RESUBMITTED, USER_ID, UserType.dependente, USER_ID, "TRIAGE", TRIAGE_ID, null);
     }
 
     @Test
@@ -379,6 +387,7 @@ class TriageServiceTest {
                 .isInstanceOf(InvalidTriageException.class);
         verify(resultQuestionTriageRepository, never()).deleteByTriageId(anyLong());
         verify(resultQuestionTriageRepository, never()).saveAll(any());
+        verifyNoInteractions(auditService);
     }
 
     private TriageResponseDTO submitOk(Long userId, TriageRequestDTO request) {
@@ -391,7 +400,7 @@ class TriageServiceTest {
         assertThatThrownBy(() -> triageService.submit(USER_ID, request(answers)))
                 .isInstanceOf(InvalidTriageException.class);
         verify(triageRepository, never()).saveAndFlush(any());
-        verifyNoInteractions(resultQuestionTriageRepository);
+        verifyNoInteractions(resultQuestionTriageRepository, auditService);
     }
 
     private void givenDependentWithoutTriage() {

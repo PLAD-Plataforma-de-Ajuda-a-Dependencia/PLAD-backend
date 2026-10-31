@@ -1,7 +1,7 @@
 # Decisões para revisão
 
 Decisões de domínio que o time tomou e que o orientador ou um psicólogo do projeto precisa revisar. Cada linha diz o que o sistema faz hoje, onde isso está no código e qual teste falha se alguém mudar a decisão.
-Conferida em 2026-10-31, sobre o commit `a0ecd2e` (branch `develop`) mais a mudança de papéis de acesso, ainda sem commit.
+Conferida em 2026-10-31, sobre o commit `a0ecd2e` (branch `develop`) mais a mudança de papéis de acesso e a trilha de auditoria, ainda sem commit.
 
 **Regra de manutenção:** toda regra de domínio nova entra nesta tabela no mesmo PR, com o teste que a fixa. Mudar uma decisão é mudar o teste: o teste e a linha da tabela mudam juntos.
 
@@ -17,10 +17,10 @@ Conferida em 2026-10-31, sobre o commit `a0ecd2e` (branch `develop`) mais a muda
 
 | Situação | Qtd | Decisões |
 |---|---:|---|
-| Aguardando revisão | 8 | 1, 2, 3, 4, 5, 6, 8, 10 |
+| Aguardando revisão | 9 | 1, 2, 3, 4, 5, 6, 8, 10, 11 |
 | Aprovada | 0 | — |
 | Pendente de implementação | 2 | 7, 9 |
-| **Total** | **10** | |
+| **Total** | **11** | |
 
 ## Decisões
 
@@ -36,6 +36,7 @@ Conferida em 2026-10-31, sobre o commit `a0ecd2e` (branch `develop`) mais a muda
 | 8 | Opções de gênero | O cadastro exige `gender` com um destes valores: `masculino`, `feminino`, `nao_binario`, `transexual`, `outro`. Outro valor dá 400 `BAD_REQUEST`. | A lista veio do esquema inicial e não foi revisada (ver nota 8). | `V1__create_enums_n_users.sql` (enum `sex`); `Sex`; `RegisterRequestDTO#gender` | `AuthControllerTest#unknownEnumValueIsBadRequest` (só rejeita valor desconhecido; não afirma a lista) | Aguardando revisão |
 | 9 | Exclusão de conta: apagar ou anonimizar | Não existe. Não há endpoint de exclusão nem regra de retenção. | A decidir (ver nota 9). | — (esquema em `V2`, `V3`, `V4`) | — | Pendente de implementação |
 | 10 | Papéis de acesso e primeiro administrador | Há três papéis: `dependente`, `psicologo` e `admin`. O papel (`type_user`) vai na claim `role` do token e vira a authority `ROLE_<VALOR>`; `/admin/**` exige `ROLE_ADMIN` (403 para os outros, 401 sem token). Token sem a claim `role` (emitido antes desta mudança) ou com papel desconhecido é inválido: 401, e a pessoa entra de novo. `/auth/register` com `type_user = admin` dá 400 `INVALID_REGISTRATION`. O primeiro admin nasce na subida da aplicação a partir de `ADMIN_EMAIL` e `ADMIN_PASSWORD`, só se as duas existirem e o e-mail ainda não estiver cadastrado; conta existente nunca é promovida nem tem a senha trocada. Senha com menos de 8 caracteres ou mais de 72 bytes impede a aplicação de subir. O admin não tem linha em `dependents` nem em `psychologists`, e usa nome `Administrador`, nascimento `2000-01-01` e gênero `outro` porque `users` exige esses campos. | Decisão do time (ver nota 10). | `V16__add_admin_user_type.sql`; `UserType`; `JwtService`; `JwtAuthenticationFilter`; `SecurityConfig`; `GlobalExceptionHandler#handleAccessDenied`; `AuthService#register`; `AdminBootstrapService`; `AdminBootstrapRunner` | `AdminAccessTest#dependentGetsForbiddenOnAdminRoutes`<br>`AdminAccessTest#psychologistGetsForbiddenOnAdminRoutes`<br>`AdminAccessTest#adminReachesAdminRoutes`<br>`AdminAccessTest#dependentGetsForbiddenOnMethodSecuredRoute`<br>`JwtAuthenticationFilterTest#signedTokenWithoutRoleIsUnauthorized`<br>`AuthControllerTest#registeringAnAdminIsBadRequestAndCreatesNothing`<br>`AdminBootstrapServiceTest#createsAdminWithNormalizedEmailAndHashedPassword`<br>`AdminBootstrapServiceTest#existingEmailIsNeverTouched`<br>`AdminBootstrapServiceTest#shortPasswordStopsTheStartup`<br>`AdminBootstrapRunnerTest#createsTheAdminWithoutDependentOrPsychologistRow` | Aguardando revisão |
+| 11 | Trilha de auditoria do dado de saúde: só INSERT, sem conteúdo, papel (não nome) para o titular | Cada envio e reenvio de triagem grava uma linha em `audit_log` (`TRIAGE_SUBMITTED`, `TRIAGE_RESUBMITTED`) na mesma transação; envio sem respostas (204), duplicado (409) ou inválido não grava. A tabela só aceita INSERT: o banco rejeita UPDATE, DELETE e TRUNCATE, e não há chave estrangeira para `users`, então o log sobrevive à exclusão de conta. `details` guarda só ids, números, indicadores e rótulos de estado (o papel de quem agiu vai em `actor_role`); resposta, nome, e-mail e texto livre são rejeitados. `GET /admin/audit` (só admin) lista com filtro e paginação. `GET /me/access-log` (só dependente) mostra quando um terceiro leu a triagem e com qual **papel**, nunca quem. | LGPD art. 11 (dado sensível de saúde) e art. 18 (transparência ao titular); RNF003. O modelo do log (só INSERT, papel em vez de nome) é decisão do time (ver nota 11). | `V17__create_audit_log.sql`; `AuditLog`; `AuditAction`; `AuditService`; `TriageService#auditTriageWrite`; `AdminAuditController`; `MeController` | `AuditLogTriggerTest#updateIsRejected`<br>`AuditLogTriggerTest#deleteIsRejected`<br>`AuditLogTriggerTest#truncateIsRejected`<br>`AuditLogTriggerTest#insertWorksAndSurvivesAUserThatDoesNotExist`<br>`TriageAuditTest#submitRecordsTriageSubmittedWithIdsAndRoleOnly`<br>`TriageAuditTest#resubmitRecordsTriageResubmitted`<br>`TriageAuditTest#nothingIsRecordedWhenNothingIsStored`<br>`TriageAuditTest#detailsNeverHoldAnswersNameOrEmail`<br>`AuditServiceTest#freeTextUnderAnyOtherKeyIsRejectedAndNotSaved`<br>`AuditServiceTransactionTest#recordOutsideATransactionFailsAndWritesNothing`<br>`AdminAuditControllerTest#dependentGetsForbidden`<br>`AdminAuditControllerTest#psychologistGetsForbidden`<br>`MeAccessLogTest#entriesShowTheRoleAndNeverWhoReadIt`<br>`MeAccessLogTest#psychologistAndAdminGetForbidden` | Aguardando revisão |
 
 ## Notas
 
@@ -73,7 +74,13 @@ Conferida em 2026-10-31, sobre o commit `a0ecd2e` (branch `develop`) mais a muda
    - Decidir também o que fazer com conteúdo que a pessoa publicou, quando RF008 a RF010 existirem. Ligado à LGPD (RNF003 na matriz) e à retenção dos dados de saúde.
 
 10. **Papéis de acesso (decisão 10).** O papel fica no token até ele expirar (24 h): se um dia existir troca de papel, o token antigo vale o papel velho até vencer. Os dados fixos do admin (`Administrador`, `2000-01-01`, `outro`) só preenchem colunas obrigatórias; não são dados de uma pessoa.
-   - *Pergunta ao revisor:* o admin deve poder ver dados de triagem (dado de saúde)? Nenhum endpoint `/admin` existe ainda; quando existir, o acesso a esses dados precisa de regra própria e de auditoria (RNF003).
+   - *Pergunta ao revisor:* o admin deve poder ver dados de triagem (dado de saúde)? Nenhum endpoint `/admin` lê triagem; o único é `GET /admin/audit`, que não devolve dado de saúde. Se o admin passar a ler triagem, o acesso precisa de regra própria e passa pelo `AuditService` (decisão 11).
+
+11. **Trilha de auditoria (decisão 11).**
+   - O papel de quem leu fica em `details.actor_role` (e não em coluna nem por consulta a `users`) para sobreviver à exclusão da conta. O titular vê o papel, não o nome (LGPD art. 18), então não consegue identificar o profissional; o admin vê o `actor_id`.
+   - `TRIAGE_READ` existe mas nada a grava: ainda não há endpoint em que psicólogo ou admin leiam a triagem. Quem criar essa leitura deve chamar o `AuditService` na mesma transação (regra no `CLAUDE.md`).
+   - Ler o log (`GET /admin/audit`) não é auditado, porque ele não devolve dado de saúde.
+   - *Pergunta ao revisor:* por quanto tempo o log deve ser mantido? Hoje não há retenção nem expurgo (a tabela não aceita DELETE), e o log guarda o id do titular mesmo depois da exclusão da conta (decisão 9).
 
 ## Lacunas
 

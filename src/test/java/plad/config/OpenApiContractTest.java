@@ -6,18 +6,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import plad.dto.AccessLogEntryDTO;
 import plad.dto.AnswerRequestDTO;
 import plad.dto.AnswerResponseDTO;
+import plad.dto.AuditLogResponseDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
 import plad.dto.LoginResponseDTO;
 import plad.dto.OptionDTO;
+import plad.dto.PageResponseDTO;
 import plad.dto.QuestionResponseDTO;
 import plad.dto.RegisterRequestDTO;
 import plad.dto.TriageRequestDTO;
 import plad.dto.TriageResponseDTO;
 import plad.dto.UserResponseDTO;
+import plad.entity.AuditAction;
 import plad.entity.CrmCrpType;
 import plad.entity.QuestionType;
 import plad.entity.Sex;
@@ -145,12 +149,19 @@ class OpenApiContractTest {
     private static Map<String, Object> responseSamples() {
         Map<String, Object> samples = new TreeMap<>();
         AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
+        AccessLogEntryDTO accessLogEntry = new AccessLogEntryDTO(Instant.now(), AuditAction.TRIAGE_READ, "psicologo");
+        AuditLogResponseDTO auditEntry = new AuditLogResponseDTO(1L, Instant.now(), 2L, AuditAction.TRIAGE_SUBMITTED, 2L, "TRIAGE", 3L,
+                Map.of("actor_role", "dependente"));
+        samples.put("AccessLogEntryDTO", accessLogEntry);
         samples.put("AnswerResponseDTO", answer);
+        samples.put("AuditLogResponseDTO", auditEntry);
         samples.put("ErrorResponseDTO", new ErrorResponseDTO("CODE", "message", Instant.now(),
                 List.of(new FieldErrorDTO("field", "message")), "trace-id"));
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
+        samples.put("PageResponseDTOAccessLogEntryDTO", new PageResponseDTO<>(List.of(accessLogEntry), 0, 20, 1L, 1));
+        samples.put("PageResponseDTOAuditLogResponseDTO", new PageResponseDTO<>(List.of(auditEntry), 0, 20, 1L, 1));
         samples.put("QuestionResponseDTO", new QuestionResponseDTO(
                 1L, "AGE_RANGE", "text", QuestionType.single_choice, List.of(new OptionDTO("code", "label")), (short) 1, true));
         samples.put("TriageResponseDTO", new TriageResponseDTO(1L, Instant.now(), List.of(answer)));

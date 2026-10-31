@@ -9,10 +9,12 @@ import plad.dto.OptionDTO;
 import plad.dto.QuestionResponseDTO;
 import plad.dto.TriageRequestDTO;
 import plad.dto.TriageResponseDTO;
+import plad.entity.AuditAction;
 import plad.entity.Dependent;
 import plad.entity.QuestionTriage;
 import plad.entity.ResultQuestionTriage;
 import plad.entity.Triage;
+import plad.entity.UserType;
 import plad.exception.ForbiddenActionException;
 import plad.exception.InvalidTriageException;
 import plad.exception.TriageAlreadyExistException;
@@ -36,18 +38,21 @@ import java.util.stream.Collectors;
 public class TriageService {
 
     private static final int MAX_FREE_TEXT_LENGTH = 1000;
+    private static final String AUDIT_ENTITY = "TRIAGE";
 
     private final QuestionTriageRepository questionTriageRepository;
     private final TriageRepository triageRepository;
     private final ResultQuestionTriageRepository resultQuestionTriageRepository;
     private final DependentRepository dependentRepository;
+    private final AuditService auditService;
 
     //constructor injection
-    public TriageService(QuestionTriageRepository questionTriageRepository, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository) {
+    public TriageService(QuestionTriageRepository questionTriageRepository, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService) {
         this.questionTriageRepository = questionTriageRepository;
         this.triageRepository = triageRepository;
         this.resultQuestionTriageRepository = resultQuestionTriageRepository;
         this.dependentRepository = dependentRepository;
+        this.auditService = auditService;
     }
 
     // a question that passed validation, with the values to persist
@@ -85,6 +90,7 @@ public class TriageService {
         }
 
         saveResults(triage, answers);
+        auditTriageWrite(AuditAction.TRIAGE_SUBMITTED, userId, triage);
         return Optional.of(toTriageResponse(triage, answers));
     }
 
@@ -102,7 +108,13 @@ public class TriageService {
 
         resultQuestionTriageRepository.deleteByTriageId(triage.getId());
         saveResults(triage, answers);
+        auditTriageWrite(AuditAction.TRIAGE_RESUBMITTED, userId, triage);
         return toTriageResponse(triage, answers);
+    }
+
+    // ids and role only: the answers never reach the audit log
+    private void auditTriageWrite(AuditAction action, Long userId, Triage triage) {
+        auditService.record(action, userId, UserType.dependente, userId, AUDIT_ENTITY, triage.getId(), null);
     }
 
     private Dependent findDependent(Long userId) {

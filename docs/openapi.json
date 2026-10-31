@@ -1,6 +1,39 @@
 {
   "components": {
     "schemas": {
+      "AccessLogEntryDTO": {
+        "properties": {
+          "action": {
+            "description": "What happened",
+            "enum": [
+              "TRIAGE_SUBMITTED",
+              "TRIAGE_RESUBMITTED",
+              "TRIAGE_READ"
+            ],
+            "example": "TRIAGE_READ",
+            "type": "string"
+          },
+          "actor_role": {
+            "description": "Role of who accessed the data: psicologo or admin",
+            "example": "psicologo",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occurred_at": {
+            "description": "When the data was accessed (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "actor_role",
+          "occurred_at"
+        ]
+      },
       "AnswerRequestDTO": {
         "properties": {
           "question_code": {
@@ -68,6 +101,94 @@
           "question_id",
           "question_text",
           "values"
+        ]
+      },
+      "AuditLogResponseDTO": {
+        "properties": {
+          "action": {
+            "description": "What happened",
+            "enum": [
+              "TRIAGE_SUBMITTED",
+              "TRIAGE_RESUBMITTED",
+              "TRIAGE_READ"
+            ],
+            "example": "TRIAGE_SUBMITTED",
+            "type": "string"
+          },
+          "actor_id": {
+            "description": "User who acted; null for system actions",
+            "example": 7,
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "details": {
+            "additionalProperties": {
+              "description": "Only ids and state changes (e.g. actor_role); never answers, names, e-mails or free text",
+              "example": {
+                "actor_role": "dependente"
+              },
+              "type": "object"
+            },
+            "description": "Only ids and state changes (e.g. actor_role); never answers, names, e-mails or free text",
+            "example": {
+              "actor_role": "dependente"
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "entity": {
+            "description": "Kind of record involved",
+            "example": "TRIAGE",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entity_id": {
+            "description": "Id of the record involved",
+            "example": 3,
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Audit entry id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "occurred_at": {
+            "description": "When the action happened (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "subject_user_id": {
+            "description": "User whose data was affected",
+            "example": 7,
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "actor_id",
+          "details",
+          "entity",
+          "entity_id",
+          "id",
+          "occurred_at",
+          "subject_user_id"
         ]
       },
       "ErrorResponseDTO": {
@@ -180,6 +301,92 @@
         "required": [
           "code",
           "label"
+        ]
+      },
+      "PageResponseDTOAccessLogEntryDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/AccessLogEntryDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
+        ]
+      },
+      "PageResponseDTOAuditLogResponseDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogResponseDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
         ]
       },
       "QuestionResponseDTO": {
@@ -405,6 +612,138 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/audit": {
+      "get": {
+        "description": "Entries hold only ids and state changes, never answers, names, e-mails or free text",
+        "operationId": "list",
+        "parameters": [
+          {
+            "description": "Only entries about this user",
+            "in": "query",
+            "name": "subject_user_id",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only this action",
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "enum": [
+                "TRIAGE_SUBMITTED",
+                "TRIAGE_RESUBMITTED",
+                "TRIAGE_READ"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOAuditLogResponseDTO"
+                }
+              }
+            },
+            "description": "One page of audit entries"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unknown action or invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List audit entries, newest first",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "operationId": "login",
@@ -602,6 +941,114 @@
         "summary": "Register a dependent or a psychologist",
         "tags": [
           "Auth"
+        ]
+      }
+    },
+    "/me/access-log": {
+      "get": {
+        "description": "Transparency to the data subject (LGPD art. 18). Shows the role of who read, never their name. Newest first",
+        "operationId": "accessLog",
+        "parameters": [
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOAccessLogEntryDTO"
+                }
+              }
+            },
+            "description": "One page of access entries"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "When someone else read my triage, and in which role",
+        "tags": [
+          "Me"
         ]
       }
     },
@@ -884,8 +1331,16 @@
   ],
   "tags": [
     {
+      "description": "Audit trail of access to sensitive data; admin only",
+      "name": "Audit"
+    },
+    {
       "description": "Public endpoints, rate limited to 5 requests per minute per client IP",
       "name": "Auth"
+    },
+    {
+      "description": "Data about the logged-in user's own data; requires a Bearer token",
+      "name": "Me"
     },
     {
       "description": "Dependents' one-time triage questionnaire; requires a Bearer token",
