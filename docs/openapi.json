@@ -302,10 +302,11 @@
             "type": "string"
           },
           "type_user": {
-            "description": "Account type; psicologo also requires credential_type and crm_crp_number",
+            "description": "Account type; psicologo also requires credential_type and crm_crp_number. admin is never accepted here (400 INVALID_REGISTRATION): the first admin is created at startup",
             "enum": [
               "dependente",
-              "psicologo"
+              "psicologo",
+              "admin"
             ],
             "type": "string"
           }
@@ -536,7 +537,7 @@
                 }
               }
             },
-            "description": "Invalid body (including a birth date under 18 years old), or a psychologist without credentials or with a credential number already registered"
+            "description": "Invalid body (including a birth date under 18 years old), type_user admin, or a psychologist without credentials or with a credential number already registered"
           },
           "409": {
             "content": {

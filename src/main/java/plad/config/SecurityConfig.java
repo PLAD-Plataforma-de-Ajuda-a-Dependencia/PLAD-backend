@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtService jwtService;
@@ -69,6 +71,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll();
                     // the error dispatch must stay reachable or anonymous errors turn into a bare 401
                     auth.requestMatchers("/error").permitAll();
+                    auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     // public only while springdoc.api-docs.enabled=true; otherwise they fall under authenticated()
                     if (apiDocsEnabled) {
                         auth.requestMatchers(HttpMethod.GET, "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml",

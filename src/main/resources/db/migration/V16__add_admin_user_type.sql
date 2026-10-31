@@ -1,0 +1,1 @@
+ALTER TYPE user_type ADD VALUE IF NOT EXISTS 'admin';

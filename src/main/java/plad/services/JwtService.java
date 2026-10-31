@@ -1,5 +1,6 @@
 package plad.services;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -7,15 +8,21 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import plad.entity.User;
+import plad.entity.UserType;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 public class JwtService {
 
     private static final String USER_ID_CLAIM = "userId";
+    private static final String ROLE_CLAIM = "role";
+
+    // role is null for tokens issued before the claim existed; the filter treats those as invalid
+    public record TokenClaims(Long userId, UserType role) {}
 
     private final SecretKey secretKey;
     private final JwtParser parser;
@@ -38,6 +45,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(String.valueOf(user.getId()))
                 .claim(USER_ID_CLAIM, user.getId())
+                .claim(ROLE_CLAIM, Objects.requireNonNull(user.getTypeUser(), "user has no type_user").name())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -46,9 +54,16 @@ public class JwtService {
 
     // null when the token is valid but has no userId claim
     public Long extractUserId(String token) {
+        return parse(token).userId();
+    }
+
+    // verifies the signature once; a claim that is missing comes back null, a malformed or unknown one is rejected
+    public TokenClaims parse(String token) {
         try {
-            return parser.parseSignedClaims(token).getPayload().get(USER_ID_CLAIM, Long.class);
-        } catch (JwtException e) {
+            Claims claims = parser.parseSignedClaims(token).getPayload();
+            String role = claims.get(ROLE_CLAIM, String.class);
+            return new TokenClaims(claims.get(USER_ID_CLAIM, Long.class), role == null ? null : UserType.valueOf(role));
+        } catch (JwtException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid or expired token", e);
         }
     }

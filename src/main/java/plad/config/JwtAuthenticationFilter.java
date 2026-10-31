@@ -2,6 +2,7 @@ package plad.config;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import plad.services.JwtService;
@@ -43,13 +45,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // invalid tokens are ignored: the request goes on unauthenticated and protected routes answer 401
     private void authenticate(String token) {
         try {
-            Long userId = jwtService.extractUserId(token);
-            if (userId == null) {
+            JwtService.TokenClaims claims = jwtService.parse(token);
+            if (claims.userId() == null) {
                 log.debug("Ignoring JWT without a userId claim");
                 return;
             }
+            // tokens issued before the role claim existed are invalid: the user logs in again
+            if (claims.role() == null) {
+                log.debug("Ignoring JWT without a role claim");
+                return;
+            }
+            List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + claims.role().name().toUpperCase(Locale.ROOT)));
             SecurityContextHolder.getContext().setAuthentication(
-                    UsernamePasswordAuthenticationToken.authenticated(userId, null, List.of()));
+                    UsernamePasswordAuthenticationToken.authenticated(claims.userId(), null, authorities));
         } catch (IllegalArgumentException e) {
             log.debug("Ignoring invalid JWT: {}", e.getMessage());
         }

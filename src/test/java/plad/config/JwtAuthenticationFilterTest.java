@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import plad.entity.User;
+import plad.entity.UserType;
 import plad.services.JwtService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -82,6 +83,28 @@ class JwtAuthenticationFilterTest {
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
+    // tokens issued before the role claim existed must log in again
+    @Test
+    void signedTokenWithoutRoleIsUnauthorized() throws Exception {
+        String token = Jwts.builder().subject("1").claim("userId", 1L)
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes())).compact();
+
+        getQuestions("Bearer " + token)
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void signedTokenWithUnknownRoleIsUnauthorized() throws Exception {
+        String token = Jwts.builder().subject("1").claim("userId", 1L).claim("role", "superuser")
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes())).compact();
+
+        getQuestions("Bearer " + token)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
     private ResultActions getQuestions(String authorization) throws Exception {
         return mockMvc.perform(get("/triage/questions").header("Authorization", authorization));
     }
@@ -89,6 +112,7 @@ class JwtAuthenticationFilterTest {
     private static User userWithId(Long id) {
         User user = new User();
         user.setId(id);
+        user.setTypeUser(UserType.dependente);
         return user;
     }
 }

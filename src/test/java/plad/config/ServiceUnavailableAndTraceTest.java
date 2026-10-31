@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.CannotCreateTransactionException;
 import plad.entity.User;
+import plad.entity.UserType;
 import plad.services.JwtService;
 import plad.services.TriageService;
 
@@ -118,6 +119,7 @@ class ServiceUnavailableAndTraceTest {
     private String bearer() {
         User user = new User();
         user.setId(1L);
+        user.setTypeUser(UserType.dependente);
         return "Bearer " + jwtService.generateToken(user);
     }
 }

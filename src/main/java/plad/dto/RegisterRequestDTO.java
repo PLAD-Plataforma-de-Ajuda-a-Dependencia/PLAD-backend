@@ -27,7 +27,8 @@ public record RegisterRequestDTO(
                 example = "1990-05-20")
         @NotNull @MinAge(value = 18) LocalDate birthDate,
         @NotNull Sex gender,
-        @Schema(description = "Account type; psicologo also requires credential_type and crm_crp_number")
+        @Schema(description = "Account type; psicologo also requires credential_type and crm_crp_number. "
+                + "admin is never accepted here (400 INVALID_REGISTRATION): the first admin is created at startup")
         @NotNull UserType typeUser,
         @Schema(description = "Professional council; required when type_user is psicologo", example = "CRP")
         CrmCrpType credentialType,

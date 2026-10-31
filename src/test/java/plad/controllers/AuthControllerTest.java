@@ -11,12 +11,14 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import plad.config.TestcontainersConfig;
+import plad.repositories.UserRepository;
 
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -34,6 +36,8 @@ class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void registerDependentStoresLowercasedEmail() throws Exception {
@@ -97,6 +101,18 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
                 .andExpect(jsonPath("$.message").value("Psychologist must provide credentials"));
+    }
+
+    @Test
+    void registeringAnAdminIsBadRequestAndCreatesNothing() throws Exception {
+        String email = newEmail();
+
+        register(nextClient(), dependentBody(email).replace("dependente", "admin"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
+                .andExpect(jsonPath("$.message").value("Admin accounts cannot be self-registered"));
+
+        assertThat(userRepository.existsByEmail(email)).isFalse();
     }
 
     @Test

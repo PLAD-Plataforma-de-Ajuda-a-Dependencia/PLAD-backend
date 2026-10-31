@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -82,6 +83,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ForbiddenActionException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenActionException ex) {
         return error(HttpStatus.FORBIDDEN, ex);
+    }
+
+    // method security (@PreAuthorize) denies inside MVC, where the Exception handler below would turn it into a 500;
+    // the caller is always authenticated here (anyRequest().authenticated()), so 403 is the right answer
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Access denied");
     }
 
     // safety net for unique constraints a service did not translate; never echo constraint names

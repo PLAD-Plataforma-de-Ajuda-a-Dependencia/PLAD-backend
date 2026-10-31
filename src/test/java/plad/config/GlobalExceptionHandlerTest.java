@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import plad.dto.ErrorResponseDTO;
 import plad.entity.User;
+import plad.entity.UserType;
 import plad.services.JwtService;
 
 import java.sql.SQLException;
@@ -121,6 +122,7 @@ class GlobalExceptionHandlerTest {
     private String bearer() {
         User user = new User();
         user.setId(1L);
+        user.setTypeUser(UserType.dependente);
         return "Bearer " + jwtService.generateToken(user);
     }
 }

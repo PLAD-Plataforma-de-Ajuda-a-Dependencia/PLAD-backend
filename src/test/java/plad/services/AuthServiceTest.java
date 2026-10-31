@@ -98,6 +98,17 @@ class AuthServiceTest {
         verify(userRepository, never()).saveAndFlush(any());
     }
 
+    @Test
+    void registerRejectsAdminBeforeTouchingTheDatabase() {
+        RegisterRequestDTO request = new RegisterRequestDTO("Admin", "admin@example.com", "senha-dev-123",
+                LocalDate.of(1990, 1, 1), Sex.outro, UserType.admin, null, null, null);
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(InvalidRegistrationException.class)
+                .hasMessageContaining("Admin");
+        verifyNoInteractions(userRepository, dependentRepository, psychologistRepository);
+    }
+
     private static User withId(User user) {
         user.setId(7L);
         return user;

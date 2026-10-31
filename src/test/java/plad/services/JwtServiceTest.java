@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
 import plad.entity.User;
+import plad.entity.UserType;
 
 import javax.crypto.SecretKey;
 
@@ -68,9 +69,48 @@ class JwtServiceTest {
         assertThat(jwtService.extractUserId(token)).isNull();
     }
 
+    @Test
+    void tokenCarriesTheRoleOfTheUserType() {
+        for (UserType type : UserType.values()) {
+            String token = jwtService.generateToken(user(1L, type));
+
+            assertThat(jwtService.parse(token).role()).isEqualTo(type);
+            Claims claims = Jwts.parser().verifyWith(KEY).build().parseSignedClaims(token).getPayload();
+            assertThat(claims.get("role", String.class)).isEqualTo(type.name());
+        }
+    }
+
+    @Test
+    void tokenWithoutRoleHasNoRole() {
+        String token = Jwts.builder().claim("userId", 1L).signWith(KEY).compact();
+
+        assertThat(jwtService.parse(token).userId()).isEqualTo(1L);
+        assertThat(jwtService.parse(token).role()).isNull();
+    }
+
+    @Test
+    void unknownRoleIsRejected() {
+        String token = Jwts.builder().claim("userId", 1L).claim("role", "superuser").signWith(KEY).compact();
+
+        assertThatThrownBy(() -> jwtService.parse(token)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void userWithoutTypeCannotGetAToken() {
+        User user = new User();
+        user.setId(1L);
+
+        assertThatThrownBy(() -> jwtService.generateToken(user)).isInstanceOf(NullPointerException.class);
+    }
+
     private static User user(Long id) {
+        return user(id, UserType.dependente);
+    }
+
+    private static User user(Long id, UserType type) {
         User user = new User();
         user.setId(id);
+        user.setTypeUser(type);
         user.setEmail("someone@example.com");
         return user;
     }

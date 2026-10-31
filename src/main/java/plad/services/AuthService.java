@@ -37,6 +37,11 @@ public class AuthService {
     public UserResponseDTO register(RegisterRequestDTO request) {
         String email = Emails.normalize(request.email());
 
+        // the else branch below creates a psychologist, so admin must be turned away before anything is written
+        if (request.typeUser() == UserType.admin) {
+            throw new InvalidRegistrationException("Admin accounts cannot be self-registered");
+        }
+
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyInUseException("Email already in use");
         }
