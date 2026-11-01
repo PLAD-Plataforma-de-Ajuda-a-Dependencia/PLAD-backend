@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.services</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package plad.services;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import plad.dto.RegisterRequestDTO;
+import plad.dto.UserResponseDTO;
+import plad.entity.Dependent;
+import plad.entity.Psychologist;
+import plad.entity.User;
+import plad.entity.UserType;
+import plad.exception.EmailAlreadyInUseException;
+import plad.exception.InvalidRegistrationException;
+import plad.repositories.DependentRepository;
+import plad.repositories.PsychologistRepository;
+import plad.repositories.UserRepository;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final DependentRepository dependentRepository;
+    private final PsychologistRepository psychologistRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    //constructor injection
+<span class="fc" id="L28">    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, DependentRepository dependentRepository, PsychologistRepository psychologistRepository) {</span>
+<span class="fc" id="L29">        this.userRepository = userRepository;</span>
+<span class="fc" id="L30">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L31">        this.dependentRepository = dependentRepository;</span>
+<span class="fc" id="L32">        this.psychologistRepository = psychologistRepository;</span>
+
+<span class="fc" id="L34">    }</span>
+
+    @Transactional
+    public UserResponseDTO register(RegisterRequestDTO request) {
+<span class="fc" id="L38">        String email = Emails.normalize(request.email());</span>
+
+        // the else branch below creates a psychologist, so admin must be turned away before anything is written
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (request.typeUser() == UserType.admin) {</span>
+<span class="fc" id="L42">            throw new InvalidRegistrationException(&quot;Admin accounts cannot be self-registered&quot;);</span>
+        }
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (userRepository.existsByEmail(email)) {</span>
+<span class="fc" id="L46">            throw new EmailAlreadyInUseException(&quot;Email already in use&quot;);</span>
+        }
+
+<span class="fc" id="L49">        String crmCrpNumber = null;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (request.typeUser() == UserType.psicologo) {</span>
+            // a number with no letters or digits (&quot;///&quot;) normalizes to empty and counts as missing
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (request.crmCrpNumber() != null) {</span>
+<span class="fc" id="L53">                crmCrpNumber = CrmCrpNumbers.normalize(request.crmCrpNumber());</span>
+            }
+<span class="pc bpc" id="L55" title="1 of 6 branches missed.">            if (request.credentialType() == null || crmCrpNumber == null || crmCrpNumber.isEmpty()) {</span>
+<span class="fc" id="L56">                throw new InvalidRegistrationException(&quot;Psychologist must provide credentials&quot;);</span>
+            }
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            if (psychologistRepository.existsByCrmCrpNumber(crmCrpNumber)) {</span>
+<span class="fc" id="L59">                throw new InvalidRegistrationException(&quot;Credential number already registered&quot;);</span>
+            }
+        }
+
+<span class="fc" id="L63">        User user = new User();</span>
+<span class="fc" id="L64">        user.setEmail(email);</span>
+<span class="fc" id="L65">        user.setRealName(request.realName());</span>
+<span class="fc" id="L66">        user.setPasswordHash(passwordEncoder.encode(request.password()));</span>
+<span class="fc" id="L67">        user.setBirthDate(request.birthDate());</span>
+<span class="fc" id="L68">        user.setGender(request.gender());</span>
+<span class="fc" id="L69">        user.setTypeUser(request.typeUser());</span>
+        User savedUser;
+        try {
+            // flush now so a concurrent registration with the same email hits the unique constraint here and not at commit
+<span class="fc" id="L73">            savedUser = userRepository.saveAndFlush(user);</span>
+<span class="fc" id="L74">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L75">            throw new EmailAlreadyInUseException(&quot;Email already in use&quot;);</span>
+<span class="fc" id="L76">        }</span>
+
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (request.typeUser() == UserType.dependente) {</span>
+<span class="fc" id="L79">            Dependent dependent = new Dependent();</span>
+<span class="fc" id="L80">            dependent.setUser(savedUser);</span>
+<span class="fc" id="L81">            dependentRepository.save(dependent);</span>
+<span class="fc" id="L82">        } else {</span>
+<span class="fc" id="L83">            Psychologist psychologist = new  Psychologist();</span>
+<span class="fc" id="L84">            psychologist.setUser(savedUser);</span>
+<span class="fc" id="L85">            psychologist.setCredentialType(request.credentialType());</span>
+<span class="fc" id="L86">            psychologist.setCrmCrpNumber(crmCrpNumber);</span>
+<span class="fc" id="L87">            psychologist.setGraduate(request.graduate());</span>
+            try {
+<span class="fc" id="L89">                psychologistRepository.saveAndFlush(psychologist);</span>
+<span class="fc" id="L90">            } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L91">                throw new InvalidRegistrationException(&quot;Credential number already registered&quot;);</span>
+<span class="fc" id="L92">            }</span>
+        }
+
+<span class="fc" id="L95">        return new UserResponseDTO(</span>
+<span class="fc" id="L96">                savedUser.getId(),</span>
+<span class="fc" id="L97">                savedUser.getRealName(),</span>
+<span class="fc" id="L98">                savedUser.getEmail()</span>
+        );
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterRequestDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.dto</a> &gt; <span class="el_source">RegisterRequestDTO.java</span></div><h1>RegisterRequestDTO.java</h1><pre class="source lang-java linenums">package plad.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import plad.entity.UserType;
+import plad.entity.Sex;
+import plad.entity.CrmCrpType;
+import plad.validation.MaxBytes;
+import plad.validation.MinAge;
+
+import java.time.LocalDate;
+
+// max sizes mirror the column lengths; password max is BCrypt's 72-byte input limit
+<span class="fc" id="L17">public record RegisterRequestDTO(</span>
+        @Schema(description = &quot;Full name&quot;, example = &quot;Maria Silva&quot;)
+        @NotBlank @Size(max = 150) String realName,
+        @Schema(description = &quot;Login e-mail; stored lowercased and unique&quot;, example = &quot;maria@example.com&quot;)
+        @NotBlank @Email @Size(max = 255) String email,
+        @Schema(description = &quot;At least 8 characters and at most 72 bytes in UTF-8&quot;, example = &quot;senha-segura-123&quot;)
+        @NotBlank @Size(min = 8) @MaxBytes(value = 72) String password,
+        @Schema(description = &quot;Date of birth (yyyy-MM-dd). The platform is only for adults: the person must be at least &quot;
+                + &quot;18 years old on today's date in America/Sao_Paulo, turning 18 on the same day and month of birth &quot;
+                + &quot;(born on Feb 29: Mar 1 in non-leap years), and at most 120. Otherwise 400 VALIDATION_ERROR on birth_date&quot;,
+                example = &quot;1990-05-20&quot;)
+        @NotNull @MinAge(value = 18) LocalDate birthDate,
+        @NotNull Sex gender,
+        @Schema(description = &quot;Account type; psicologo also requires credential_type and crm_crp_number. &quot;
+                + &quot;admin is never accepted here (400 INVALID_REGISTRATION): the first admin is created at startup&quot;)
+        @NotNull UserType typeUser,
+        @Schema(description = &quot;Professional council; required when type_user is psicologo&quot;, example = &quot;CRP&quot;)
+        CrmCrpType credentialType,
+        @Schema(description = &quot;Council registration number, unique; required when type_user is psicologo&quot;, example = &quot;06/123456&quot;)
+        @Size(max = 30) String crmCrpNumber,
+        @Schema(description = &quot;Graduation, only stored for psicologo&quot;, example = &quot;Psicologia - USP&quot;)
+        @Size(max = 150) String graduate
+) {}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

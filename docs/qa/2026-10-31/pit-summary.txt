@@ -1,0 +1,27 @@
+plad.config total 115 killed 102 survived 12 nocov 1 timeout 0 score 88.7%
+plad.controllers total 12 killed 12 survived 0 nocov 0 timeout 0 score 100.0%
+plad.services total 162 killed 154 survived 5 nocov 3 timeout 0 score 95.1%
+plad.validation total 17 killed 17 survived 0 nocov 0 timeout 0 score 100.0%
+ALL 306 285 93.1%
+--- non-killed
+SURVIVED config.OpenApiConfig lambda$internalServerErrorResponse$0 L143 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig lambda$internalServerErrorResponse$0 L143 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig lambda$internalServerErrorResponse$0 L149 NullReturnValsMutator | replaced return value with null for plad/config/OpenApiConfig::lambda$internalServerErrorResponse$0
+SURVIVED config.OpenApiConfig lambda$serviceUnavailableResponse$0 L157 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig lambda$serviceUnavailableResponse$0 L157 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig lambda$serviceUnavailableResponse$0 L166 NullReturnValsMutator | replaced return value with null for plad/config/OpenApiConfig::lambda$serviceUnavailableResponse$0
+SURVIVED config.OpenApiConfig lambda$sortedTags$0 L69 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig lambda$sortedTags$0 L70 VoidMethodCallMutator | removed call to java/util/List::sort
+SURVIVED config.OpenApiConfig renderNullable L113 NegateConditionalsMutator | negated conditional
+NO_COVERAGE config.OpenApiConfig renderNullable L113 NegateConditionalsMutator | negated conditional
+SURVIVED config.OpenApiConfig snakeCaseModelResolver L62 NullReturnValsMutator | replaced return value with null for plad/config/OpenApiConfig::snakeCaseModelResolver
+SURVIVED config.GlobalExceptionHandler reasonPhrase L198 NegateConditionalsMutator | negated conditional
+SURVIVED services.AuthService register L87 VoidMethodCallMutator | removed call to plad/entity/Psychologist::setGraduate
+NO_COVERAGE services.TriageReadService lambda$actorRole$0 L76 NullReturnValsMutator | replaced return value with null for plad/services/TriageReadService::lambda$actorRole$0
+SURVIVED services.RateLimiterService lambda$evictIdleBuckets$0 L64 ConditionalsBoundaryMutator | changed conditional boundary
+SURVIVED services.RateLimiterService refund L51 VoidMethodCallMutator | removed call to java/util/concurrent/atomic/AtomicLong::set
+SURVIVED services.AdminBootstrapService createIfAbsent L47 ConditionalsBoundaryMutator | changed conditional boundary
+SURVIVED services.AdminBootstrapService createIfAbsent L48 ConditionalsBoundaryMutator | changed conditional boundary
+SURVIVED config.SecurityErrorHandler write L47 VoidMethodCallMutator | removed call to jakarta/servlet/http/HttpServletResponse::setCharacterEncoding
+NO_COVERAGE services.MeService lambda$findMe$0 L31 NullReturnValsMutator | replaced return value with null for plad/services/MeService::lambda$findMe$0
+NO_COVERAGE services.MeService lambda$findMe$1 L36 NullReturnValsMutator | replaced return value with null for plad/services/MeService::lambda$findMe$1

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuditLog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.entity</a> &gt; <span class="el_source">AuditLog.java</span></div><h1>AuditLog.java</h1><pre class="source lang-java linenums">package plad.entity;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
+import java.util.Map;
+
+// rows are only ever inserted: a database trigger rejects UPDATE, DELETE and TRUNCATE
+@Entity
+@Table(name = &quot;audit_log&quot;)
+public class AuditLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // set on persist like the other entities' timestamps, so the saved entity already has it (the column default
+    // now() only covers inserts made outside JPA)
+    @Column(name = &quot;occurred_at&quot;, nullable = false, updatable = false)
+    private Instant occurredAt;
+
+    @PrePersist
+    public void prePersist() {
+<span class="fc" id="L26">        this.occurredAt = Instant.now();</span>
+<span class="fc" id="L27">    }</span>
+
+    @Column(name = &quot;actor_id&quot;, updatable = false)
+    private Long actorId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;action&quot;, nullable = false, length = 50, updatable = false)
+    private AuditAction action;
+
+    @Column(name = &quot;subject_user_id&quot;, updatable = false)
+    private Long subjectUserId;
+
+    @Column(name = &quot;entity&quot;, length = 50, updatable = false)
+    private String entity;
+
+    @Column(name = &quot;entity_id&quot;, updatable = false)
+    private Long entityId;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = &quot;details&quot;, columnDefinition = &quot;jsonb&quot;, updatable = false)
+    private Map&lt;String, Object&gt; details;
+
+    //getters n setters
+
+    public Long getId() {
+<span class="fc" id="L52">        return id;</span>
+    }
+
+    public Instant getOccurredAt() {
+<span class="fc" id="L56">        return occurredAt;</span>
+    }
+
+    public Long getActorId() {
+<span class="fc" id="L60">        return actorId;</span>
+    }
+
+    public void setActorId(Long actorId) {
+<span class="fc" id="L64">        this.actorId = actorId;</span>
+<span class="fc" id="L65">    }</span>
+
+    public AuditAction getAction() {
+<span class="fc" id="L68">        return action;</span>
+    }
+
+    public void setAction(AuditAction action) {
+<span class="fc" id="L72">        this.action = action;</span>
+<span class="fc" id="L73">    }</span>
+
+    public Long getSubjectUserId() {
+<span class="fc" id="L76">        return subjectUserId;</span>
+    }
+
+    public void setSubjectUserId(Long subjectUserId) {
+<span class="fc" id="L80">        this.subjectUserId = subjectUserId;</span>
+<span class="fc" id="L81">    }</span>
+
+    public String getEntity() {
+<span class="fc" id="L84">        return entity;</span>
+    }
+
+    public void setEntity(String entity) {
+<span class="fc" id="L88">        this.entity = entity;</span>
+<span class="fc" id="L89">    }</span>
+
+    public Long getEntityId() {
+<span class="fc" id="L92">        return entityId;</span>
+    }
+
+    public void setEntityId(Long entityId) {
+<span class="fc" id="L96">        this.entityId = entityId;</span>
+<span class="fc" id="L97">    }</span>
+
+    public Map&lt;String, Object&gt; getDetails() {
+<span class="fc" id="L100">        return details;</span>
+    }
+
+    public void setDetails(Map&lt;String, Object&gt; details) {
+<span class="fc" id="L104">        this.details = details;</span>
+<span class="fc" id="L105">    }</span>
+
+    //empty constructor
+<span class="fc" id="L108">    public AuditLog() {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

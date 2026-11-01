@@ -1,0 +1,100 @@
+## SUREFIRE por classe
+| plad.config.AdminAccessTest | 8 | 8 | 0 | 0 | 0 |
+| plad.config.AdminBootstrapRunnerTest | 3 | 3 | 0 | 0 | 0 |
+| plad.config.AdminBootstrapRunnerWiringTest | 1 | 1 | 0 | 0 | 0 |
+| plad.config.CorsConfigTest | 3 | 3 | 0 | 0 | 0 |
+| plad.config.ForwardedClientIpTrustedProxyTest | 2 | 2 | 0 | 0 | 0 |
+| plad.config.ForwardedClientIpUntrustedPeerTest | 1 | 1 | 0 | 0 | 0 |
+| plad.config.GlobalExceptionHandlerTest | 6 | 6 | 0 | 0 | 0 |
+| plad.config.JwtAuthenticationFilterTest | 8 | 8 | 0 | 0 | 0 |
+| plad.config.OpenApiConfigTest | 1 | 1 | 0 | 0 | 0 |
+| plad.config.OpenApiContractTest | 5 | 5 | 0 | 0 | 0 |
+| plad.config.OpenApiDisabledTest | 2 | 2 | 0 | 0 | 0 |
+| plad.config.RequestIdFilterTest | 5 | 5 | 0 | 0 | 0 |
+| plad.config.SecurityErrorHandlerTest | 3 | 3 | 0 | 0 | 0 |
+| plad.config.ServiceUnavailableAndTraceTest | 7 | 7 | 0 | 0 | 0 |
+| plad.config.TestDataRunner | 1 | 1 | 0 | 0 | 0 |
+| plad.controllers.AdminAuditControllerTest | 9 | 9 | 0 | 0 | 0 |
+| plad.controllers.AuthControllerTest | 15 | 15 | 0 | 0 | 0 |
+| plad.controllers.LoginControllerTest | 12 | 12 | 0 | 0 | 0 |
+| plad.controllers.MeAccessLogTest | 7 | 7 | 0 | 0 | 0 |
+| plad.controllers.MeControllerTest | 9 | 9 | 0 | 0 | 0 |
+| plad.controllers.RegisterMinAgeTest | 7 | 7 | 0 | 0 | 0 |
+| plad.controllers.TriageAuditTest | 4 | 4 | 0 | 0 | 0 |
+| plad.controllers.TriageControllerTest | 28 | 28 | 0 | 0 | 0 |
+| plad.controllers.TriageReadControllerTest | 13 | 13 | 0 | 0 | 0 |
+| plad.exception.ErrorCodeTest | 1 | 1 | 0 | 0 | 0 |
+| plad.PladApplicationTests | 1 | 1 | 0 | 0 | 0 |
+| plad.repositories.AuditLogTriggerTest | 4 | 4 | 0 | 0 | 0 |
+| plad.repositories.InstantRoundTripTest | 3 | 3 | 0 | 0 | 0 |
+| plad.repositories.TriageRepositoryTest | 6 | 6 | 0 | 0 | 0 |
+| plad.services.AdminBootstrapServiceTest | 6 | 6 | 0 | 0 | 0 |
+| plad.services.AuditServiceTest | 7 | 7 | 0 | 0 | 0 |
+| plad.services.AuditServiceTransactionTest | 1 | 1 | 0 | 0 | 0 |
+| plad.services.AuthServiceTest | 6 | 6 | 0 | 0 | 0 |
+| plad.services.CrmCrpNumbersTest | 4 | 4 | 0 | 0 | 0 |
+| plad.services.JwtServiceTest | 11 | 11 | 0 | 0 | 0 |
+| plad.services.RateLimiterServiceTest | 7 | 7 | 0 | 0 | 0 |
+| plad.services.TriageServiceTest | 33 | 33 | 0 | 0 | 0 |
+| plad.validation.MaxBytesValidatorTest | 4 | 4 | 0 | 0 | 0 |
+| plad.validation.MinAgeValidatorTest | 11 | 11 | 0 | 0 | 0 |
+TOTAL classes=39 tests=265 failures=0 errors=0 skipped=0
+## JACOCO por pacote
+| plad | 1 | 1/3 (33.3%) | 0/0 (n/a) | 37.5% |
+| plad.config | 10 | 236/241 (97.9%) | 60/82 (73.2%) | 98.1% |
+| plad.controllers | 6 | 33/33 (100.0%) | 0/0 (n/a) | 100.0% |
+| plad.dto | 17 | 33/33 (100.0%) | 2/4 (50.0%) | 99.0% |
+| plad.entity | 12 | 141/165 (85.5%) | 0/0 (n/a) | 87.5% |
+| plad.exception | 10 | 36/36 (100.0%) | 0/0 (n/a) | 100.0% |
+| plad.services | 15 | 372/374 (99.5%) | 135/140 (96.4%) | 98.8% |
+| plad.validation | 2 | 23/23 (100.0%) | 16/18 (88.9%) | 100.0% |
+| TOTAL | 73 | 875/908 (96.4%) | 213/244 (87.3%) | 97.4% |
+## JACOCO 10 classes com menor cobertura de linhas (desempate: instrucoes)
+| plad.PladApplication | 1/3 (33.3%) | sem branches | 37.5% |
+| plad.entity.Dependent | 9/13 (69.2%) | sem branches | 64.3% |
+| plad.entity.QuestionTriage | 21/28 (75.0%) | sem branches | 77.3% |
+| plad.entity.ResultQuestionTriage | 10/13 (76.9%) | sem branches | 77.4% |
+| plad.entity.Psychologist | 19/23 (82.6%) | sem branches | 80.8% |
+| plad.entity.Triage | 10/12 (83.3%) | sem branches | 85.7% |
+| plad.entity.User | 24/28 (85.7%) | sem branches | 84.1% |
+| plad.config.OpenApiConfig | 71/74 (95.9%) | 24/38 (63.2%) | 96.8% |
+| plad.config.SecurityConfig | 38/39 (97.4%) | 4/6 (66.7%) | 97.2% |
+| plad.services.TriageReadService | 42/43 (97.7%) | 1/2 (50.0%) | 97.1% |
+## PLAYWRIGHT stats {"startTime":"2026-10-31T23:38:46.238Z","duration":202647.801,"expected":36,"skipped":0,"unexpected":1,"flaky":0}
+expected    passed  api.spec.ts :: adulto: 201 com id, nome e e-mail
+expected    passed  api.spec.ts :: quem faz 18 amanhã: 400 VALIDATION_ERROR em birth_date
+expected    passed  api.spec.ts :: quem faz 18 hoje: 201
+expected    passed  api.spec.ts :: type_user admin: 400 INVALID_REGISTRATION
+expected    passed  api.spec.ts :: e-mail repetido em maiúsculas: 409 EMAIL_IN_USE
+expected    passed  api.spec.ts :: CRP "06/123456" e "06 / 123456" são o mesmo registro: duplicado 400
+expected    passed  api.spec.ts :: psicólogo sem número de registro: 400
+expected    passed  api.spec.ts :: senha errada e e-mail inexistente respondem igual (não revela se a conta existe)
+expected    passed  api.spec.ts :: 6ª tentativa do mesmo IP: 429 RATE_LIMITED com Retry-After
+expected    passed  api.spec.ts :: /me do dependente: sem real_name, com has_triage
+expected    passed  api.spec.ts :: /me do psicólogo: credencial e is_validated=false
+expected    passed  api.spec.ts :: sem token: 401 UNAUTHORIZED em JSON
+expected    passed  api.spec.ts :: X-Request-Id é devolvido (o enviado, se válido; senão um gerado)
+expected    passed  api.spec.ts :: perguntas não oferecem AGE_UNDER_18
+expected    passed  api.spec.ts :: POST 201, segundo POST 409, PUT 200
+expected    passed  api.spec.ts :: POST vazio: 204 e nada gravado (ainda dá para enviar depois)
+expected    passed  api.spec.ts :: PUT vazio: 400 INVALID_TRIAGE e a triagem guardada permanece
+expected    passed  api.spec.ts :: AGE_UNDER_18 como resposta: 400
+unexpected  passed  api.spec.ts :: texto livre com 1000 emojis: 201
+expected    passed  api.spec.ts :: psicólogo não envia triagem: 403
+expected    passed  api.spec.ts :: dependente 403; admin 200 sem real_name nem e-mail; psicólogo 200
+expected    passed  api.spec.ts :: TRIAGE_VIEWED em /admin/audit e em /me/access-log (sem actor_id); psicólogo 403 em /admin/audit
+expected    failed  api.spec.ts :: FALHA CONHECIDA: psicólogo recém-cadastrado recebe 403 em /triages
+expected    passed  api.spec.ts :: Swagger UI abre em /swagger-ui/index.html
+expected    passed  ui.spec.ts :: dependente: cria a conta e vai para /login com o e-mail preenchido
+expected    passed  ui.spec.ts :: psicólogo: etapa 1 leva à etapa 2 e o cadastro conclui
+expected    passed  ui.spec.ts :: menor de 18 (faz 18 amanhã): o back recusa e a tela mostra um alerta
+expected    passed  ui.spec.ts :: e-mail já cadastrado: mostra erro e continua no formulário
+expected    passed  ui.spec.ts :: campos obrigatórios vazios: o navegador barra o envio sem chamar a API
+expected    passed  ui.spec.ts :: senha errada: mensagem de erro e permanece em /login
+expected    passed  ui.spec.ts :: login → triagem completa (puladas e respondidas) → "Triagem enviada!" e token no localStorage
+expected    passed  ui.spec.ts :: triagem repetida: 409 vira a oferta de substituir e o PUT conclui
+expected    passed  ui.spec.ts :: sem token, /Triagem redireciona para /login
+expected    passed  ui.spec.ts :: sem token, /Calendario redireciona para /login
+expected    passed  ui.spec.ts :: sem token, /adminPsico redireciona para /login
+expected    passed  ui.spec.ts :: token vencido é tratado como sem sessão
+expected    passed  ui.spec.ts :: rota inexistente volta para a home

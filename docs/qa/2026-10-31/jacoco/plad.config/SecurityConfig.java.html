@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package plad.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import plad.services.JwtService;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final JwtService jwtService;
+    private final SecurityErrorHandler securityErrorHandler;
+    private final List&lt;String&gt; allowedOrigins;
+    private final boolean apiDocsEnabled;
+
+    public SecurityConfig(
+            JwtService jwtService,
+            SecurityErrorHandler securityErrorHandler,
+            @Value(&quot;${cors.allowed-origins}&quot;) String allowedOrigins,
+            @Value(&quot;${springdoc.api-docs.enabled:false}&quot;) boolean apiDocsEnabled
+<span class="fc" id="L38">    ) {</span>
+<span class="fc" id="L39">        this.jwtService = jwtService;</span>
+<span class="fc" id="L40">        this.securityErrorHandler = securityErrorHandler;</span>
+<span class="fc" id="L41">        this.allowedOrigins = parseOrigins(allowedOrigins);</span>
+<span class="fc" id="L42">        this.apiDocsEnabled = apiDocsEnabled;</span>
+<span class="fc" id="L43">    }</span>
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="fc" id="L47">        return new BCryptPasswordEncoder();</span>
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+<span class="fc" id="L52">        CorsConfiguration config = new CorsConfiguration();</span>
+<span class="fc" id="L53">        config.setAllowedOrigins(allowedOrigins);</span>
+<span class="fc" id="L54">        config.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="fc" id="L55">        config.setAllowedHeaders(List.of(&quot;Authorization&quot;, &quot;Content-Type&quot;));</span>
+
+<span class="fc" id="L57">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L58">        source.registerCorsConfiguration(&quot;/**&quot;, config);</span>
+<span class="fc" id="L59">        return source;</span>
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L64">        http</span>
+                // explicit source: HandlerMappingIntrospector is also a CorsConfigurationSource
+<span class="fc" id="L66">                .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="fc" id="L67">                .csrf(csrf -&gt; csrf.disable())</span>
+<span class="fc" id="L68">                .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L69">                .authorizeHttpRequests(auth -&gt; {</span>
+                    // listed one by one so a future /auth endpoint is not public by accident
+<span class="fc" id="L71">                    auth.requestMatchers(HttpMethod.POST, &quot;/auth/login&quot;, &quot;/auth/register&quot;).permitAll();</span>
+                    // the error dispatch must stay reachable or anonymous errors turn into a bare 401
+<span class="fc" id="L73">                    auth.requestMatchers(&quot;/error&quot;).permitAll();</span>
+<span class="fc" id="L74">                    auth.requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;);</span>
+                    // public only while springdoc.api-docs.enabled=true; otherwise they fall under authenticated()
+<span class="fc bfc" id="L76" title="All 2 branches covered.">                    if (apiDocsEnabled) {</span>
+<span class="fc" id="L77">                        auth.requestMatchers(HttpMethod.GET, &quot;/v3/api-docs&quot;, &quot;/v3/api-docs/**&quot;, &quot;/v3/api-docs.yaml&quot;,</span>
+<span class="fc" id="L78">                                &quot;/swagger-ui.html&quot;, &quot;/swagger-ui/**&quot;).permitAll();</span>
+                    }
+<span class="fc" id="L80">                    auth.anyRequest().authenticated();</span>
+<span class="fc" id="L81">                })</span>
+                // missing or invalid token: 401 so the client knows to log in again (403 stays &quot;not allowed&quot;);
+                // both answer with the same ErrorResponseDTO JSON as GlobalExceptionHandler
+<span class="fc" id="L84">                .exceptionHandling(exceptions -&gt; exceptions</span>
+<span class="fc" id="L85">                        .authenticationEntryPoint(securityErrorHandler)</span>
+<span class="fc" id="L86">                        .accessDeniedHandler(securityErrorHandler))</span>
+<span class="fc" id="L87">                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);</span>
+
+<span class="fc" id="L89">        return http.build();</span>
+    }
+
+    private static List&lt;String&gt; parseOrigins(String raw) {
+<span class="fc" id="L93">        List&lt;String&gt; origins = Arrays.stream(raw.split(&quot;,&quot;))</span>
+<span class="fc" id="L94">                .map(String::trim)</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                .filter(origin -&gt; !origin.isEmpty())</span>
+<span class="fc" id="L96">                .toList();</span>
+
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        if (origins.stream().anyMatch(origin -&gt; origin.contains(&quot;*&quot;))) {</span>
+<span class="nc" id="L99">            throw new IllegalStateException(&quot;cors.allowed-origins must list explicit origins, wildcards are not allowed&quot;);</span>
+        }
+<span class="fc" id="L101">        return origins;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

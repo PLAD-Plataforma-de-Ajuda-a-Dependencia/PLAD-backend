@@ -196,4 +196,49 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<!-- Mutation testing (PIT), only on the test/qa-suite branch: ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage
+		     Narrow the scope with -Dpit.targetClasses='plad.services.*,plad.validation.*' -->
+		<profile>
+			<id>mutation</id>
+			<properties>
+				<pit.targetClasses>plad.services.*,plad.validation.*,plad.config.*,plad.controllers.*</pit.targetClasses>
+				<pit.threads>4</pit.threads>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-maven</artifactId>
+						<version>1.30.1</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.pitest</groupId>
+								<artifactId>pitest-junit5-plugin</artifactId>
+								<version>1.2.3</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<targetClasses>${pit.targetClasses}</targetClasses>
+							<targetTests>plad.*</targetTests>
+							<threads>${pit.threads}</threads>
+							<outputFormats>
+								<outputFormat>HTML</outputFormat>
+								<outputFormat>XML</outputFormat>
+							</outputFormats>
+							<timestampedReports>false</timestampedReports>
+							<timeoutConstant>15000</timeoutConstant>
+							<!-- the minion JVM does not inherit the surefire settings, so repeat them here -->
+							<jvmArgs>
+								<value>-Duser.timezone=America/Sao_Paulo</value>
+								<value>-Djwt.secret=test-only-not-a-real-secret-0123456789-0123456789-0123456789</value>
+								<value>-Dspringdoc.api-docs.enabled=true</value>
+							</jvmArgs>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

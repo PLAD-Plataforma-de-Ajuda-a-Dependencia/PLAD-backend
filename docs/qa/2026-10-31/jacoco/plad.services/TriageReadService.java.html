@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TriageReadService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.services</a> &gt; <span class="el_source">TriageReadService.java</span></div><h1>TriageReadService.java</h1><pre class="source lang-java linenums">package plad.services;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import plad.dto.AnswerResponseDTO;
+import plad.dto.PageResponseDTO;
+import plad.dto.TriageReadResponseDTO;
+import plad.entity.AuditAction;
+import plad.entity.QuestionTriage;
+import plad.entity.ResultQuestionTriage;
+import plad.entity.Triage;
+import plad.entity.UserType;
+import plad.exception.InvalidCredentialsException;
+import plad.exception.TriageNotFoundException;
+import plad.repositories.ResultQuestionTriageRepository;
+import plad.repositories.TriageRepository;
+import plad.repositories.UserRepository;
+
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+// Reading triages for admins and psychologists. Every triage returned writes one TRIAGE_VIEWED entry in the
+// same transaction, so reading the same triage twice leaves two entries. The route's @PreAuthorize decides who
+// gets here; the role recorded in the entry comes from the database.
+@Service
+public class TriageReadService {
+
+    private static final String AUDIT_ENTITY = &quot;TRIAGE&quot;;
+<span class="fc" id="L36">    private static final Sort NEWEST_FIRST = Sort.by(Sort.Order.desc(&quot;createdAt&quot;), Sort.Order.desc(&quot;id&quot;));</span>
+
+    private final TriageRepository triageRepository;
+    private final ResultQuestionTriageRepository resultQuestionTriageRepository;
+    private final UserRepository userRepository;
+    private final AuditService auditService;
+
+    public TriageReadService(TriageRepository triageRepository,
+                             ResultQuestionTriageRepository resultQuestionTriageRepository,
+                             UserRepository userRepository,
+<span class="fc" id="L46">                             AuditService auditService) {</span>
+<span class="fc" id="L47">        this.triageRepository = triageRepository;</span>
+<span class="fc" id="L48">        this.resultQuestionTriageRepository = resultQuestionTriageRepository;</span>
+<span class="fc" id="L49">        this.userRepository = userRepository;</span>
+<span class="fc" id="L50">        this.auditService = auditService;</span>
+<span class="fc" id="L51">    }</span>
+
+    // not readOnly: the audit entry is an INSERT and a read-only transaction would reject it
+    @Transactional
+    public PageResponseDTO&lt;TriageReadResponseDTO&gt; list(Long actorId, int page, int size) {
+<span class="fc" id="L56">        UserType actorRole = actorRole(actorId);</span>
+<span class="fc" id="L57">        Pageable pageable = PageRequest.of(page, size, NEWEST_FIRST);</span>
+<span class="fc" id="L58">        Page&lt;Triage&gt; triages = triageRepository.findAllBy(pageable);</span>
+<span class="fc" id="L59">        Map&lt;Long, List&lt;AnswerResponseDTO&gt;&gt; answers = answersByTriage(triages.getContent());</span>
+<span class="fc" id="L60">        triages.forEach(triage -&gt; auditView(actorId, actorRole, triage));</span>
+<span class="fc" id="L61">        return PageResponseDTO.of(triages, triage -&gt; toResponse(triage, answers.getOrDefault(triage.getId(), List.of())));</span>
+    }
+
+    @Transactional
+    public TriageReadResponseDTO find(Long actorId, Long triageId) {
+<span class="fc" id="L66">        UserType actorRole = actorRole(actorId);</span>
+<span class="fc" id="L67">        Triage triage = triageRepository.findWithDependentById(triageId)</span>
+<span class="fc" id="L68">                .orElseThrow(() -&gt; new TriageNotFoundException(&quot;Triage not found&quot;));</span>
+<span class="fc" id="L69">        Map&lt;Long, List&lt;AnswerResponseDTO&gt;&gt; answers = answersByTriage(List.of(triage));</span>
+<span class="fc" id="L70">        auditView(actorId, actorRole, triage);</span>
+<span class="fc" id="L71">        return toResponse(triage, answers.getOrDefault(triage.getId(), List.of()));</span>
+    }
+
+    private UserType actorRole(Long actorId) {
+<span class="fc" id="L75">        return userRepository.findById(actorId)</span>
+<span class="pc" id="L76">                .orElseThrow(() -&gt; new InvalidCredentialsException(&quot;User no longer exists&quot;))</span>
+<span class="fc" id="L77">                .getTypeUser();</span>
+    }
+
+    private void auditView(Long actorId, UserType actorRole, Triage triage) {
+<span class="fc" id="L81">        auditService.record(AuditAction.TRIAGE_VIEWED, actorId, actorRole, triage.getDependent().getUserId(),</span>
+<span class="fc" id="L82">                AUDIT_ENTITY, triage.getId(), null);</span>
+<span class="fc" id="L83">    }</span>
+
+    // a single query loads the answers (and their questions) of every triage in the page
+    private Map&lt;Long, List&lt;AnswerResponseDTO&gt;&gt; answersByTriage(List&lt;Triage&gt; triages) {
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (triages.isEmpty()) {</span>
+<span class="nc" id="L88">            return Map.of();</span>
+        }
+<span class="fc" id="L90">        List&lt;Long&gt; ids = triages.stream().map(Triage::getId).toList();</span>
+<span class="fc" id="L91">        Map&lt;Long, List&lt;ResultQuestionTriage&gt;&gt; rowsByTriage = resultQuestionTriageRepository</span>
+<span class="fc" id="L92">                .findByTriageIdInOrderByIdAsc(ids).stream()</span>
+<span class="fc" id="L93">                .collect(Collectors.groupingBy(row -&gt; row.getTriage().getId()));</span>
+<span class="fc" id="L94">        return rowsByTriage.entrySet().stream()</span>
+<span class="fc" id="L95">                .collect(Collectors.toMap(Map.Entry::getKey, entry -&gt; toAnswers(entry.getValue())));</span>
+    }
+
+    // one entry per question (several rows for multi-choice), in the order of the questionnaire
+    private List&lt;AnswerResponseDTO&gt; toAnswers(List&lt;ResultQuestionTriage&gt; rows) {
+<span class="fc" id="L100">        Map&lt;QuestionTriage, List&lt;String&gt;&gt; valuesByQuestion = rows.stream()</span>
+<span class="fc" id="L101">                .collect(Collectors.groupingBy(ResultQuestionTriage::getQuestion, LinkedHashMap::new,</span>
+<span class="fc" id="L102">                        Collectors.mapping(ResultQuestionTriage::getValueResult, Collectors.toList())));</span>
+<span class="fc" id="L103">        return valuesByQuestion.entrySet().stream()</span>
+<span class="fc" id="L104">                .sorted(Map.Entry.comparingByKey(Comparator.comparing(QuestionTriage::getDisplayOrder)</span>
+<span class="fc" id="L105">                        .thenComparing(QuestionTriage::getId)))</span>
+<span class="fc" id="L106">                .map(entry -&gt; new AnswerResponseDTO(entry.getKey().getId(), entry.getKey().getCode(),</span>
+<span class="fc" id="L107">                        entry.getKey().getQuestionText(), entry.getValue()))</span>
+<span class="fc" id="L108">                .toList();</span>
+    }
+
+    private TriageReadResponseDTO toResponse(Triage triage, List&lt;AnswerResponseDTO&gt; answers) {
+<span class="fc" id="L112">        return new TriageReadResponseDTO(triage.getId(), triage.getDependent().getUserId(), triage.getCreatedAt(), answers);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

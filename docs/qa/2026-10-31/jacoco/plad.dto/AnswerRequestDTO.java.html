@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnswerRequestDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.dto</a> &gt; <span class="el_source">AnswerRequestDTO.java</span></div><h1>AnswerRequestDTO.java</h1><pre class="source lang-java linenums">package plad.dto;
+
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+
+import java.util.List;
+
+<span class="fc" id="L11">public record AnswerRequestDTO(</span>
+        @Schema(description = &quot;Id of a question from GET /triage/questions; send this or question_code (if both, they must match)&quot;, example = &quot;1&quot;)
+        Long questionId,
+        @Schema(description = &quot;Stable code of a question from GET /triage/questions; send this or question_id (if both, they must match)&quot;, example = &quot;AGE_RANGE&quot;)
+        @Size(max = 50) String questionCode,
+        // @ArraySchema: a plain @Schema on a List also lands on its items (and on the schema of a DTO item)
+        @ArraySchema(arraySchema = @Schema(example = &quot;[\&quot;AGE_25_39\&quot;]&quot;,
+                description = &quot;Option codes for single_choice and multi_choice questions (single_choice takes exactly one); &quot;
+                        + &quot;the text itself, as the only item, for free_text&quot;))
+        @NotEmpty @Size(max = 20) List&lt;@NotBlank String&gt; values
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
