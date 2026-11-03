@@ -18,6 +18,7 @@
 		<jjwt.version>0.12.6</jjwt.version>
 		<bucket4j.version>8.20.0</bucket4j.version>
 		<springdoc.version>3.1.1</springdoc.version>
+		<jacoco.version>0.8.16</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -180,11 +181,34 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<!-- sets the argLine property that surefire picks up through @{argLine} below -->
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<!-- coverage report in target/site/jacoco after ./mvnw test -->
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<!-- tests only: run the JVM outside UTC so time zone bugs show up (see InstantRoundTripTest) -->
-					<argLine>-Duser.timezone=America/Sao_Paulo</argLine>
+					<!-- tests only: run the JVM outside UTC so time zone bugs show up (see InstantRoundTripTest);
+					     @{argLine} keeps the JaCoCo agent -->
+					<argLine>@{argLine} -Duser.timezone=America/Sao_Paulo</argLine>
 					<systemPropertyVariables>
 						<!-- tests only: the app itself refuses to start without the JWT_SECRET env var -->
 						<jwt.secret>test-only-not-a-real-secret-0123456789-0123456789-0123456789</jwt.secret>

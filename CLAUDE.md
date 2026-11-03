@@ -13,7 +13,7 @@ Use the Maven wrapper (`./mvnw` in bash, `.\mvnw.cmd` in PowerShell):
 - Build: `./mvnw clean package`
 - Run: `./mvnw spring-boot:run` (the API docs stay closed; add `-Dspring-boot.run.profiles=dev` to open Swagger UI at `/swagger-ui.html`)
 - Update the API contract snapshot: `./mvnw test -Dopenapi.update=true` (in PowerShell quote it: `"-Dopenapi.update=true"`, or the dot splits the argument)
-- All tests: `./mvnw test`
+- All tests: `./mvnw test` (also writes the JaCoCo coverage report to `target/site/jacoco/index.html`; the surefire `argLine` must keep `@{argLine}` or the agent is lost)
 - Single test class / method: `./mvnw test -Dtest=TestDataRunner` / `./mvnw test -Dtest=TestDataRunner#savesAndFindsUserByEmail`
 
 The app needs a running PostgreSQL at `localhost:5432/dbtest` (user/password `postgres`/`postgres`, see `src/main/resources/application.properties`). **Tests only need Docker running**: they start their own throwaway `postgres:16` via Testcontainers and never touch `pladDB` or `dbtest`. There is no in-memory test DB: `@DataJpaTest` tests use `@AutoConfigureTestDatabase(replace = NONE)`, so they hit a real Postgres with Flyway migrations applied.
