@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Conferida em 2026-11-04, no commit `16b8739` (branch `develop`).
+Conferida em 2026-11-04, no commit `f08dd99` (branch `feat/refresh-tokens`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
 
