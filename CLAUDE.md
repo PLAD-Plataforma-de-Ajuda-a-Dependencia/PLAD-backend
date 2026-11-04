@@ -86,6 +86,7 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 - Every API contract change (endpoint, DTO field, status code, validation constraint) updates `docs/openapi.json` in the same PR: run `./mvnw test -Dopenapi.update=true`, review the diff and commit it. `OpenApiContractTest` fails until you do.
 - Every PR that changes the status of a requirement (RF/RNF) updates `docs/matriz-de-requisitos.md` in the same PR: status, code location, test, and the count table at the top.
 - Every new domain rule enters `docs/decisoes-para-revisao.md` in the same PR (what the system does, basis, code location, status), together with the test that pins it. Changing a decision means changing that test and its row there; keep the count table at the top in sync.
+- The "Conferida em" line at the top of `docs/matriz-de-requisitos.md` and of `docs/decisoes-para-revisao.md` is replaced, never stacked: one line per file, with the date and the commit it was checked against (`no commit <hash> (branch develop)`), and no mention of changes "not yet committed". Re-check the rows against the code before updating it.
 
 ## Database
 
