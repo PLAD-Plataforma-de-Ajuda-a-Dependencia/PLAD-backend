@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,7 +41,9 @@ public class AuthController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body (including a birth date under 18 years old), type_user admin, or a psychologist without credentials or with a credential number already registered",
+                    description = "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials "
+                            + "or with a credential number already registered, or (CONSENT_REQUIRED) the terms and the privacy policy "
+                            + "in force were not accepted: accepted_terms_version and accepted_privacy_version missing or not the current ones",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "409", description = "E-mail already in use",
@@ -53,8 +56,9 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
-        UserResponseDTO response = authService.register(request);
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request, HttpServletRequest httpRequest) {
+        // getRemoteAddr() is the real client IP: Tomcat only honors X-Forwarded-For from trusted proxies
+        UserResponseDTO response = authService.register(request, httpRequest.getRemoteAddr());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }

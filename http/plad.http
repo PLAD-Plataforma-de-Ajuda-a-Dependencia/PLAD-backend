@@ -17,7 +17,9 @@ Content-Type: application/json
   "password": "{{password}}",
   "birth_date": "2000-05-20",
   "gender": "nao_binario",
-  "type_user": "dependente"
+  "type_user": "dependente",
+  "accepted_terms_version": "1.0",
+  "accepted_privacy_version": "1.0"
 }
 
 > {%
@@ -38,7 +40,9 @@ Content-Type: application/json
   "type_user": "psicologo",
   "credential_type": "CRP",
   "crm_crp_number": "06/{{$timestamp}}",
-  "graduate": "Psicologia - USP"
+  "graduate": "Psicologia - USP",
+  "accepted_terms_version": "1.0",
+  "accepted_privacy_version": "1.0"
 }
 
 > {%

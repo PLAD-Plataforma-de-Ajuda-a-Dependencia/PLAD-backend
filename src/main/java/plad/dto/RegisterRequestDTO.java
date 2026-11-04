@@ -35,5 +35,11 @@ public record RegisterRequestDTO(
         @Schema(description = "Council registration number, unique; required when type_user is psicologo", example = "06/123456")
         @Size(max = 30) String crmCrpNumber,
         @Schema(description = "Graduation, only stored for psicologo", example = "Psicologia - USP")
-        @Size(max = 150) String graduate
+        @Size(max = 150) String graduate,
+        @Schema(description = "Version of the terms of use being accepted (LGPD art. 11); must be the one in force, "
+                + "otherwise 400 CONSENT_REQUIRED", example = "1.0")
+        @Size(max = 20) String acceptedTermsVersion,
+        @Schema(description = "Version of the privacy policy being accepted (LGPD art. 11); must be the one in force, "
+                + "otherwise 400 CONSENT_REQUIRED", example = "1.0")
+        @Size(max = 20) String acceptedPrivacyVersion
 ) {}

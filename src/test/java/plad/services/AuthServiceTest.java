@@ -15,6 +15,7 @@ import plad.entity.Psychologist;
 import plad.entity.User;
 import plad.entity.Sex;
 import plad.entity.UserType;
+import plad.exception.ConsentRequiredException;
 import plad.exception.EmailAlreadyInUseException;
 import plad.exception.InvalidRegistrationException;
 import plad.repositories.PsychologistRepository;
@@ -25,6 +26,8 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,6 +44,10 @@ class AuthServiceTest {
     private PsychologistRepository psychologistRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private ConsentService consentService;
+
+    private static final String IP = "203.0.113.9";
 
     @InjectMocks
     private AuthService authService;
@@ -50,7 +57,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
 
-        UserResponseDTO response = authService.register(dependentRequest("  Ana@Example.COM "));
+        UserResponseDTO response = authService.register(dependentRequest("  Ana@Example.COM "), IP);
 
         verify(userRepository).existsByEmail("ana@example.com");
         assertThat(response.email()).isEqualTo("ana@example.com");
@@ -61,7 +68,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
 
-        authService.register(dependentRequest("ana@example.com"));
+        authService.register(dependentRequest("ana@example.com"), IP);
 
         verify(nicknameService).assignInitial(7L);
     }
@@ -71,7 +78,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
 
-        authService.register(psychologistRequest("06/12345"));
+        authService.register(psychologistRequest("06/12345"), IP);
 
         verifyNoInteractions(nicknameService);
     }
@@ -81,7 +88,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("users_email_key"));
 
-        assertThatThrownBy(() -> authService.register(dependentRequest("ana@example.com")))
+        assertThatThrownBy(() -> authService.register(dependentRequest("ana@example.com"), IP))
                 .isInstanceOf(EmailAlreadyInUseException.class);
         verifyNoInteractions(nicknameService);
     }
@@ -92,7 +99,7 @@ class AuthServiceTest {
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
         when(psychologistRepository.saveAndFlush(any(Psychologist.class))).thenThrow(new DataIntegrityViolationException("crm_crp_number"));
 
-        assertThatThrownBy(() -> authService.register(psychologistRequest("06/12345")))
+        assertThatThrownBy(() -> authService.register(psychologistRequest("06/12345"), IP))
                 .isInstanceOf(InvalidRegistrationException.class)
                 .hasMessageContaining("Credential number");
     }
@@ -102,7 +109,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
 
-        authService.register(psychologistRequest(" 06 / 12345-sp "));
+        authService.register(psychologistRequest(" 06 / 12345-sp "), IP);
 
         verify(psychologistRepository).existsByCrmCrpNumber("0612345SP");
         ArgumentCaptor<Psychologist> saved = ArgumentCaptor.forClass(Psychologist.class);
@@ -112,7 +119,7 @@ class AuthServiceTest {
 
     @Test
     void registerRejectsPsychologistWithBlankCredentialNumber() {
-        assertThatThrownBy(() -> authService.register(psychologistRequest("   ")))
+        assertThatThrownBy(() -> authService.register(psychologistRequest("   "), IP))
                 .isInstanceOf(InvalidRegistrationException.class);
         verify(userRepository, never()).saveAndFlush(any());
     }
@@ -120,12 +127,35 @@ class AuthServiceTest {
     @Test
     void registerRejectsAdminBeforeTouchingTheDatabase() {
         RegisterRequestDTO request = new RegisterRequestDTO("Admin", "admin@example.com", "senha-dev-123",
-                LocalDate.of(1990, 1, 1), Sex.outro, UserType.admin, null, null, null);
+                LocalDate.of(1990, 1, 1), Sex.outro, UserType.admin, null, null, null, "1.0", "1.0");
 
-        assertThatThrownBy(() -> authService.register(request))
+        assertThatThrownBy(() -> authService.register(request, IP))
                 .isInstanceOf(InvalidRegistrationException.class)
                 .hasMessageContaining("Admin");
         verifyNoInteractions(userRepository, nicknameService, psychologistRepository);
+    }
+
+    @Test
+    void registerRecordsTheConsentOfTheNewUserWithTheClientIp() {
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
+
+        authService.register(dependentRequest("ana@example.com"), IP);
+
+        verify(consentService).requireCurrent("1.0", "1.0");
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(consentService).record(saved.capture(), eq(IP));
+        assertThat(saved.getValue().getId()).isEqualTo(7L);
+    }
+
+    @Test
+    void registerWithoutTheCurrentConsentTouchesNothing() {
+        doThrow(new ConsentRequiredException("accept")).when(consentService).requireCurrent(any(), any());
+
+        assertThatThrownBy(() -> authService.register(dependentRequest("ana@example.com"), IP))
+                .isInstanceOf(ConsentRequiredException.class);
+        verifyNoInteractions(userRepository, nicknameService, psychologistRepository);
+        verify(consentService, never()).record(any(), any());
     }
 
     private static User withId(User user) {
@@ -135,11 +165,11 @@ class AuthServiceTest {
 
     private static RegisterRequestDTO dependentRequest(String email) {
         return new RegisterRequestDTO("Ana Teste", email, "senha-dev-123", LocalDate.of(2000, 5, 20),
-                Sex.nao_binario, UserType.dependente, null, null, null);
+                Sex.nao_binario, UserType.dependente, null, null, null, "1.0", "1.0");
     }
 
     private static RegisterRequestDTO psychologistRequest(String crmCrpNumber) {
         return new RegisterRequestDTO("Psi Teste", "psi@example.com", "senha-dev-123", LocalDate.of(1985, 3, 10),
-                Sex.feminino, UserType.psicologo, CrmCrpType.CRP, crmCrpNumber, "Psicologia");
+                Sex.feminino, UserType.psicologo, CrmCrpType.CRP, crmCrpNumber, "Psicologia", "1.0", "1.0");
     }
 }

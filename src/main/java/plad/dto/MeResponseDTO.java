@@ -33,22 +33,25 @@ public record MeResponseDTO(
         String crmCrpNumber,
         @Schema(description = "Psychologists only: whether the credential was validated. Null for other types",
                 example = "false", nullable = true)
-        Boolean isValidated
+        Boolean isValidated,
+        @Schema(description = "True while the user has not accepted the terms and the privacy policy in the versions in force "
+                + "(accept with POST /me/consents). Set for every account type", example = "false")
+        boolean consentPending
 ) {
 
-    public static MeResponseDTO ofDependent(User user, boolean hasTriage, String nickname) {
+    public static MeResponseDTO ofDependent(User user, boolean hasTriage, String nickname, boolean consentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                hasTriage, nickname, null, null, null, null);
+                hasTriage, nickname, null, null, null, null, consentPending);
     }
 
-    public static MeResponseDTO ofPsychologist(User user, Psychologist psychologist) {
+    public static MeResponseDTO ofPsychologist(User user, Psychologist psychologist, boolean consentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
                 null, null, user.getRealName(), psychologist.getCredentialType(), psychologist.getCrmCrpNumber(),
-                psychologist.isValidate());
+                psychologist.isValidate(), consentPending);
     }
 
-    public static MeResponseDTO ofAdmin(User user) {
+    public static MeResponseDTO ofAdmin(User user, boolean consentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, consentPending);
     }
 }

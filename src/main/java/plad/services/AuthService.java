@@ -21,9 +21,12 @@ public class AuthService {
     private final NicknameService nicknameService;
     private final PsychologistRepository psychologistRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ConsentService consentService;
 
     //constructor injection
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, NicknameService nicknameService, PsychologistRepository psychologistRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, NicknameService nicknameService,
+                       PsychologistRepository psychologistRepository, ConsentService consentService) {
+        this.consentService = consentService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.nicknameService = nicknameService;
@@ -32,13 +35,16 @@ public class AuthService {
     }
 
     @Transactional
-    public UserResponseDTO register(RegisterRequestDTO request) {
+    public UserResponseDTO register(RegisterRequestDTO request, String clientIp) {
         String email = Emails.normalize(request.email());
 
         // the else branch below creates a psychologist, so admin must be turned away before anything is written
         if (request.typeUser() == UserType.admin) {
             throw new InvalidRegistrationException("Admin accounts cannot be self-registered");
         }
+
+        // LGPD art. 11: no account without the acceptance of the terms and privacy policy in force
+        consentService.requireCurrent(request.acceptedTermsVersion(), request.acceptedPrivacyVersion());
 
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyInUseException("Email already in use");
@@ -72,6 +78,9 @@ public class AuthService {
         } catch (DataIntegrityViolationException e) {
             throw new EmailAlreadyInUseException("Email already in use");
         }
+
+        // same transaction as the user: the acceptance commits or rolls back with the account
+        consentService.record(savedUser, clientIp);
 
         if (request.typeUser() == UserType.dependente) {
             // creates the dependents row together with its random nickname, in this same transaction

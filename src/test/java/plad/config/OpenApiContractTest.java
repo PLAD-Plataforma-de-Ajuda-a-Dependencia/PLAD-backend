@@ -10,6 +10,7 @@ import plad.dto.AccessLogEntryDTO;
 import plad.dto.AnswerRequestDTO;
 import plad.dto.AnswerResponseDTO;
 import plad.dto.AuditLogResponseDTO;
+import plad.dto.ConsentRequestDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
@@ -147,7 +148,8 @@ class OpenApiContractTest {
         samples.put("LoginRequestDTO", new LoginRequestDTO("a@b.com", "password-123"));
         samples.put("RegisterRequestDTO", new RegisterRequestDTO(
                 "name", "a@b.com", "password-123", LocalDate.of(1990, 5, 20), Sex.nao_binario,
-                UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia"));
+                UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia", "1.0", "1.0"));
+        samples.put("ConsentRequestDTO", new ConsentRequestDTO("1.0", "1.0"));
         samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
     }
@@ -169,7 +171,7 @@ class OpenApiContractTest {
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false, null,
-                "name", CrmCrpType.CRP, "06123456", false));
+                "name", CrmCrpType.CRP, "06123456", false, false));
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));

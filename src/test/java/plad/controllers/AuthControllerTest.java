@@ -147,6 +147,60 @@ class AuthControllerTest {
     }
 
     @Test
+    void registerWithoutAcceptingTheTermsIsBadRequestAndCreatesNothing() throws Exception {
+        String email = newEmail();
+        String withoutConsent = dependentBody(email)
+                .replaceAll(",\\s*\"accepted_terms_version\": \"1.0\", \"accepted_privacy_version\": \"1.0\"", "");
+        assertThat(withoutConsent).doesNotContain("accepted_");
+
+        register(nextClient(), withoutConsent)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        assertThat(userRepository.existsByEmail(email)).isFalse();
+    }
+
+    @Test
+    void registerWithOnlyOneOfTheTwoVersionsIsBadRequest() throws Exception {
+        String email = newEmail();
+
+        register(nextClient(), dependentBody(email).replace("\"accepted_privacy_version\": \"1.0\"", "\"accepted_privacy_version\": null"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        assertThat(userRepository.existsByEmail(email)).isFalse();
+    }
+
+    @Test
+    void registerWithAVersionThatIsNotInForceIsBadRequest() throws Exception {
+        String email = newEmail();
+
+        register(nextClient(), dependentBody(email).replace("\"accepted_terms_version\": \"1.0\"", "\"accepted_terms_version\": \"0.9\""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        assertThat(userRepository.existsByEmail(email)).isFalse();
+    }
+
+    @Test
+    void registerStoresBothAcceptancesWithTheClientIpAndLeavesNothingPending() throws Exception {
+        String body = register(nextClient(), dependentBody(newEmail()))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long id = ((Number) JsonPath.read(body, "$.id")).longValue();
+
+        var rows = jdbcTemplate.queryForList(
+                "SELECT document, version, ip, accepted_at FROM consents WHERE user_id = ? ORDER BY document", id);
+        assertThat(rows).hasSize(2);
+        assertThat(rows.get(0)).containsEntry("document", "privacy").containsEntry("version", "1.0");
+        assertThat(rows.get(1)).containsEntry("document", "terms").containsEntry("version", "1.0");
+        assertThat(rows).allSatisfy(row -> {
+            assertThat(row.get("ip")).asString().startsWith("10.1.0.");
+            assertThat(row.get("accepted_at")).isNotNull();
+        });
+    }
+
+    @Test
     void nameLongerThanTheColumnIsBadRequest() throws Exception {
         register(nextClient(), dependentBody(newEmail()).replace("Ana Teste", "a".repeat(151)))
                 .andExpect(status().isBadRequest())
@@ -242,13 +296,15 @@ class AuthControllerTest {
     private static String dependentBody(String email) {
         return """
                 {"real_name": "Ana Teste", "email": "%s", "password": "senha-dev-123",
-                 "birth_date": "2000-05-20", "gender": "nao_binario", "type_user": "dependente"}""".formatted(email);
+                 "birth_date": "2000-05-20", "gender": "nao_binario", "type_user": "dependente",
+                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}""".formatted(email);
     }
 
     private static String psychologistBody(String email, String crmCrpNumber) {
         return """
                 {"real_name": "Psi Teste", "email": "%s", "password": "senha-dev-123",
                  "birth_date": "1985-03-10", "gender": "feminino", "type_user": "psicologo",
-                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "Psicologia"}""".formatted(email, crmCrpNumber);
+                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "Psicologia",
+                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}""".formatted(email, crmCrpNumber);
     }
 }

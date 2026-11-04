@@ -60,6 +60,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponseDTO(ex.getCode().name(), ex.getMessage(), Instant.now()));
     }
 
+    @ExceptionHandler(ConsentRequiredException.class)
+    public ResponseEntity<ErrorResponseDTO> handleConsentRequired(ConsentRequiredException ex) {
+        return error(HttpStatus.BAD_REQUEST, ex); // 400
+    }
+
     @ExceptionHandler(InvalidRegistrationException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidRegistration(InvalidRegistrationException ex) {
         return error(HttpStatus.BAD_REQUEST, ex); // 400

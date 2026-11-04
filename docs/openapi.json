@@ -233,6 +233,24 @@
           "subject_user_id"
         ]
       },
+      "ConsentRequestDTO": {
+        "properties": {
+          "accepted_privacy_version": {
+            "description": "Version of the privacy policy being accepted; must be the one in force, otherwise 400 CONSENT_REQUIRED",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accepted_terms_version": {
+            "description": "Version of the terms of use being accepted; must be the one in force, otherwise 400 CONSENT_REQUIRED",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "DependentIdentityDTO": {
         "description": "Who answered the triage, as seen by a psychologist",
         "properties": {
@@ -361,6 +379,11 @@
       },
       "MeResponseDTO": {
         "properties": {
+          "consent_pending": {
+            "description": "True while the user has not accepted the terms and the privacy policy in the versions in force (accept with POST /me/consents). Set for every account type",
+            "example": false,
+            "type": "boolean"
+          },
           "created_at": {
             "description": "When the account was created (UTC)",
             "example": "2026-10-27T21:15:30Z",
@@ -442,6 +465,7 @@
           }
         },
         "required": [
+          "consent_pending",
           "created_at",
           "credential_type",
           "crm_crp_number",
@@ -714,6 +738,20 @@
       },
       "RegisterRequestDTO": {
         "properties": {
+          "accepted_privacy_version": {
+            "description": "Version of the privacy policy being accepted (LGPD art. 11); must be the one in force, otherwise 400 CONSENT_REQUIRED",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accepted_terms_version": {
+            "description": "Version of the terms of use being accepted (LGPD art. 11); must be the one in force, otherwise 400 CONSENT_REQUIRED",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
           "birth_date": {
             "description": "Date of birth (yyyy-MM-dd). The platform is only for adults: the person must be at least 18 years old on today's date in America/Sao_Paulo, turning 18 on the same day and month of birth (born on Feb 29: Mar 1 in non-leap years), and at most 120. Otherwise 400 VALIDATION_ERROR on birth_date",
             "example": "1990-05-20",
@@ -1384,7 +1422,7 @@
                 }
               }
             },
-            "description": "Invalid body (including a birth date under 18 years old), type_user admin, or a psychologist without credentials or with a credential number already registered"
+            "description": "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials or with a credential number already registered, or (CONSENT_REQUIRED) the terms and the privacy policy in force were not accepted: accepted_terms_version and accepted_privacy_version missing or not the current ones"
           },
           "409": {
             "content": {
@@ -1454,7 +1492,7 @@
     },
     "/me": {
       "get": {
-        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists",
+        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists. consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents)",
         "operationId": "me",
         "responses": {
           "200": {
@@ -1616,6 +1654,80 @@
           }
         },
         "summary": "When someone else read my triage, and in which role",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/me/consents": {
+      "post": {
+        "description": "Any account type. Records the acceptance of both documents in the versions in force (LGPD art. 11), with the time and the client IP. Use it when GET /me says consent_pending. Accepting a version that is already on file changes nothing",
+        "operationId": "acceptConsents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Accepted (or already on file)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, or (CONSENT_REQUIRED) a version is missing or is not the one in force"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or the user no longer exists"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accept the terms and privacy policy in force",
         "tags": [
           "Me"
         ]

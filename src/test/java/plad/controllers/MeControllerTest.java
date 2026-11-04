@@ -65,6 +65,8 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.credential_type").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.crm_crp_number").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.is_validated").value(org.hamcrest.Matchers.nullValue()))
+                // no consent on file for a user built straight in the database
+                .andExpect(jsonPath("$.consent_pending").value(true))
                 // every key is always sent
                 .andExpect(jsonPath("$", hasKey("real_name")))
                 .andExpect(jsonPath("$", hasKey("is_validated")))

@@ -19,9 +19,12 @@ public class MeService {
     private final PsychologistRepository psychologistRepository;
     private final DependentRepository dependentRepository;
     private final TriageRepository triageRepository;
+    private final ConsentService consentService;
 
     public MeService(UserRepository userRepository, PsychologistRepository psychologistRepository,
-                     DependentRepository dependentRepository, TriageRepository triageRepository) {
+                     DependentRepository dependentRepository, TriageRepository triageRepository,
+                     ConsentService consentService) {
+        this.consentService = consentService;
         this.dependentRepository = dependentRepository;
         this.userRepository = userRepository;
         this.psychologistRepository = psychologistRepository;
@@ -33,18 +36,19 @@ public class MeService {
     public MeResponseDTO findMe(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidCredentialsException("User no longer exists"));
+        boolean consentPending = consentService.isPending(userId);
         return switch (user.getTypeUser()) {
             case dependente -> {
                 Dependent dependent = dependentRepository.findById(userId)
                         .orElseThrow(() -> new IllegalStateException("Dependent " + userId + " has no dependents row"));
-                yield MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId), dependent.getNickname());
+                yield MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId), dependent.getNickname(), consentPending);
             }
             case psicologo -> {
                 Psychologist psychologist = psychologistRepository.findById(userId)
                         .orElseThrow(() -> new IllegalStateException("Psychologist " + userId + " has no psychologists row"));
-                yield MeResponseDTO.ofPsychologist(user, psychologist);
+                yield MeResponseDTO.ofPsychologist(user, psychologist, consentPending);
             }
-            case admin -> MeResponseDTO.ofAdmin(user);
+            case admin -> MeResponseDTO.ofAdmin(user, consentPending);
         };
     }
 }

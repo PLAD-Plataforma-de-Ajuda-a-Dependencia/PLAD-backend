@@ -13,6 +13,7 @@ class ErrorCodeTest {
         assertThat(new InvalidCredentialsException("m").getCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS);
         assertThat(new InvalidRegistrationException("m").getCode()).isEqualTo(ErrorCode.INVALID_REGISTRATION);
         assertThat(new InvalidTriageException("m").getCode()).isEqualTo(ErrorCode.INVALID_TRIAGE);
+        assertThat(new ConsentRequiredException("m").getCode()).isEqualTo(ErrorCode.CONSENT_REQUIRED);
         assertThat(new TriageAlreadyExistException("m").getCode()).isEqualTo(ErrorCode.TRIAGE_ALREADY_EXISTS);
         assertThat(new TriageNotFoundException("m").getCode()).isEqualTo(ErrorCode.TRIAGE_NOT_FOUND);
         assertThat(new ForbiddenActionException("m").getCode()).isEqualTo(ErrorCode.FORBIDDEN);

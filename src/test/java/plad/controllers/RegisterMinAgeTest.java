@@ -163,7 +163,8 @@ class RegisterMinAgeTest {
     private static String dependentBody(String birthDate) {
         return """
                 {"real_name": "Ana Teste", "email": "%s", "password": "senha-dev-123",
-                 "birth_date": "%s", "gender": "nao_binario", "type_user": "dependente"}"""
+                 "birth_date": "%s", "gender": "nao_binario", "type_user": "dependente",
+                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}"""
                 .formatted(newEmail(), birthDate);
     }
 
@@ -171,7 +172,8 @@ class RegisterMinAgeTest {
         return """
                 {"real_name": "Psi Teste", "email": "%s", "password": "senha-dev-123",
                  "birth_date": "%s", "gender": "feminino", "type_user": "psicologo",
-                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "Psicologia"}"""
+                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "Psicologia",
+                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}"""
                 .formatted(newEmail(), birthDate, UUID.randomUUID().toString().substring(0, 20));
     }
 
