@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
 import java.util.Arrays;
@@ -25,18 +27,25 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // login sets the refresh cookie, refresh rotates it, logout clears it: a cross-origin fetch only stores or sends
+    // the cookie when the response allows credentials
+    private static final List<String> CREDENTIALED_PATHS = List.of("/auth/login", "/auth/refresh", "/auth/logout");
+
     private final JwtService jwtService;
+    private final UserRepository userRepository;
     private final SecurityErrorHandler securityErrorHandler;
     private final List<String> allowedOrigins;
     private final boolean apiDocsEnabled;
 
     public SecurityConfig(
             JwtService jwtService,
+            UserRepository userRepository,
             SecurityErrorHandler securityErrorHandler,
             @Value("${cors.allowed-origins}") String allowedOrigins,
             @Value("${springdoc.api-docs.enabled:false}") boolean apiDocsEnabled
     ) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
         this.securityErrorHandler = securityErrorHandler;
         this.allowedOrigins = parseOrigins(allowedOrigins);
         this.apiDocsEnabled = apiDocsEnabled;
@@ -49,14 +58,22 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // credentials (cookies) only where the refresh cookie is set or sent; the first match wins, so these go first
+        for (String path : CREDENTIALED_PATHS) {
+            source.registerCorsConfiguration(path, corsConfiguration(true));
+        }
+        source.registerCorsConfiguration("/**", corsConfiguration(false));
+        return source;
+    }
+
+    private CorsConfiguration corsConfiguration(boolean allowCredentials) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
+        config.setAllowCredentials(allowCredentials);
+        return config;
     }
 
     @Bean
@@ -67,8 +84,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    // listed one by one so a future /auth endpoint is not public by accident
-                    auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll();
+                    // listed one by one so a future /auth endpoint is not public by accident;
+                    // refresh and logout authenticate with the refresh cookie, not a bearer token
+                    auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register",
+                            "/auth/refresh", "/auth/logout").permitAll();
                     // the error dispatch must stay reachable or anonymous errors turn into a bare 401
                     auth.requestMatchers("/error").permitAll();
                     // orchestrator probes only; /actuator/health itself and any other actuator path need a token
@@ -86,7 +105,9 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(securityErrorHandler)
                         .accessDeniedHandler(securityErrorHandler))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new RefreshOriginFilter(allowedOrigins, securityErrorHandler), CorsFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userRepository, securityErrorHandler),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

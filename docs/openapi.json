@@ -368,7 +368,7 @@
       "LoginResponseDTO": {
         "properties": {
           "token": {
-            "description": "JWT for the Authorization: Bearer header",
+            "description": "Access JWT for the Authorization: Bearer header, valid for 15 minutes (jwt.expiration-ms); keep it in memory only and renew it with POST /auth/refresh",
             "example": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.c2lnbmF0dXJl",
             "type": "string"
           }
@@ -1312,7 +1312,16 @@
                 }
               }
             },
-            "description": "Logged in"
+            "description": "Logged in",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Opaque refresh token: HttpOnly, Secure, SameSite=Strict, Path=/auth",
+                "schema": {
+                  "type": "string"
+                },
+                "style": "simple"
+              }
+            }
           },
           "400": {
             "content": {
@@ -1384,7 +1393,191 @@
           }
         },
         "security": [ ],
-        "summary": "Log in and get a JWT",
+        "summary": "Log in: short-lived access token in the body, refresh token in an HttpOnly cookie",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Idempotent: answers 204 even when there is no cookie or it is already revoked.",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "refresh_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Logged out; the refresh cookie is cleared",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Empty refresh_token cookie with Max-Age=0 (same attributes)",
+                "schema": {
+                  "type": "string"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Origin header missing or not in cors.allowed-origins"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [ ],
+        "summary": "Revoke the refresh token in the cookie and clear the cookie",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Rotates: the cookie used is revoked and a new pair is issued. Presenting a refresh token that was already used or revoked revokes every refresh token of that user.",
+        "operationId": "refresh",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "refresh_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              }
+            },
+            "description": "New access token and new refresh cookie",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Opaque refresh token: HttpOnly, Secure, SameSite=Strict, Path=/auth",
+                "schema": {
+                  "type": "string"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Refresh cookie missing, unknown, expired or already used; the cookie is cleared"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Origin header missing or not in cors.allowed-origins"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Too many attempts from this client IP",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [ ],
+        "summary": "Trade the refresh cookie for a new access token and a new refresh cookie",
         "tags": [
           "Auth"
         ]

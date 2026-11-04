@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import plad.dto.ErrorResponseDTO;
 import plad.entity.User;
 import plad.entity.UserType;
+import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
 import java.sql.SQLException;
@@ -43,6 +44,8 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private GlobalExceptionHandler handler;
 
@@ -120,9 +123,7 @@ class GlobalExceptionHandlerTest {
     }
 
     private String bearer() {
-        User user = new User();
-        user.setId(1L);
-        user.setTypeUser(UserType.dependente);
+        User user = TestUsers.save(userRepository, UserType.dependente);
         return "Bearer " + jwtService.generateToken(user);
     }
 }

@@ -49,6 +49,16 @@ Para só o banco (rodando a API pelo Maven): `docker compose up -d db`.
 
 Variáveis opcionais como `TRUSTED_PROXIES` ou `JAVA_OPTS` entram por um `docker-compose.override.yml` (não versionado) com `services.api.environment`.
 
+## Sessão: access token e cookie de refresh
+
+O login devolve no corpo um JWT de 15 minutos (o front o guarda só em memória) e define o cookie `refresh_token` (7 dias, `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/auth`). `POST /auth/refresh` troca o cookie por um par novo; `POST /auth/logout` o revoga.
+
+- **Front e API no mesmo site.** `SameSite=Strict` faz o navegador não enviar o cookie em requisições entre sites. `app.exemplo.com` e `api.exemplo.com` são o mesmo site (a porta não conta, então `localhost:5173` e `localhost:8080` também); `exemplo.com` e `outro.com` não são, e o refresh nunca funcionaria.
+- **`CORS_ALLOWED_ORIGINS` precisa ter a origem exata do front** (esquema + host + porta). `/auth/refresh` e `/auth/logout` respondem 403 a qualquer `Origin` fora da lista, ou sem `Origin`. O front deve chamar login, refresh e logout com `credentials: 'include'`.
+- **HTTPS.** O cookie é `Secure`: em HTTP puro o navegador não o guarda (exceto em `localhost` no Chrome e no Firefox). Para desenvolver em HTTP fora de `localhost`, `AUTH_REFRESH_COOKIE_SECURE=false`; nunca em produção.
+- **Limpeza.** Todo dia às 03:00 (America/Sao_Paulo) um job apaga refresh tokens expirados ou revogados há mais de 7 dias (`auth.refresh-token.cleanup-retention-days`) e loga quantos apagou. Com mais de uma instância, o job roda em cada uma; apagar é idempotente.
+- **Derrubar todas as sessões de um usuário** (troca de senha): `UserSessionService#revokeAllSessions`. Ele incrementa `users.token_version`, o que invalida os access tokens, e revoga os refresh tokens.
+
 ## Health
 
 Só duas rotas respondem sem token, e sem detalhes:
@@ -60,7 +70,7 @@ Só duas rotas respondem sem token, e sem detalhes:
 
 ## TRUSTED_PROXIES
 
-A API limita `POST /auth/login` e `POST /auth/register` por IP do cliente (5 por minuto) e grava o IP junto do aceite dos termos. O Tomcat só lê o IP real de `X-Forwarded-For` quando quem abriu a conexão TCP está em `TRUSTED_PROXIES` (lista de CIDRs); em qualquer outro caso vale o IP da conexão.
+A API limita `POST /auth/login`, `POST /auth/register` e `POST /auth/refresh` por IP do cliente (5 por minuto) e grava o IP junto do aceite dos termos. O Tomcat só lê o IP real de `X-Forwarded-For` quando quem abriu a conexão TCP está em `TRUSTED_PROXIES` (lista de CIDRs); em qualquer outro caso vale o IP da conexão.
 
 - **O padrão serve** quando a API só é acessível pelo proxy da plataforma. O padrão cobre loopback e as faixas privadas (`127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `100.64.0.0/10`, `::1/128`, `fc00::/7`, `fe80::/10`), onde costuma ficar o proxy interno de uma plataforma de hospedagem (confira o da sua) e a rede do compose.
 - **Com CDN na frente** (ex.: Cloudflare), o último salto até a API passa a ser a borda da CDN, que tem IP público. Acrescente as faixas publicadas por ela (Cloudflare: https://www.cloudflare.com/ips/). O valor de `TRUSTED_PROXIES` **substitui** o padrão, então mantenha também as faixas privadas do proxy interno:

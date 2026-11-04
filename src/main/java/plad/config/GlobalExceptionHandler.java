@@ -48,6 +48,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, ex); // 401
     }
 
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        return error(HttpStatus.UNAUTHORIZED, ex); // 401
+    }
+
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity<ErrorResponseDTO> handleEmailInUse(EmailAlreadyInUseException ex) {
         return error(HttpStatus.CONFLICT, ex); // 409

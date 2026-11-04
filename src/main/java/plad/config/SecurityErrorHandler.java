@@ -2,6 +2,7 @@ package plad.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,6 +39,13 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
         write(response, HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Access denied");
+    }
+
+    // the filter chain cannot reach GlobalExceptionHandler, so a database that fails there answers the same 503 here
+    public void serviceUnavailable(HttpServletResponse response) throws IOException {
+        response.setHeader(HttpHeaders.RETRY_AFTER, "5");
+        write(response, HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.SERVICE_UNAVAILABLE,
+                "Service temporarily unavailable, try again shortly");
     }
 
     private void write(HttpServletResponse response, HttpStatus status, ErrorCode code, String message)

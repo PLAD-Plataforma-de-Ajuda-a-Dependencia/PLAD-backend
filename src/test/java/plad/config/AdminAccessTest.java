@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import plad.entity.User;
 import plad.entity.UserType;
+import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -45,6 +46,8 @@ class AdminAccessTest {
     private MockMvc mockMvc;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void dependentGetsForbiddenOnAdminRoutes() throws Exception {
@@ -92,9 +95,7 @@ class AdminAccessTest {
     }
 
     private ResultActions call(String path, UserType type) throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setTypeUser(type);
+        User user = TestUsers.save(userRepository, type);
         return mockMvc.perform(get(path).header("Authorization", "Bearer " + jwtService.generateToken(user)));
     }
 

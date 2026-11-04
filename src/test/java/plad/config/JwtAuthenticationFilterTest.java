@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import plad.entity.User;
 import plad.entity.UserType;
+import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,13 +30,38 @@ class JwtAuthenticationFilterTest {
     private MockMvc mockMvc;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
     @Value("${jwt.secret}")
     private String secret;
 
     @Test
     void validTokenIsAuthenticated() throws Exception {
-        getQuestions("Bearer " + jwtService.generateToken(userWithId(1L)))
+        getQuestions("Bearer " + jwtService.generateToken(TestUsers.save(userRepository, UserType.dependente)))
                 .andExpect(status().isOk());
+    }
+
+    // tokens issued before the version claim existed must log in again
+    @Test
+    void signedTokenWithoutTokenVersionIsUnauthorized() throws Exception {
+        User user = TestUsers.save(userRepository, UserType.dependente);
+        String token = Jwts.builder().subject(user.getId().toString()).claim("userId", user.getId())
+                .claim("role", "dependente").signWith(Keys.hmacShaKeyFor(secret.getBytes())).compact();
+
+        getQuestions("Bearer " + token)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void tokenOfADeletedUserIsUnauthorized() throws Exception {
+        User user = TestUsers.save(userRepository, UserType.dependente);
+        String token = jwtService.generateToken(user);
+        userRepository.delete(user);
+
+        getQuestions("Bearer " + token)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
