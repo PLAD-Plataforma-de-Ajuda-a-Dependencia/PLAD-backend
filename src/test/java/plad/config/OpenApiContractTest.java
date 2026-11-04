@@ -14,7 +14,11 @@ import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
 import plad.dto.LoginResponseDTO;
+import plad.dto.AdminTriageReadResponseDTO;
+import plad.dto.DependentIdentityDTO;
+import plad.dto.DependentNicknameDTO;
 import plad.dto.MeResponseDTO;
+import plad.dto.NicknameResponseDTO;
 import plad.dto.OptionDTO;
 import plad.dto.PageResponseDTO;
 import plad.dto.QuestionResponseDTO;
@@ -151,20 +155,26 @@ class OpenApiContractTest {
     private static Map<String, Object> responseSamples() {
         Map<String, Object> samples = new TreeMap<>();
         AnswerResponseDTO answer = new AnswerResponseDTO(1L, "AGE_RANGE", "text", List.of("AGE_25_39"));
-        TriageReadResponseDTO triageRead = new TriageReadResponseDTO(1L, 2L, Instant.now(), List.of(answer));
+        TriageReadResponseDTO triageRead = new TriageReadResponseDTO(1L, 2L, new DependentIdentityDTO("Morcego Sereno", "Maria Silva"), Instant.now(), List.of(answer));
+        AdminTriageReadResponseDTO adminTriageRead = new AdminTriageReadResponseDTO(1L, 2L, new DependentNicknameDTO("Morcego Sereno"), Instant.now(), List.of(answer));
         AccessLogEntryDTO accessLogEntry = new AccessLogEntryDTO(Instant.now(), AuditAction.TRIAGE_VIEWED, "psicologo");
         AuditLogResponseDTO auditEntry = new AuditLogResponseDTO(1L, Instant.now(), 2L, AuditAction.TRIAGE_SUBMITTED, 2L, "TRIAGE", 3L,
                 Map.of("actor_role", "dependente"));
         samples.put("AccessLogEntryDTO", accessLogEntry);
+        samples.put("AdminTriageReadResponseDTO", adminTriageRead);
         samples.put("AnswerResponseDTO", answer);
         samples.put("AuditLogResponseDTO", auditEntry);
         samples.put("ErrorResponseDTO", new ErrorResponseDTO("CODE", "message", Instant.now(),
                 List.of(new FieldErrorDTO("field", "message")), "trace-id"));
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
-        samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false,
+        samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false, null,
                 "name", CrmCrpType.CRP, "06123456", false));
+        samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
+        samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
+        samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
+        samples.put("PageResponseDTOAdminTriageReadResponseDTO", new PageResponseDTO<>(List.of(adminTriageRead), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAccessLogEntryDTO", new PageResponseDTO<>(List.of(accessLogEntry), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAuditLogResponseDTO", new PageResponseDTO<>(List.of(auditEntry), 0, 20, 1L, 1));
         samples.put("PageResponseDTOTriageReadResponseDTO", new PageResponseDTO<>(List.of(triageRead), 0, 20, 1L, 1));

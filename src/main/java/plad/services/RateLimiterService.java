@@ -18,14 +18,21 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RateLimiterService {
 
     public static final String LOGIN_EMAIL_PREFIX = "login-email:";
+    public static final String NICKNAME_REROLL_PREFIX = "nickname-reroll:";
 
-    private record Limit(int capacity, Duration refillPeriod) {
+    // fixedWindow: the whole capacity comes back at once, one period after the bucket was created. Without it the
+    // tokens drip back one by one (capacity/period), which would let 5 a day turn into up to 10 inside one day.
+    private record Limit(int capacity, Duration refillPeriod, boolean fixedWindow) {
+        Limit(int capacity, Duration refillPeriod) {
+            this(capacity, refillPeriod, false);
+        }
     }
 
     private static final Limit DEFAULT_LIMIT = new Limit(5, Duration.ofMinutes(1));
     // keys starting with one of these prefixes get their own limit; per-IP keys start with "/" so they never match
     private static final Map<String, Limit> LIMITS_BY_PREFIX = Map.of(
-            LOGIN_EMAIL_PREFIX, new Limit(10, Duration.ofMinutes(15)));
+            LOGIN_EMAIL_PREFIX, new Limit(10, Duration.ofMinutes(15)),
+            NICKNAME_REROLL_PREFIX, new Limit(5, Duration.ofDays(1), true));
     private static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
 
     private record Entry(Bucket bucket, Limit limit, AtomicLong lastSeenNanos) {
@@ -77,9 +84,10 @@ public class RateLimiterService {
     }
 
     private static Entry newEntry(Limit limit) {
-        Bucket bucket = Bucket.builder()
-                .addLimit(Bandwidth.simple(limit.capacity(), limit.refillPeriod()))
-                .build();
+        Bandwidth bandwidth = limit.fixedWindow()
+                ? Bandwidth.builder().capacity(limit.capacity()).refillIntervally(limit.capacity(), limit.refillPeriod()).build()
+                : Bandwidth.simple(limit.capacity(), limit.refillPeriod());
+        Bucket bucket = Bucket.builder().addLimit(bandwidth).build();
         return new Entry(bucket, limit, new AtomicLong());
     }
 }

@@ -17,7 +17,6 @@ import plad.entity.Sex;
 import plad.entity.UserType;
 import plad.exception.EmailAlreadyInUseException;
 import plad.exception.InvalidRegistrationException;
-import plad.repositories.DependentRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.UserRepository;
 
@@ -37,7 +36,7 @@ class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private DependentRepository dependentRepository;
+    private NicknameService nicknameService;
     @Mock
     private PsychologistRepository psychologistRepository;
     @Mock
@@ -58,13 +57,33 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerGivesTheDependentANicknameInTheSameFlow() {
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
+
+        authService.register(dependentRequest("ana@example.com"));
+
+        verify(nicknameService).assignInitial(7L);
+    }
+
+    @Test
+    void registerGivesPsychologistsNoNickname() {
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
+
+        authService.register(psychologistRequest("06/12345"));
+
+        verifyNoInteractions(nicknameService);
+    }
+
+    @Test
     void registerTurnsConcurrentDuplicateEmailIntoConflict() {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("users_email_key"));
 
         assertThatThrownBy(() -> authService.register(dependentRequest("ana@example.com")))
                 .isInstanceOf(EmailAlreadyInUseException.class);
-        verifyNoInteractions(dependentRepository);
+        verifyNoInteractions(nicknameService);
     }
 
     @Test
@@ -106,7 +125,7 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(InvalidRegistrationException.class)
                 .hasMessageContaining("Admin");
-        verifyNoInteractions(userRepository, dependentRepository, psychologistRepository);
+        verifyNoInteractions(userRepository, nicknameService, psychologistRepository);
     }
 
     private static User withId(User user) {

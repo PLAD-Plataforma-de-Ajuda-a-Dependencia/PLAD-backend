@@ -6,10 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import plad.dto.AdminTriageReadResponseDTO;
 import plad.dto.AnswerResponseDTO;
+import plad.dto.DependentIdentityDTO;
+import plad.dto.DependentNicknameDTO;
 import plad.dto.PageResponseDTO;
 import plad.dto.TriageReadResponseDTO;
 import plad.entity.AuditAction;
+import plad.entity.Dependent;
 import plad.entity.QuestionTriage;
 import plad.entity.ResultQuestionTriage;
 import plad.entity.Triage;
@@ -51,24 +55,49 @@ public class TriageReadService {
     }
 
     // not readOnly: the audit entry is an INSERT and a read-only transaction would reject it
+    // Psychologist: the dependent comes with nickname and real name (the only reader who gets the real name).
     @Transactional
     public PageResponseDTO<TriageReadResponseDTO> list(Long actorId, int page, int size) {
+        return listAs(actorId, page, size, TriageReadService::toPsychologistResponse);
+    }
+
+    @Transactional
+    public TriageReadResponseDTO find(Long actorId, Long triageId) {
+        return findAs(actorId, triageId, TriageReadService::toPsychologistResponse);
+    }
+
+    // Admin: same triages, but the dependent shows up by nickname only. A separate DTO, not a hidden field.
+    @Transactional
+    public PageResponseDTO<AdminTriageReadResponseDTO> listForAdmin(Long actorId, int page, int size) {
+        return listAs(actorId, page, size, TriageReadService::toAdminResponse);
+    }
+
+    @Transactional
+    public AdminTriageReadResponseDTO findForAdmin(Long actorId, Long triageId) {
+        return findAs(actorId, triageId, TriageReadService::toAdminResponse);
+    }
+
+    private <T> PageResponseDTO<T> listAs(Long actorId, int page, int size, TriageMapper<T> mapper) {
         UserType actorRole = actorRole(actorId);
         Pageable pageable = PageRequest.of(page, size, NEWEST_FIRST);
         Page<Triage> triages = triageRepository.findAllBy(pageable);
         Map<Long, List<AnswerResponseDTO>> answers = answersByTriage(triages.getContent());
         triages.forEach(triage -> auditView(actorId, actorRole, triage));
-        return PageResponseDTO.of(triages, triage -> toResponse(triage, answers.getOrDefault(triage.getId(), List.of())));
+        return PageResponseDTO.of(triages, triage -> mapper.map(triage, answers.getOrDefault(triage.getId(), List.of())));
     }
 
-    @Transactional
-    public TriageReadResponseDTO find(Long actorId, Long triageId) {
+    private <T> T findAs(Long actorId, Long triageId, TriageMapper<T> mapper) {
         UserType actorRole = actorRole(actorId);
         Triage triage = triageRepository.findWithDependentById(triageId)
                 .orElseThrow(() -> new TriageNotFoundException("Triage not found"));
         Map<Long, List<AnswerResponseDTO>> answers = answersByTriage(List.of(triage));
         auditView(actorId, actorRole, triage);
-        return toResponse(triage, answers.getOrDefault(triage.getId(), List.of()));
+        return mapper.map(triage, answers.getOrDefault(triage.getId(), List.of()));
+    }
+
+    @FunctionalInterface
+    private interface TriageMapper<T> {
+        T map(Triage triage, List<AnswerResponseDTO> answers);
     }
 
     private UserType actorRole(Long actorId) {
@@ -108,7 +137,16 @@ public class TriageReadService {
                 .toList();
     }
 
-    private TriageReadResponseDTO toResponse(Triage triage, List<AnswerResponseDTO> answers) {
-        return new TriageReadResponseDTO(triage.getId(), triage.getDependent().getUserId(), triage.getCreatedAt(), answers);
+    private static TriageReadResponseDTO toPsychologistResponse(Triage triage, List<AnswerResponseDTO> answers) {
+        Dependent dependent = triage.getDependent();
+        return new TriageReadResponseDTO(triage.getId(), dependent.getUserId(),
+                new DependentIdentityDTO(dependent.getNickname(), dependent.getUser().getRealName()),
+                triage.getCreatedAt(), answers);
+    }
+
+    private static AdminTriageReadResponseDTO toAdminResponse(Triage triage, List<AnswerResponseDTO> answers) {
+        Dependent dependent = triage.getDependent();
+        return new AdminTriageReadResponseDTO(triage.getId(), dependent.getUserId(),
+                new DependentNicknameDTO(dependent.getNickname()), triage.getCreatedAt(), answers);
     }
 }

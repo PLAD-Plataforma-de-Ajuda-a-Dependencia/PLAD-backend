@@ -80,6 +80,7 @@ class TriageAuditTest {
         user.setTypeUser(UserType.dependente);
         user = userRepository.save(user);
         Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
         token = jwtService.generateToken(user);

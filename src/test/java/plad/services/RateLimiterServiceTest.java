@@ -58,6 +58,21 @@ class RateLimiterServiceTest {
                 .isInstanceOf(TooManyRequestException.class);
     }
 
+    // 5 a day, as a fixed window: the whole allowance comes back after 24h, not one token every 4.8h
+    @Test
+    void nicknameRerollKeysAllowFiveADayThenRejectUntilTheNextDay() {
+        String key = RateLimiterService.NICKNAME_REROLL_PREFIX + 42;
+        for (int i = 0; i < 5; i++) {
+            rateLimiterService.consume(key);
+        }
+
+        assertThatThrownBy(() -> rateLimiterService.consume(key))
+                .isInstanceOfSatisfying(TooManyRequestException.class,
+                        ex -> assertThat(ex.getRetryAfterSeconds()).isGreaterThan(23L * 3600).isLessThanOrEqualTo(24L * 3600));
+        // another dependent has an allowance of their own
+        rateLimiterService.consume(RateLimiterService.NICKNAME_REROLL_PREFIX + 43);
+    }
+
     @Test
     void evictsEmailBucketsOnlyAfterTheirOwnRefillPeriod() {
         rateLimiterService.consume("client-a");

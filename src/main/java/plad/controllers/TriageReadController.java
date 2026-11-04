@@ -23,12 +23,13 @@ import plad.dto.PageResponseDTO;
 import plad.dto.TriageReadResponseDTO;
 import plad.services.TriageReadService;
 
-// Only admins and psychologists read triages. A dependent has no read route, not even for their own triage:
+// Psychologists read triages here, with the dependent's nickname and real name. Admins read them at /admin/triages
+// (nickname only, AdminTriageReadController). A dependent has no read route, not even for their own triage:
 // they get their answers in the POST/PUT response.
-@Tag(name = "Triage", description = "Reading triages; admin and psychologist only")
+@Tag(name = "Triage", description = "Reading triages; psychologist only (admins read at /admin/triages)")
 @RestController
 @RequestMapping("/triages")
-@PreAuthorize("hasAnyRole('ADMIN','PSICOLOGO')")
+@PreAuthorize("hasRole('PSICOLOGO')")
 public class TriageReadController {
 
     private final TriageReadService triageReadService;
@@ -40,7 +41,7 @@ public class TriageReadController {
     // explicit operationIds: a second method called "list" would rename the one in /admin/audit in the contract
     @Operation(operationId = "listTriages", summary = "List triages, newest first",
             description = "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. "
-                    + "The dependent is identified by id only")
+                    + "The dependent is identified by id, nickname and real name")
     @ApiResponses({
             // no explicit schema: springdoc reads the generic return type, so the items keep their type
             @ApiResponse(responseCode = "200", description = "One page of triages"),
@@ -50,7 +51,7 @@ public class TriageReadController {
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "The user is not an admin or psychologist",
+            @ApiResponse(responseCode = "403", description = "The user is not a psychologist",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -71,7 +72,7 @@ public class TriageReadController {
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "The user is not an admin or psychologist",
+            @ApiResponse(responseCode = "403", description = "The user is not a psychologist",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "No triage with this id (TRIAGE_NOT_FOUND)",

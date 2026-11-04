@@ -8,7 +8,8 @@
             "enum": [
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
-              "TRIAGE_VIEWED"
+              "TRIAGE_VIEWED",
+              "NICKNAME_REROLLED"
             ],
             "example": "TRIAGE_VIEWED",
             "type": "string"
@@ -32,6 +33,46 @@
           "action",
           "actor_role",
           "occurred_at"
+        ]
+      },
+      "AdminTriageReadResponseDTO": {
+        "description": "A triage as read by an admin; the dependent is identified by id and nickname, never by real name or e-mail",
+        "properties": {
+          "answers": {
+            "description": "Stored answers, one entry per question",
+            "items": {
+              "$ref": "#/components/schemas/AnswerResponseDTO"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "description": "When the triage was first submitted (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dependent": {
+            "$ref": "#/components/schemas/DependentNicknameDTO"
+          },
+          "dependent_id": {
+            "description": "User id of the dependent who answered",
+            "example": 7,
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Triage id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "answers",
+          "created_at",
+          "dependent",
+          "dependent_id",
+          "id"
         ]
       },
       "AnswerRequestDTO": {
@@ -110,7 +151,8 @@
             "enum": [
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
-              "TRIAGE_VIEWED"
+              "TRIAGE_VIEWED",
+              "NICKNAME_REROLLED"
             ],
             "example": "TRIAGE_SUBMITTED",
             "type": "string"
@@ -189,6 +231,38 @@
           "id",
           "occurred_at",
           "subject_user_id"
+        ]
+      },
+      "DependentIdentityDTO": {
+        "description": "Who answered the triage, as seen by a psychologist",
+        "properties": {
+          "nickname": {
+            "description": "Anonymous nickname, the name every other user sees",
+            "example": "Morcego Sereno",
+            "type": "string"
+          },
+          "real_name": {
+            "description": "Real name, shown only to psychologists, together with the triage",
+            "example": "Maria Silva",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname",
+          "real_name"
+        ]
+      },
+      "DependentNicknameDTO": {
+        "description": "Who answered the triage, as seen by an admin: the anonymous nickname only",
+        "properties": {
+          "nickname": {
+            "description": "Anonymous nickname, the name every other user sees",
+            "example": "Morcego Sereno",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
         ]
       },
       "ErrorResponseDTO": {
@@ -340,6 +414,14 @@
               "null"
             ]
           },
+          "nickname": {
+            "description": "Dependents only: the anonymous nickname other users see instead of the real name. Null for other types",
+            "example": "Morcego Sereno",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "real_name": {
             "description": "Psychologists only: full name. Null for other types",
             "example": "Maria Silva",
@@ -367,8 +449,21 @@
           "has_triage",
           "id",
           "is_validated",
+          "nickname",
           "real_name",
           "type_user"
+        ]
+      },
+      "NicknameResponseDTO": {
+        "properties": {
+          "nickname": {
+            "description": "The dependent's new anonymous nickname",
+            "example": "Coruja Serena",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
         ]
       },
       "OptionDTO": {
@@ -396,6 +491,49 @@
             "description": "Items of this page",
             "items": {
               "$ref": "#/components/schemas/AccessLogEntryDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
+        ]
+      },
+      "PageResponseDTOAdminTriageReadResponseDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/AdminTriageReadResponseDTO"
             },
             "type": "array"
           },
@@ -657,7 +795,7 @@
         ]
       },
       "TriageReadResponseDTO": {
-        "description": "A triage as read by an admin or psychologist; the dependent is identified by id only",
+        "description": "A triage as read by a psychologist; the dependent is identified by id, nickname and real name (never e-mail)",
         "properties": {
           "answers": {
             "description": "Stored answers, one entry per question",
@@ -672,8 +810,11 @@
             "format": "date-time",
             "type": "string"
           },
+          "dependent": {
+            "$ref": "#/components/schemas/DependentIdentityDTO"
+          },
           "dependent_id": {
-            "description": "User id of the dependent who answered; no name or e-mail",
+            "description": "User id of the dependent who answered",
             "example": 7,
             "format": "int64",
             "type": "integer"
@@ -688,6 +829,7 @@
         "required": [
           "answers",
           "created_at",
+          "dependent",
           "dependent_id",
           "id"
         ]
@@ -801,7 +943,8 @@
               "enum": [
                 "TRIAGE_SUBMITTED",
                 "TRIAGE_RESUBMITTED",
-                "TRIAGE_VIEWED"
+                "TRIAGE_VIEWED",
+                "NICKNAME_REROLLED"
               ],
               "type": "string"
             }
@@ -906,6 +1049,206 @@
         "summary": "List audit entries, newest first",
         "tags": [
           "Audit"
+        ]
+      }
+    },
+    "/admin/triages": {
+      "get": {
+        "description": "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the admin role. The dependent is identified by id and nickname; the real name is never sent",
+        "operationId": "listAdminTriages",
+        "parameters": [
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOAdminTriageReadResponseDTO"
+                }
+              }
+            },
+            "description": "One page of triages"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List triages as an admin, newest first",
+        "tags": [
+          "Admin triage"
+        ]
+      }
+    },
+    "/admin/triages/{id}": {
+      "get": {
+        "description": "Recorded in the audit trail (TRIAGE_VIEWED) with the admin role, every time it is read. The real name of the dependent is never sent",
+        "operationId": "findAdminTriage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTriageReadResponseDTO"
+                }
+              }
+            },
+            "description": "The triage"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "No triage with this id (TRIAGE_NOT_FOUND)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Read one triage as an admin",
+        "tags": [
+          "Admin triage"
         ]
       }
     },
@@ -1111,7 +1454,7 @@
     },
     "/me": {
       "get": {
-        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists",
+        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists",
         "operationId": "me",
         "responses": {
           "200": {
@@ -1273,6 +1616,96 @@
           }
         },
         "summary": "When someone else read my triage, and in which role",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/me/nickname/reroll": {
+      "post": {
+        "description": "Dependents only. Replaces the nickname other users see by a new random one, keeps the old one in the history and writes a NICKNAME_REROLLED audit entry. At most 5 per day per dependent",
+        "operationId": "rerollNickname",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NicknameResponseDTO"
+                }
+              }
+            },
+            "description": "The new nickname"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or the user no longer exists"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The daily limit of 5 rerolls was reached",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next reroll",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Draw a new anonymous nickname",
         "tags": [
           "Me"
         ]
@@ -1545,7 +1978,7 @@
     },
     "/triages": {
       "get": {
-        "description": "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id only",
+        "description": "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id, nickname and real name",
         "operationId": "listTriages",
         "parameters": [
           {
@@ -1613,7 +2046,7 @@
                 }
               }
             },
-            "description": "The user is not an admin or psychologist"
+            "description": "The user is not a psychologist"
           },
           "500": {
             "content": {
@@ -1695,7 +2128,7 @@
                 }
               }
             },
-            "description": "The user is not an admin or psychologist"
+            "description": "The user is not a psychologist"
           },
           "404": {
             "content": {
@@ -1757,6 +2190,10 @@
   ],
   "tags": [
     {
+      "description": "Reading triages as an admin; the dependent is shown by nickname only",
+      "name": "Admin triage"
+    },
+    {
       "description": "Audit trail of access to sensitive data; admin only",
       "name": "Audit"
     },
@@ -1773,7 +2210,7 @@
       "name": "Triage"
     },
     {
-      "description": "Reading triages; admin and psychologist only",
+      "description": "Reading triages; psychologist only (admins read at /admin/triages)",
       "name": "Triage"
     }
   ]

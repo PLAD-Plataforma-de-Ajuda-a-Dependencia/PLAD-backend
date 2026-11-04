@@ -17,10 +17,10 @@ public interface TriageRepository extends JpaRepository<Triage,Long> {
 
     boolean existsByDependentUserId(Long dependentUserId);
 
-    // dependent is fetched with the page so reading its id never costs an extra query per row
-    @EntityGraph(attributePaths = "dependent")
+    // dependent and its user (real name) are fetched with the page, so no extra query per row
+    @EntityGraph(attributePaths = {"dependent", "dependent.user"})
     Page<Triage> findAllBy(Pageable pageable);
 
-    @EntityGraph(attributePaths = "dependent")
+    @EntityGraph(attributePaths = {"dependent", "dependent.user"})
     Optional<Triage> findWithDependentById(Long id);
 }

@@ -3,9 +3,11 @@ package plad.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import plad.dto.MeResponseDTO;
+import plad.entity.Dependent;
 import plad.entity.Psychologist;
 import plad.entity.User;
 import plad.exception.InvalidCredentialsException;
+import plad.repositories.DependentRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.TriageRepository;
 import plad.repositories.UserRepository;
@@ -15,10 +17,12 @@ public class MeService {
 
     private final UserRepository userRepository;
     private final PsychologistRepository psychologistRepository;
+    private final DependentRepository dependentRepository;
     private final TriageRepository triageRepository;
 
     public MeService(UserRepository userRepository, PsychologistRepository psychologistRepository,
-                     TriageRepository triageRepository) {
+                     DependentRepository dependentRepository, TriageRepository triageRepository) {
+        this.dependentRepository = dependentRepository;
         this.userRepository = userRepository;
         this.psychologistRepository = psychologistRepository;
         this.triageRepository = triageRepository;
@@ -30,7 +34,11 @@ public class MeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidCredentialsException("User no longer exists"));
         return switch (user.getTypeUser()) {
-            case dependente -> MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId));
+            case dependente -> {
+                Dependent dependent = dependentRepository.findById(userId)
+                        .orElseThrow(() -> new IllegalStateException("Dependent " + userId + " has no dependents row"));
+                yield MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId), dependent.getNickname());
+            }
             case psicologo -> {
                 Psychologist psychologist = psychologistRepository.findById(userId)
                         .orElseThrow(() -> new IllegalStateException("Psychologist " + userId + " has no psychologists row"));

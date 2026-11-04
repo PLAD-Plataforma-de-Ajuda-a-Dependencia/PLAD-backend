@@ -21,6 +21,9 @@ public record MeResponseDTO(
         @Schema(description = "Dependents only: whether the triage was already submitted. Null for other types",
                 example = "false", nullable = true)
         Boolean hasTriage,
+        @Schema(description = "Dependents only: the anonymous nickname other users see instead of the real name. Null for other types",
+                example = "Morcego Sereno", nullable = true)
+        String nickname,
         @Schema(description = "Psychologists only: full name. Null for other types", example = "Maria Silva", nullable = true)
         String realName,
         @Schema(description = "Psychologists only: CRM or CRP. Null for other types", example = "CRP", nullable = true)
@@ -33,19 +36,19 @@ public record MeResponseDTO(
         Boolean isValidated
 ) {
 
-    public static MeResponseDTO ofDependent(User user, boolean hasTriage) {
+    public static MeResponseDTO ofDependent(User user, boolean hasTriage, String nickname) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                hasTriage, null, null, null, null);
+                hasTriage, nickname, null, null, null, null);
     }
 
     public static MeResponseDTO ofPsychologist(User user, Psychologist psychologist) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                null, user.getRealName(), psychologist.getCredentialType(), psychologist.getCrmCrpNumber(),
+                null, null, user.getRealName(), psychologist.getCredentialType(), psychologist.getCrmCrpNumber(),
                 psychologist.isValidate());
     }
 
     public static MeResponseDTO ofAdmin(User user) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 }

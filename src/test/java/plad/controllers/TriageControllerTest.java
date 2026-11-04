@@ -478,6 +478,7 @@ class TriageControllerTest {
     private String newDependentToken() {
         User user = newUser(UserType.dependente);
         Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
         return jwtService.generateToken(user);

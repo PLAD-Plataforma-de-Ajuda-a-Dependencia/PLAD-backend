@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// GET /triages and GET /triages/{id}: any admin or psychologist reads, as often as they want; a dependent never
+// GET /triages (psychologist, with the real name) and GET /admin/triages (admin, nickname only): any of them reads, as often as they want; a dependent never
 // does (not even their own triage); every triage returned leaves a TRIAGE_VIEWED entry (RNF003)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -101,14 +101,14 @@ class TriageReadControllerTest {
         long firstTriage = submit(first);
         long secondTriage = submit(second);
 
-        String response = read("/triages?size=100", admin).andExpect(status().isOk())
+        String response = read("/admin/triages?size=100", admin).andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(100))
                 .andReturn().getResponse().getContentAsString();
         List<Integer> ids = JsonPath.read(response, "$.items[*].id");
         assertThat(ids.indexOf((int) secondTriage)).isGreaterThanOrEqualTo(0).isLessThan(ids.indexOf((int) firstTriage));
 
-        read("/triages/" + firstTriage, admin).andExpect(status().isOk())
+        read("/admin/triages/" + firstTriage, admin).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(firstTriage))
                 .andExpect(jsonPath("$.dependent_id").value(first.getId()))
                 .andExpect(jsonPath("$.created_at").exists())
@@ -152,7 +152,7 @@ class TriageReadControllerTest {
     void unknownTriageIsNotFoundAndWritesNothing() throws Exception {
         long before = auditLogRepository.count();
 
-        read("/triages/999999999", admin).andExpect(status().isNotFound())
+        read("/admin/triages/999999999", admin).andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("TRIAGE_NOT_FOUND"));
 
         assertThat(auditLogRepository.count()).isEqualTo(before);
@@ -160,21 +160,85 @@ class TriageReadControllerTest {
 
     @Test
     void invalidPagingIsBadRequest() throws Exception {
-        read("/triages?size=101", admin).andExpect(status().isBadRequest());
-        read("/triages?size=0", admin).andExpect(status().isBadRequest());
-        read("/triages?page=-1", admin).andExpect(status().isBadRequest());
+        read("/admin/triages?size=101", admin).andExpect(status().isBadRequest());
+        read("/admin/triages?size=0", admin).andExpect(status().isBadRequest());
+        read("/admin/triages?page=-1", admin).andExpect(status().isBadRequest());
+        read("/triages?size=101", psychologist).andExpect(status().isBadRequest());
+        read("/triages?size=0", psychologist).andExpect(status().isBadRequest());
+        read("/triages?page=-1", psychologist).andExpect(status().isBadRequest());
+    }
+
+    // Decision 15: only a psychologist (validated or not) gets the dependent's real name, next to the nickname
+    @Test
+    void psychologistWhoIsNotValidatedGetsNicknameAndRealNameButNeverTheEmail() throws Exception {
+        User dependent = newDependent(REAL_NAME);
+        String nickname = dependentRepository.findById(dependent.getId()).orElseThrow().getNickname();
+        long triageId = submit(dependent);
+
+        String detail = read("/triages/" + triageId, psychologist).andExpect(status().isOk())
+                .andExpect(jsonPath("$.dependent.nickname").value(nickname))
+                .andExpect(jsonPath("$.dependent.real_name").value(REAL_NAME))
+                .andReturn().getResponse().getContentAsString();
+        String list = read("/triages?size=100", psychologist).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[?(@.id == %d)].dependent.nickname".formatted(triageId)).value(nickname))
+                .andExpect(jsonPath("$.items[?(@.id == %d)].dependent.real_name".formatted(triageId)).value(REAL_NAME))
+                .andReturn().getResponse().getContentAsString();
+
+        for (String body : List.of(detail, list)) {
+            assertThat(body).doesNotContain(dependent.getEmail());
+        }
     }
 
     @Test
-    void responseIdentifiesTheDependentOnlyById() throws Exception {
+    void adminGetsOnlyTheNicknameNeverTheRealName() throws Exception {
+        User dependent = newDependent(REAL_NAME);
+        String nickname = dependentRepository.findById(dependent.getId()).orElseThrow().getNickname();
+        long triageId = submit(dependent);
+
+        String detail = read("/admin/triages/" + triageId, admin).andExpect(status().isOk())
+                .andExpect(jsonPath("$.dependent_id").value(dependent.getId()))
+                .andExpect(jsonPath("$.dependent.nickname").value(nickname))
+                .andExpect(jsonPath("$.dependent", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasKey("real_name"))))
+                .andReturn().getResponse().getContentAsString();
+        String list = read("/admin/triages?size=100", admin).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[?(@.id == %d)].dependent.nickname".formatted(triageId)).value(nickname))
+                .andReturn().getResponse().getContentAsString();
+
+        for (String body : List.of(detail, list)) {
+            assertThat(body).doesNotContain(REAL_NAME).doesNotContain("real_name").doesNotContain(dependent.getEmail());
+        }
+    }
+
+    @Test
+    void eachRoleOnlyReadsOnItsOwnRoute() throws Exception {
         User dependent = newDependent(REAL_NAME);
         long triageId = submit(dependent);
 
-        String detail = read("/triages/" + triageId, admin).andReturn().getResponse().getContentAsString();
-        String list = read("/triages?size=100", admin).andReturn().getResponse().getContentAsString();
+        // the admin is not a psychologist: no real name through /triages
+        read("/triages?size=100", admin).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+        read("/triages/" + triageId, admin).andExpect(status().isForbidden());
+        // and the psychologist has no business on /admin
+        read("/admin/triages?size=100", psychologist).andExpect(status().isForbidden());
+        read("/admin/triages/" + triageId, psychologist).andExpect(status().isForbidden());
+        // a dependent reaches neither
+        read("/admin/triages?size=100", dependent).andExpect(status().isForbidden());
+        read("/admin/triages/" + triageId, dependent).andExpect(status().isForbidden());
+        mockMvc.perform(get("/admin/triages")).andExpect(status().isUnauthorized());
+        assertThat(viewsOf(dependent)).isEmpty();
+    }
 
-        for (String body : List.of(detail, list)) {
-            assertThat(body).doesNotContain(REAL_NAME).doesNotContain(dependent.getEmail());
+    @Test
+    void aDependentNeverGetsAnotherDependentsRealNameFromTheTriageRoutes() throws Exception {
+        User owner = newDependent(REAL_NAME);
+        long triageId = submit(owner);
+        User other = newDependent("Outro Dependente Curioso");
+
+        for (String path : List.of("/triages?size=100", "/triages/" + triageId,
+                "/admin/triages?size=100", "/admin/triages/" + triageId)) {
+            String body = read(path, other).andExpect(status().isForbidden())
+                    .andReturn().getResponse().getContentAsString();
+            assertThat(body).doesNotContain(REAL_NAME);
         }
     }
 
@@ -200,7 +264,7 @@ class TriageReadControllerTest {
         User dependent = newDependent(REAL_NAME);
         long triageId = submit(dependent);
 
-        read("/triages/" + triageId, admin).andExpect(status().isOk());
+        read("/admin/triages/" + triageId, admin).andExpect(status().isOk());
 
         List<AuditLog> views = viewsOf(dependent);
         assertThat(views).hasSize(1);
@@ -215,7 +279,7 @@ class TriageReadControllerTest {
 
         read("/triages/" + triageId, psychologist).andExpect(status().isOk());
         read("/triages/" + triageId, psychologist).andExpect(status().isOk());
-        read("/triages/" + triageId, admin).andExpect(status().isOk());
+        read("/admin/triages/" + triageId, admin).andExpect(status().isOk());
 
         assertThat(viewsOf(dependent)).hasSize(3);
     }
@@ -248,8 +312,8 @@ class TriageReadControllerTest {
     void viewEntriesNeverHoldAnswersNameOrEmail() throws Exception {
         User dependent = newDependent(REAL_NAME);
         long triageId = submit(dependent);
-        read("/triages/" + triageId, admin).andExpect(status().isOk());
-        read("/triages?size=100", admin).andExpect(status().isOk());
+        read("/admin/triages/" + triageId, admin).andExpect(status().isOk());
+        read("/admin/triages?size=100", admin).andExpect(status().isOk());
 
         auditLogRepository.flush();
         List<String> rows = jdbcTemplate.queryForList(
@@ -307,6 +371,7 @@ class TriageReadControllerTest {
     private User newDependent(String realName) {
         User user = newUser(UserType.dependente, realName);
         Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
         return user;

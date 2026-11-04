@@ -60,6 +60,7 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.type_user").value("dependente"))
                 .andExpect(jsonPath("$.created_at").isNotEmpty())
                 .andExpect(jsonPath("$.has_triage").value(false))
+                .andExpect(jsonPath("$.nickname").value(dependentRepository.findById(user.getId()).orElseThrow().getNickname()))
                 .andExpect(jsonPath("$.real_name").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.credential_type").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.crm_crp_number").value(org.hamcrest.Matchers.nullValue()))
@@ -105,7 +106,9 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.crm_crp_number").value(psychologist.getCrmCrpNumber()))
                 .andExpect(jsonPath("$.is_validated").value(false))
                 .andExpect(jsonPath("$.has_triage").value(org.hamcrest.Matchers.nullValue()))
-                .andExpect(jsonPath("$", hasKey("has_triage")));
+                .andExpect(jsonPath("$", hasKey("has_triage")))
+                .andExpect(jsonPath("$.nickname").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$", hasKey("nickname")));
     }
 
     @Test
@@ -186,6 +189,7 @@ class MeControllerTest {
     private User newDependent() {
         User user = newUser(UserType.dependente, "Dependent Test");
         Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
         return user;

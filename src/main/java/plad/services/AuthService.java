@@ -6,13 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import plad.dto.RegisterRequestDTO;
 import plad.dto.UserResponseDTO;
-import plad.entity.Dependent;
 import plad.entity.Psychologist;
 import plad.entity.User;
 import plad.entity.UserType;
 import plad.exception.EmailAlreadyInUseException;
 import plad.exception.InvalidRegistrationException;
-import plad.repositories.DependentRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.UserRepository;
 
@@ -20,15 +18,15 @@ import plad.repositories.UserRepository;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final DependentRepository dependentRepository;
+    private final NicknameService nicknameService;
     private final PsychologistRepository psychologistRepository;
     private final PasswordEncoder passwordEncoder;
 
     //constructor injection
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, DependentRepository dependentRepository, PsychologistRepository psychologistRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, NicknameService nicknameService, PsychologistRepository psychologistRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.dependentRepository = dependentRepository;
+        this.nicknameService = nicknameService;
         this.psychologistRepository = psychologistRepository;
 
     }
@@ -76,9 +74,8 @@ public class AuthService {
         }
 
         if (request.typeUser() == UserType.dependente) {
-            Dependent dependent = new Dependent();
-            dependent.setUser(savedUser);
-            dependentRepository.save(dependent);
+            // creates the dependents row together with its random nickname, in this same transaction
+            nicknameService.assignInitial(savedUser.getId());
         } else {
             Psychologist psychologist = new  Psychologist();
             psychologist.setUser(savedUser);

@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Rastreabilidade entre os requisitos do levantamento formal, o código que os implementa e os testes que os comprovam.
+Conferida em 2026-11-04, sobre o commit `92c970b` (branch `develop`) mais as mudanças ainda sem commit (apelido anônimo, RF007).
 Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
@@ -21,8 +21,8 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 |---|---:|---|
 | Testado | 2 | RF001, RF002 |
 | Implementado sem teste | 0 | — |
-| Parcial | 6 | RF003, RF011, RNF001, RNF002, RNF003, RNF006 |
-| Não iniciado | 10 | RF005, RF006, RF007, RF008, RF009, RF010, RF012, RNF004, RNF005, RNF007 |
+| Parcial | 7 | RF003, RF007, RF011, RNF001, RNF002, RNF003, RNF006 |
+| Não iniciado | 9 | RF005, RF006, RF008, RF009, RF010, RF012, RNF004, RNF005, RNF007 |
 | Fora do escopo | 1 | RF004 |
 | **Total** | **19** | 12 RFs + 7 RNFs |
 
@@ -30,13 +30,13 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 
 | Requisito | Descrição curta | Situação | Onde está no código | Teste que comprova |
 |---|---|---|---|---|
-| RF001 | Cadastro de usuário com dados mínimos | Testado | `AuthController#register` → `AuthService#register`; `RegisterRequestDTO`; `MinAge`/`MinAgeValidator`; `MaxBytes`; `CrmCrpNumbers`; `Emails`; migrações V1–V3, V7, V13 | `AuthControllerTest#registerDependentStoresLowercasedEmail`<br>`AuthControllerTest#registerPsychologistIsCreated`<br>`AuthControllerTest#sameEmailWithDifferentCaseIsConflict`<br>`RegisterMinAgeTest#turning18TodayIsCreated`<br>`RegisterMinAgeTest#turning18TomorrowIsBadRequest`<br>`RegisterMinAgeTest#bornOnLeapDayIsAnAdultOnlyFromMarchFirstInANonLeapYear` |
+| RF001 | Cadastro de usuário com dados mínimos | Testado | `AuthController#register` → `AuthService#register`; `RegisterRequestDTO`; `MinAge`/`MinAgeValidator`; `MaxBytes`; `CrmCrpNumbers`; `Emails`; `NicknameService#assignInitial` (apelido do dependente); migrações V1–V3, V7, V13, V18–V20 | `AuthControllerTest#registerDependentStoresLowercasedEmail`<br>`AuthControllerTest#registerPsychologistIsCreated`<br>`AuthControllerTest#sameEmailWithDifferentCaseIsConflict`<br>`RegisterMinAgeTest#turning18TodayIsCreated`<br>`RegisterMinAgeTest#turning18TomorrowIsBadRequest`<br>`RegisterMinAgeTest#bornOnLeapDayIsAnAdultOnlyFromMarchFirstInANonLeapYear` |
 | RF002 | Login e autenticação (JWT) | Testado | `LoginController#login` → `LoginService#login`; `JwtService`; `JwtAuthenticationFilter`; `SecurityConfig#securityFilterChain`; `RateLimitInterceptor`/`RateLimiterService` | `LoginControllerTest#loginReturnsTokenThatAuthenticatesRequests`<br>`LoginControllerTest#wrongPasswordAndUnknownEmailGetTheSameAnswer`<br>`LoginControllerTest#sixthAttemptFromSameClientIsTooManyRequests`<br>`LoginControllerTest#eleventhFailedAttemptOnSameEmailIsTooManyRequestsEvenFromDifferentClients`<br>`JwtAuthenticationFilterTest#missingTokenIsUnauthorized` |
-| RF003 | Triagem inicial | Parcial | `TriageController` (`GET /triage/questions`, `POST /triage`, `PUT /triage`); `TriageService`; `TriageReadController` (`GET /triages`, `GET /triages/{id}`, só admin e psicólogo) → `TriageReadService`; entidades `Triage`, `QuestionTriage`, `ResultQuestionTriage`; 10 perguntas em V5, V9, V11, V12, V15 (todas opcionais); respostas em V4, V6, V14 | `TriageControllerTest#getQuestionsReturnsSeededQuestionsInSnakeCase`<br>`TriageControllerTest#submitCreatesTriageAndSecondSubmitIsConflict`<br>`TriageControllerTest#submitAsPsychologistIsForbidden`<br>`TriageControllerTest#resubmitReplacesAnswersAndKeepsTriageId`<br>`TriageControllerTest#submitWithEmptyAnswersStoresNothingAndDoesNotUseTheSingleSubmission`<br>`TriageControllerTest#resubmitWithEmptyAnswersIsBadRequestAndKeepsTheTriage`<br>`TriageReadControllerTest#adminListsTriagesNewestFirstAndReadsTheDetail`<br>`TriageReadControllerTest#psychologistReadsListAndDetailWithoutBeingValidated`<br>`TriageReadControllerTest#dependentCannotReadAnyTriageNotEvenTheirOwn` |
+| RF003 | Triagem inicial | Parcial | `TriageController` (`GET /triage/questions`, `POST /triage`, `PUT /triage`); `TriageService`; `TriageReadController` (`GET /triages`, `GET /triages/{id}`, só psicólogo, com nome real) e `AdminTriageReadController` (`GET /admin/triages`, `GET /admin/triages/{id}`, só admin, só apelido) → `TriageReadService`; entidades `Triage`, `QuestionTriage`, `ResultQuestionTriage`; 10 perguntas em V5, V9, V11, V12, V15 (todas opcionais); respostas em V4, V6, V14 | `TriageControllerTest#getQuestionsReturnsSeededQuestionsInSnakeCase`<br>`TriageControllerTest#submitCreatesTriageAndSecondSubmitIsConflict`<br>`TriageControllerTest#submitAsPsychologistIsForbidden`<br>`TriageControllerTest#resubmitReplacesAnswersAndKeepsTriageId`<br>`TriageControllerTest#submitWithEmptyAnswersStoresNothingAndDoesNotUseTheSingleSubmission`<br>`TriageControllerTest#resubmitWithEmptyAnswersIsBadRequestAndKeepsTheTriage`<br>`TriageReadControllerTest#adminListsTriagesNewestFirstAndReadsTheDetail`<br>`TriageReadControllerTest#psychologistReadsListAndDetailWithoutBeingValidated`<br>`TriageReadControllerTest#dependentCannotReadAnyTriageNotEvenTheirOwn` |
 | RF004 | Redirecionamento por risco | Fora do escopo | Não existe | — |
 | RF005 | Participação em reuniões online | Não iniciado | Só o tipo enum `status_reuniao` em V1, sem tabela, entidade ou endpoint | — |
 | RF006 | Moderação de reuniões | Não iniciado | Não existe | — |
-| RF007 | Anonimato nas reuniões | Não iniciado | Não existe | — |
+| RF007 | Anonimato nas reuniões | Parcial | Só a parte do apelido: `NicknameGenerator`, `NicknameWordLists`, `NicknameService`, `NicknameConfig`; `AuthService#register` (apelido do dependente na mesma transação); `MeController#rerollNickname` (`POST /me/nickname/reroll`, 5 por 24 h); `MeResponseDTO#nickname`; `TriageReadResponseDTO` (psicólogo: apelido + nome real) e `AdminTriageReadResponseDTO` (admin: só apelido); V18, V19 (Java), V20. Falta a sala de reunião (RF005), onde o apelido seria usado | `NicknameGeneratorTest#adjectiveAgreesInGenderWithTheAnimalForEveryPossiblePair`<br>`NicknameWordListsTest#noForbiddenWordIsInTheLists`<br>`NicknameServiceTest#afterTenCollisionsInARowItAppendsANumberAndRedrawsWhenThatCollidesToo`<br>`NicknameRerollControllerTest#rerollReturnsANewNicknameThatGetMeThenShows`<br>`NicknameRerollControllerTest#sixthRerollInADayIsRateLimitedWithRetryAfter`<br>`TriageReadControllerTest#psychologistWhoIsNotValidatedGetsNicknameAndRealNameButNeverTheEmail`<br>`TriageReadControllerTest#adminGetsOnlyTheNicknameNeverTheRealName`<br>`RealNameExposureTest#onlyTheListedDtosHaveARealNameComponent` |
 | RF008 | Publicação de conteúdos | Não iniciado | Não existe | — |
 | RF009 | Relatos anônimos | Não iniciado | Não existe | — |
 | RF010 | Aba comunidade | Não iniciado | Não existe | — |
@@ -72,6 +72,7 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 
 ### Não iniciado (o que falta)
 
+- **RF007:** o apelido anônimo existe (cadastro, `GET /me`, troca limitada, triagem lida por psicólogo e admin), mas só faz sentido na sala de reunião, que depende de RF005. As listas de palavras aguardam revisão (decisão 7).
 - **RF005, RF006, RF007, RF012:** modelo de reunião (o enum `status_reuniao` está órfão), endpoints, papéis (hoje o JWT não traz authorities) e a sala em si. RF006 e RF012 dependem de RF005. RF007 também exige decidir como o anonimato convive com o cadastro, que hoje pede nome real.
 - **RF008, RF009, RF010:** nenhuma entidade, endpoint ou migração de conteúdo, relato ou comunidade. RF009 e RF010 dependem de uma decisão de anonimato.
 - **RNF004:** faltam Dockerfile, health/readiness (sem actuator), deploy e monitoramento. O CI (`.github/workflows/ci.yml`) só compila e testa.

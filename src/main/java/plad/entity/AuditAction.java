@@ -6,7 +6,9 @@ public enum AuditAction {
     TRIAGE_SUBMITTED(false),
     TRIAGE_RESUBMITTED(false),
     // an admin or psychologist read the triage (GET /triages, GET /triages/{id}); shown to the owner in GET /me/access-log
-    TRIAGE_VIEWED(true);
+    TRIAGE_VIEWED(true),
+    // a dependent drew a new anonymous nickname (POST /me/nickname/reroll); the nickname is never stored in the entry
+    NICKNAME_REROLLED(false);
 
     private final boolean thirdPartyRead;
 

@@ -135,6 +135,7 @@ class TriageRepositoryTest {
         userRepository.save(user);
 
         Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         return dependentRepository.saveAndFlush(dependent);
     }

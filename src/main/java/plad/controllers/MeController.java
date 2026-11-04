@@ -2,6 +2,7 @@ package plad.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,15 +15,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import plad.dto.AccessLogEntryDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.MeResponseDTO;
+import plad.dto.NicknameResponseDTO;
 import plad.dto.PageResponseDTO;
 import plad.services.AuditService;
 import plad.services.MeService;
+import plad.services.NicknameService;
 
 @Tag(name = "Me", description = "Data about the logged-in user's own data; requires a Bearer token")
 @RestController
@@ -31,8 +35,10 @@ public class MeController {
 
     private final AuditService auditService;
     private final MeService meService;
+    private final NicknameService nicknameService;
 
-    public MeController(AuditService auditService, MeService meService) {
+    public MeController(AuditService auditService, MeService meService, NicknameService nicknameService) {
+        this.nicknameService = nicknameService;
         this.auditService = auditService;
         this.meService = meService;
     }
@@ -40,7 +46,7 @@ public class MeController {
     @Operation(summary = "My account",
             description = "Data of the logged-in user, for the front to pick the first screen after login. "
                     + "The user comes from the token, never from the request. Fields that do not apply to the user's type are null: "
-                    + "has_triage for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists")
+                    + "has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The user's own data",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -52,6 +58,31 @@ public class MeController {
     @GetMapping
     public ResponseEntity<MeResponseDTO> me(@AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(meService.findMe(userId));
+    }
+
+    @Operation(operationId = "rerollNickname", summary = "Draw a new anonymous nickname",
+            description = "Dependents only. Replaces the nickname other users see by a new random one, keeps the old one in the history "
+                    + "and writes a NICKNAME_REROLLED audit entry. At most 5 per day per dependent")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "The new nickname",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = NicknameResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token, or the user no longer exists",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "The user is not a dependent",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "The daily limit of 5 rerolls was reached",
+                    headers = @Header(name = "Retry-After", description = "Seconds until the next reroll",
+                            schema = @Schema(type = "integer")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PreAuthorize("hasRole('DEPENDENTE')")
+    @PostMapping("/nickname/reroll")
+    public ResponseEntity<NicknameResponseDTO> rerollNickname(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(new NicknameResponseDTO(nicknameService.reroll(userId)));
     }
 
     @Operation(summary = "When someone else read my triage, and in which role",

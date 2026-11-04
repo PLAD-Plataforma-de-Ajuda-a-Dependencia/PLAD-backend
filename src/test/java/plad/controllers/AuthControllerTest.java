@@ -1,5 +1,6 @@
 package plad.controllers;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import plad.config.TestcontainersConfig;
+import org.springframework.jdbc.core.JdbcTemplate;
 import plad.repositories.UserRepository;
 
 import java.time.LocalDate;
@@ -38,6 +40,8 @@ class AuthControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void registerDependentStoresLowercasedEmail() throws Exception {
@@ -48,6 +52,33 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.real_name").value("Ana Teste"))
                 .andExpect(jsonPath("$.email").value(email.toLowerCase(Locale.ROOT)));
+    }
+
+    @Test
+    void registerDependentGetsAnAnonymousNicknameAndAnOpenHistoryRow() throws Exception {
+        String body = register(nextClient(), dependentBody(newEmail()))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long id = ((Number) JsonPath.read(body, "$.id")).longValue();
+
+        String nickname = jdbcTemplate.queryForObject("SELECT nickname FROM dependents WHERE user_id = ?", String.class, id);
+        // "Morcego Sereno", or with a number at the end after a run of collisions
+        assertThat(nickname).matches("[\\p{L}-]+ \\p{L}+( \\d+)?").doesNotContain("Ana").doesNotContain("Teste");
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT nickname FROM dependent_nickname_history WHERE dependent_id = ? AND replaced_at IS NULL",
+                String.class, id)).containsExactly(nickname);
+    }
+
+    @Test
+    void registerPsychologistGetsNoNickname() throws Exception {
+        String body = register(nextClient(), psychologistBody(newEmail(), newCredentialNumber()))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long id = ((Number) JsonPath.read(body, "$.id")).longValue();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM dependents WHERE user_id = ?", Long.class, id)).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM dependent_nickname_history WHERE dependent_id = ?", Long.class, id)).isZero();
     }
 
     @Test
