@@ -84,9 +84,10 @@ public class RateLimiterService {
     }
 
     private static Entry newEntry(Limit limit) {
-        Bandwidth bandwidth = limit.fixedWindow()
-                ? Bandwidth.builder().capacity(limit.capacity()).refillIntervally(limit.capacity(), limit.refillPeriod()).build()
-                : Bandwidth.simple(limit.capacity(), limit.refillPeriod());
+        var capacity = Bandwidth.builder().capacity(limit.capacity());
+        Bandwidth bandwidth = (limit.fixedWindow()
+                ? capacity.refillIntervally(limit.capacity(), limit.refillPeriod())
+                : capacity.refillGreedy(limit.capacity(), limit.refillPeriod())).build();
         Bucket bucket = Bucket.builder().addLimit(bandwidth).build();
         return new Entry(bucket, limit, new AtomicLong());
     }
