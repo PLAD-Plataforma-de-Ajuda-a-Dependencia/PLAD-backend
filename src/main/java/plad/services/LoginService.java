@@ -4,7 +4,6 @@ package plad.services;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import plad.dto.LoginRequestDTO;
-import plad.dto.LoginResponseDTO;
 import plad.entity.User;
 import plad.exception.InvalidCredentialsException;
 import plad.repositories.UserRepository;
@@ -16,21 +15,22 @@ public class LoginService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final RateLimiterService rateLimiterService;
 
     private static final String DUMMY_HASH =
             "$2a$10$DowJonesXXXXXXXXXXXXXuY1P0k9y2sZ3wq7vRr8tGZzL4mN5cWe6";
 
-    public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-                        RateLimiterService rateLimiterService) {
+    public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                        RefreshTokenService refreshTokenService, RateLimiterService rateLimiterService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.rateLimiterService = rateLimiterService;
     }
 
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    // the session holds the access token (for the response body) and the refresh token (for the cookie)
+    public RefreshTokenService.Session login(LoginRequestDTO request) {
 
         String email = Emails.normalize(request.email());
         // on top of the per-IP limit, so attempts spread over many IPs still hit one budget per account.
@@ -53,10 +53,6 @@ public class LoginService {
 
         rateLimiterService.refund(emailKey);
 
-        User user = userOpt.get();
-        String token = jwtService.generateToken(user);
-
-        return new LoginResponseDTO(token);
-
+        return refreshTokenService.start(userOpt.get());
     }
 }

@@ -20,9 +20,10 @@ public class JwtService {
 
     private static final String USER_ID_CLAIM = "userId";
     private static final String ROLE_CLAIM = "role";
+    private static final String TOKEN_VERSION_CLAIM = "tv";
 
-    // role is null for tokens issued before the claim existed; the filter treats those as invalid
-    public record TokenClaims(Long userId, UserType role) {}
+    // role and tokenVersion are null for tokens issued before the claims existed; the filter treats those as invalid
+    public record TokenClaims(Long userId, UserType role, Integer tokenVersion) {}
 
     private final SecretKey secretKey;
     private final JwtParser parser;
@@ -46,6 +47,7 @@ public class JwtService {
                 .subject(String.valueOf(user.getId()))
                 .claim(USER_ID_CLAIM, user.getId())
                 .claim(ROLE_CLAIM, Objects.requireNonNull(user.getTypeUser(), "user has no type_user").name())
+                .claim(TOKEN_VERSION_CLAIM, user.getTokenVersion())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -62,7 +64,8 @@ public class JwtService {
         try {
             Claims claims = parser.parseSignedClaims(token).getPayload();
             String role = claims.get(ROLE_CLAIM, String.class);
-            return new TokenClaims(claims.get(USER_ID_CLAIM, Long.class), role == null ? null : UserType.valueOf(role));
+            return new TokenClaims(claims.get(USER_ID_CLAIM, Long.class), role == null ? null : UserType.valueOf(role),
+                    claims.get(TOKEN_VERSION_CLAIM, Integer.class));
         } catch (JwtException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid or expired token", e);
         }

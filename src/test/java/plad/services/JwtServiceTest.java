@@ -96,6 +96,22 @@ class JwtServiceTest {
     }
 
     @Test
+    void tokenCarriesTheTokenVersionOfTheUser() {
+        String token = jwtService.generateToken(user(1L));
+
+        assertThat(jwtService.parse(token).tokenVersion()).isZero();
+        Claims claims = Jwts.parser().verifyWith(KEY).build().parseSignedClaims(token).getPayload();
+        assertThat(claims.get("tv", Integer.class)).isZero();
+    }
+
+    @Test
+    void tokenWithoutTokenVersionHasNone() {
+        String token = Jwts.builder().claim("userId", 1L).claim("role", "dependente").signWith(KEY).compact();
+
+        assertThat(jwtService.parse(token).tokenVersion()).isNull();
+    }
+
+    @Test
     void userWithoutTypeCannotGetAToken() {
         User user = new User();
         user.setId(1L);

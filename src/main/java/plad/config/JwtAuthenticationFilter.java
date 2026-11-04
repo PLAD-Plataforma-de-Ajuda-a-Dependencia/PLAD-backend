@@ -3,6 +3,7 @@ package plad.config;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
 // not a @Component: Spring Boot would also register it as a plain servlet filter outside the security chain
@@ -24,9 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final SecurityErrorHandler securityErrorHandler;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository,
+                                   SecurityErrorHandler securityErrorHandler) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.securityErrorHandler = securityErrorHandler;
     }
 
     @Override
@@ -37,7 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            authenticate(authHeader.substring(BEARER_PREFIX.length()));
+            try {
+                authenticate(authHeader.substring(BEARER_PREFIX.length()));
+            } catch (TokenVersionLookupException e) {
+                log.warn("Could not check the token version ({})", e.getCause().getClass().getSimpleName());
+                securityErrorHandler.serviceUnavailable(response);
+                return;
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -55,12 +68,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("Ignoring JWT without a role claim");
                 return;
             }
+            // same for the version claim; a version that is not the current one means the sessions were revoked
+            if (claims.tokenVersion() == null || !claims.tokenVersion().equals(currentTokenVersion(claims.userId()).orElse(null))) {
+                log.debug("Ignoring JWT with a stale or missing token version");
+                return;
+            }
             List<SimpleGrantedAuthority> authorities = List.of(
                     new SimpleGrantedAuthority("ROLE_" + claims.role().name().toUpperCase(Locale.ROOT)));
             SecurityContextHolder.getContext().setAuthentication(
                     UsernamePasswordAuthenticationToken.authenticated(claims.userId(), null, authorities));
         } catch (IllegalArgumentException e) {
             log.debug("Ignoring invalid JWT: {}", e.getMessage());
+        }
+    }
+
+    // one indexed single-column read per authenticated request; empty when the user no longer exists
+    private Optional<Integer> currentTokenVersion(Long userId) {
+        try {
+            return userRepository.findTokenVersionById(userId);
+        } catch (RuntimeException e) {
+            throw new TokenVersionLookupException(e);
+        }
+    }
+
+    private static final class TokenVersionLookupException extends RuntimeException {
+        TokenVersionLookupException(Throwable cause) {
+            super(cause);
         }
     }
 }

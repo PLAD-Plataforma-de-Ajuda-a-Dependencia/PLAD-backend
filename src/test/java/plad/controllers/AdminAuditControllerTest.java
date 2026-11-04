@@ -9,10 +9,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestUsers;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.User;
 import plad.entity.UserType;
+import plad.repositories.UserRepository;
 import plad.services.AuditService;
 import plad.services.JwtService;
 
@@ -35,6 +37,8 @@ class AdminAuditControllerTest {
     private JwtService jwtService;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private UserRepository userRepository;
 
     private long subjectA;
     private long subjectB;
@@ -139,9 +143,7 @@ class AdminAuditControllerTest {
     }
 
     private ResultActions call(String path, UserType type) throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setTypeUser(type);
+        User user = TestUsers.save(userRepository, type);
         return mockMvc.perform(get(path).header("Authorization", "Bearer " + jwtService.generateToken(user)));
     }
 

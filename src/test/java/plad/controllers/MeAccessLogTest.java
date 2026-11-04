@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import plad.config.TestUsers;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.User;
@@ -37,6 +39,8 @@ class MeAccessLogTest {
     private JwtService jwtService;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private JdbcTemplate jdbc;
 
     private long me;
     private long someoneElse;
@@ -121,6 +125,7 @@ class MeAccessLogTest {
     }
 
     private ResultActions call(String path, long userId, UserType type) throws Exception {
+        TestUsers.ensureExists(jdbc, userId, type);
         User user = new User();
         user.setId(userId);
         user.setTypeUser(type);

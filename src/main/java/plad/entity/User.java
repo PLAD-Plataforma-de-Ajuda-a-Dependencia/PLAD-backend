@@ -37,6 +37,10 @@ public class User {
     @Column(name = "gender", nullable = false)
     private Sex gender;
 
+    // only changed by UserRepository#incrementTokenVersion (atomic), never by writing the entity back
+    @Column(name = "token_version", nullable = false, updatable = false)
+    private int tokenVersion;
+
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
@@ -102,6 +106,10 @@ public class User {
 
     public void setGender(Sex gender) {
         this.gender = gender;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
     }
 
     public Instant getCreatedAt() {
