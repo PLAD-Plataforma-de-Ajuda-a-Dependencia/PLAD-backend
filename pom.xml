@@ -218,6 +218,8 @@
 						<jwt.secret>test-only-not-a-real-secret-0123456789-0123456789-0123456789</jwt.secret>
 						<!-- tests only: the API docs are closed by default (see application.properties) -->
 						<springdoc.api-docs.enabled>true</springdoc.api-docs.enabled>
+						<!-- tests only: never read a developer's .env (see application.properties) -->
+						<spring.config.import></spring.config.import>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>

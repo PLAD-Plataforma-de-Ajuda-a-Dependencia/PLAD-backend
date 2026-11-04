@@ -38,6 +38,7 @@ build/
 ### Local secrets (credentials come from env vars, see application.properties) ###
 .env
 .env.*
+!.env.example
 
 ### Claude Code (personal; .claude/settings.json and .claude/agents/ stay shared) ###
 .claude/settings.local.json

@@ -36,10 +36,11 @@ docker run --rm -p 8080:8080 \
 
 ## docker compose
 
-`docker compose up` sobe o banco (`pladDB`) e a API (`pladAPI`, porta 8080 só em `127.0.0.1`). A API espera o banco ficar saudável e só fica `healthy` quando a readiness responde `UP`. `JWT_SECRET` é obrigatório: exporte-o ou ponha num `.env` (já ignorado pelo git).
+`docker compose up` sobe o banco (`pladDB`) e a API (`pladAPI`, porta 8080 só em `127.0.0.1`). A API espera o banco ficar saudável e só fica `healthy` quando a readiness responde `UP`. `DB_PASSWORD` e `JWT_SECRET` são obrigatórios: copie `.env.example` para `.env` (ignorado pelo git) e troque o `JWT_SECRET`. Variáveis exportadas no shell têm prioridade sobre o `.env`.
 
 ```
-export JWT_SECRET=$(openssl rand -base64 48)
+cp .env.example .env      # PowerShell: Copy-Item .env.example .env
+# edite o .env: JWT_SECRET=$(openssl rand -base64 48)
 docker compose up -d --build
 curl localhost:8080/actuator/health/readiness   # {"status":"UP"}
 ```

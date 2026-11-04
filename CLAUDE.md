@@ -12,7 +12,7 @@ Use the Maven wrapper (`./mvnw` in bash, `.\mvnw.cmd` in PowerShell):
 
 - Build: `./mvnw clean package`
 - Run: `./mvnw spring-boot:run` (the API docs stay closed; add `-Dspring-boot.run.profiles=dev` to open Swagger UI at `/swagger-ui.html`)
-- Image + stack: `docker build -t plad-api .` builds the multi-stage image (tests are skipped there; CI runs them). `JWT_SECRET=... docker compose up -d --build` starts `db` and `api`; the `api` healthcheck is `/actuator/health/readiness`. Profile `prod` (the image default) has no defaults for `DB_URL`, `DB_USER`, `DB_PASSWORD` (`ProdEnvironmentCheck` stops the start naming what is missing), `TRUSTED_PROXIES` and the rest are in `docs/deploy.md`
+- Image + stack: `docker build -t plad-api .` builds the multi-stage image (tests are skipped there; CI runs them). Before the first `docker compose up`, run `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`) and replace `JWT_SECRET` in it (`openssl rand -base64 48`; the example value is too short on purpose, so the app won't start with it): compose refuses to run without `DB_PASSWORD` (and the `api` without `JWT_SECRET`). `docker compose up -d --build` then starts `db` and `api`; the `api` healthcheck is `/actuator/health/readiness`. Profile `prod` (the image default) has no defaults for `DB_URL`, `DB_USER`, `DB_PASSWORD` (`ProdEnvironmentCheck` stops the start naming what is missing), `TRUSTED_PROXIES` and the rest are in `docs/deploy.md`
 - Update the API contract snapshot: `./mvnw test -Dopenapi.update=true` (in PowerShell quote it: `"-Dopenapi.update=true"`, or the dot splits the argument)
 - All tests: `./mvnw test` (also writes the JaCoCo coverage report to `target/site/jacoco/index.html`; the surefire `argLine` must keep `@{argLine}` or the agent is lost)
 - Single test class / method: `./mvnw test -Dtest=TestDataRunner` / `./mvnw test -Dtest=TestDataRunner#savesAndFindsUserByEmail`
@@ -21,7 +21,7 @@ The app needs a running PostgreSQL at `localhost:5432/dbtest` (user/password `po
 
 Every test that loads a Spring context (`@SpringBootTest`, `@DataJpaTest`) must add `@Import(TestcontainersConfig.class)` (`src/test/java/plad/config`). It declares a single `@ServiceConnection` Postgres container shared by all contexts in the JVM, and its connection replaces `spring.datasource.*`. Unit tests with Mockito don't need it.
 
-Running the app also needs a `JWT_SECRET` env var (at least 32 bytes, e.g. from `openssl rand -base64 48`). There is no default on purpose, so the app refuses to start without it. Tests don't need it: the surefire config in `pom.xml` sets a throwaway `jwt.secret`.
+Running the app also needs a `JWT_SECRET` env var (at least 32 bytes, e.g. from `openssl rand -base64 48`). There is no default on purpose, so the app refuses to start without it. Export it or put it in `.env` (copied from `.env.example`, git-ignored): `application.properties` imports `.env` (`spring.config.import`, optional), the same file `docker compose` reads, and real env vars win over it. The image has no `.env` and the tests don't read it (surefire blanks `spring.config.import` and sets a throwaway `jwt.secret`).
 
 Optional `ADMIN_EMAIL` + `ADMIN_PASSWORD` env vars create the first admin at startup (see Auth). Both or neither; the password follows the registration rule (8+ characters, at most 72 bytes) and a weaker one stops the app from starting.
 
@@ -91,7 +91,7 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 
 PostgreSQL 16 runs in a Docker container defined in `docker-compose.yml` at the
 repo root (container name: `pladDB`, named volume `pladdb_data`). Start it with
-`docker compose up -d db` (plain `docker compose up` also starts the `api` service, which needs `JWT_SECRET` and takes port 8080, see `docs/deploy.md`). Only the app needs it, at `localhost:5432/dbtest`
+`docker compose up -d db` (needs the `.env` from `.env.example` for `DB_PASSWORD`; plain `docker compose up` also starts the `api` service, which needs `JWT_SECRET` and takes port 8080, see `docs/deploy.md`). Only the app needs it, at `localhost:5432/dbtest`
 (dev-only credentials `postgres`/`postgres`); tests use their own Testcontainers
 Postgres and work with `pladDB` stopped.
 
