@@ -29,6 +29,7 @@ import plad.repositories.DependentRepository;
 import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -320,6 +321,35 @@ class TriageServiceTest {
         verify(auditService).record(AuditAction.TRIAGE_RESUBMITTED, USER_ID, UserType.dependente, USER_ID, "TRIAGE", TRIAGE_ID, null);
     }
 
+    @Test
+    void resubmitMovesUpdatedAtForward() {
+        Triage existing = existingTriage();
+        existing.setCreatedAt(Instant.EPOCH);
+        existing.setUpdatedAt(Instant.EPOCH);
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existing));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
+        Instant before = Instant.now();
+
+        triageService.resubmit(USER_ID, request(answer(age, "AGE_25_39")));
+
+        assertThat(existing.getUpdatedAt()).isAfterOrEqualTo(before);
+        assertThat(existing.getCreatedAt()).isEqualTo(Instant.EPOCH);
+    }
+
+    @Test
+    void resubmitRejectedForInvalidAnswerLeavesUpdatedAtAlone() {
+        Triage existing = existingTriage();
+        existing.setUpdatedAt(Instant.EPOCH);
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
+        when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existing));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
+
+        assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answer(age, "AGE_99"))))
+                .isInstanceOf(InvalidTriageException.class);
+
+        assertThat(existing.getUpdatedAt()).isEqualTo(Instant.EPOCH);
+    }
     @Test
     void resubmitAcceptsQuestionsIdentifiedByCode() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));

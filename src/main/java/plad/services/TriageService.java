@@ -23,6 +23,7 @@ import plad.repositories.DependentRepository;
 import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -105,6 +106,7 @@ public class TriageService {
             throw new InvalidTriageException("At least one question must be answered");
         }
 
+        triage.setUpdatedAt(Instant.now());
         resultQuestionTriageRepository.deleteByTriageId(triage.getId());
         saveResults(triage, answers);
         auditTriageWrite(AuditAction.TRIAGE_RESUBMITTED, userId, triage);

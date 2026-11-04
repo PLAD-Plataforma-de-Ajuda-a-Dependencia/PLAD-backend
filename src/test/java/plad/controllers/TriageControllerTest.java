@@ -2,6 +2,7 @@ package plad.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -22,9 +23,11 @@ import plad.entity.UserType;
 import plad.repositories.DependentRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.QuestionTriageRepository;
+import plad.repositories.TriageRepository;
 import plad.repositories.UserRepository;
 import plad.services.JwtService;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -33,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,6 +63,10 @@ class TriageControllerTest {
     private PsychologistRepository psychologistRepository;
     @Autowired
     private QuestionTriageRepository questionTriageRepository;
+    @Autowired
+    private TriageRepository triageRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     private List<QuestionTriage> questions;
     private Long singleChoiceId;
@@ -397,6 +405,29 @@ class TriageControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void resubmitMovesUpdatedAtForwardAndLeavesCreatedAtAlone() throws Exception {
+        User user = newUser(UserType.dependente);
+        Dependent dependent = new Dependent();
+        dependent.setNickname(plad.TestNicknames.unique());
+        dependent.setUser(user);
+        dependentRepository.save(dependent);
+        String token = jwtService.generateToken(user);
+
+        submit(token, body()).andExpect(status().isCreated());
+        entityManager.flush();
+        entityManager.clear();
+        Instant createdAt = triageRepository.findForUpdateByDependentUserId(user.getId()).orElseThrow().getCreatedAt();
+        Instant afterSubmit = triageRepository.findForUpdateByDependentUserId(user.getId()).orElseThrow().getUpdatedAt();
+        assertThat(afterSubmit).isEqualTo(createdAt);
+
+        resubmit(token, body()).andExpect(status().isOk());
+        entityManager.flush();
+        entityManager.clear();
+        var stored = triageRepository.findForUpdateByDependentUserId(user.getId()).orElseThrow();
+        assertThat(stored.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(stored.getUpdatedAt()).isAfter(createdAt);
+    }
     // helpers
 
     private ResultActions submit(String token, String body) throws Exception {
