@@ -1,0 +1,14 @@
+target/
+.git/
+.github/
+.idea/
+.claude/
+.mvn/
+.env
+.env.*
+docs/
+http/
+console.sql
+HELP.md
+Dockerfile
+docker-compose.yml

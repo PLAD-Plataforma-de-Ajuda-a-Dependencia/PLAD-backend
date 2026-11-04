@@ -1,5 +1,6 @@
 # Matriz de requisitos
 
+Conferida em 2026-11-04, sobre o commit `6c64f9d` (branch `develop`) mais as mudanças de preparo do deploy ainda sem commit (Dockerfile, perfis, actuator, compose; RNF004).
 Conferida em 2026-11-04, sobre o commit `92c970b` (branch `develop`) mais as mudanças ainda sem commit (apelido anônimo, RF007; consentimento LGPD no cadastro, RF001).
 Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 
@@ -21,8 +22,8 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 |---|---:|---|
 | Testado | 2 | RF001, RF002 |
 | Implementado sem teste | 0 | — |
-| Parcial | 7 | RF003, RF007, RF011, RNF001, RNF002, RNF003, RNF006 |
-| Não iniciado | 9 | RF005, RF006, RF008, RF009, RF010, RF012, RNF004, RNF005, RNF007 |
+| Parcial | 8 | RF003, RF007, RF011, RNF001, RNF002, RNF003, RNF004, RNF006 |
+| Não iniciado | 8 | RF005, RF006, RF008, RF009, RF010, RF012, RNF005, RNF007 |
 | Fora do escopo | 1 | RF004 |
 | **Total** | **19** | 12 RFs + 7 RNFs |
 
@@ -50,7 +51,7 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 | RNF001 | Usabilidade | Parcial | `GlobalExceptionHandler`/`ErrorResponseDTO` (erro padronizado); `OpenApiConfig` e `docs/openapi.json` (contrato); `http/plad.http` | `OpenApiContractTest#apiDocsMatchCommittedSnapshot` |
 | RNF002 | Segurança (HTTPS) | Parcial | `SecurityConfig` (BCrypt, JWT stateless, CORS por origens explícitas); `RateLimiterService`; `application.properties` (`server.forward-headers-strategy`, `TRUSTED_PROXIES`, docs fechadas por padrão) | `JwtAuthenticationFilterTest#malformedTokenIsUnauthorized`<br>`CorsConfigTest#preflightFromDisallowedOriginIsBlocked`<br>`OpenApiDisabledTest#apiDocsRequireAuthenticationWhenDisabled` |
 | RNF003 | Privacidade e confidencialidade | Parcial | `SecurityConfig#passwordEncoder` (BCrypt); `JwtService` (token só com `userId` e papel); `TriageController` (usuário vem do token); `GlobalExceptionHandler` (sem detalhe interno na resposta ou no log); `UserResponseDTO`; trilha de auditoria: `V17__create_audit_log.sql` (só INSERT), `AuditService`, `AdminAuditController` (`GET /admin/audit`), `MeController` (`GET /me/access-log`); `TriageReadService` (grava `TRIAGE_VIEWED` a cada triagem lida) | `LoginControllerTest#wrongPasswordAndUnknownEmailGetTheSameAnswer`<br>`ServiceUnavailableAndTraceTest#unexpectedFailureReturnsTheTraceThatAppearsInTheLog`<br>`AuditLogTriggerTest#updateIsRejected`<br>`TriageAuditTest#submitRecordsTriageSubmittedWithIdsAndRoleOnly`<br>`TriageAuditTest#detailsNeverHoldAnswersNameOrEmail`<br>`AdminAuditControllerTest#dependentGetsForbidden`<br>`MeAccessLogTest#entriesShowTheRoleAndNeverWhoReadIt`<br>`TriageReadControllerTest#detailReadRecordsOneViewWithActorSubjectAndRole`<br>`TriageReadControllerTest#listRecordsOneViewPerTriageReturned`<br>`TriageReadControllerTest#readingTheSameTriageTwiceRecordsTwoViews`<br>`TriageReadControllerTest#viewEntriesNeverHoldAnswersNameOrEmail`<br>`TriageReadControllerTest#dependentSeesTheReadInTheirAccessLogWithTheRoleButNotTheReader` |
-| RNF004 | Disponibilidade 24/7 | Não iniciado | Só `GlobalExceptionHandler` (503 com `Retry-After` se o banco cai) e `restart: unless-stopped` do Postgres em `docker-compose.yml` | — |
+| RNF004 | Disponibilidade 24/7 | Parcial | `Dockerfile` (JRE 25, não-root); `docker-compose.yml` (`api` com healthcheck na readiness, `restart: unless-stopped`); actuator com `/actuator/health/liveness` e `/readiness` liberados em `SecurityConfig` (readiness inclui o banco, `application.properties`); `ProdEnvironmentCheck` e `application-prod.properties` (prod sem credencial padrão); `GlobalExceptionHandler` (503 com `Retry-After` se o banco cai). Guia em `docs/deploy.md` | `ActuatorHealthTest#readinessAnswersUpWithoutTokenAndWithoutDetails`<br>`ActuatorHealthTest#everythingElseUnderActuatorStillNeedsAToken`<br>`ProdEnvironmentCheckTest#prodWithoutDatabaseVariablesStopsAndNamesEveryMissingOne`<br>`ProdProfilePropertiesTest#databaseSettingsAreRequiredPlaceholdersWithoutDefault`<br>`ServiceUnavailableAndTraceTest` |
 | RNF005 | Resposta em até 2 s | Não iniciado | Nada configurado; `spring.jpa.open-in-view=false` em `application.properties` | — |
 | RNF006 | Escalabilidade | Parcial | `SecurityConfig` (`SessionCreationPolicy.STATELESS`); `RateLimiterService` (em memória, por JVM) | — |
 | RNF007 | Estabilidade da videochamada | Não iniciado | Não existe | — |
@@ -75,6 +76,6 @@ Conferida em 2026-10-29, no commit `0232182` (branch `develop`).
 - **RF007:** o apelido anônimo existe (cadastro, `GET /me`, troca limitada, triagem lida por psicólogo e admin), mas só faz sentido na sala de reunião, que depende de RF005. As listas de palavras aguardam revisão (decisão 7).
 - **RF005, RF006, RF007, RF012:** modelo de reunião (o enum `status_reuniao` está órfão), endpoints, papéis (hoje o JWT não traz authorities) e a sala em si. RF006 e RF012 dependem de RF005. RF007 também exige decidir como o anonimato convive com o cadastro, que hoje pede nome real.
 - **RF008, RF009, RF010:** nenhuma entidade, endpoint ou migração de conteúdo, relato ou comunidade. RF009 e RF010 dependem de uma decisão de anonimato.
-- **RNF004:** faltam Dockerfile, health/readiness (sem actuator), deploy e monitoramento. O CI (`.github/workflows/ci.yml`) só compila e testa.
+- **RNF004:** a imagem, as probes de liveness/readiness e o compose existem e têm teste, e o perfil `prod` exige as variáveis do banco. Faltam deploy de fato (nenhum ambiente de produção no repositório), monitoramento e alertas, mais de uma instância (o limitador de taxa vive na memória de cada JVM, ver RNF006) e HTTPS (ver RNF002). O CI (`.github/workflows/ci.yml`) compila, testa e constrói a imagem (job `docker-build`), sem publicá-la nem subir a API. Nenhuma medida de disponibilidade existe.
 - **RNF005:** faltam timeouts de pool e de consulta (tudo no padrão, 30 s no Hikari) e um teste de latência ou carga.
 - **RNF007:** falta tudo (provedor de vídeo ou WebRTC, sinalização, monitoramento de qualidade); depende de RF005.

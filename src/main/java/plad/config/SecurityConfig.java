@@ -71,6 +71,8 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll();
                     // the error dispatch must stay reachable or anonymous errors turn into a bare 401
                     auth.requestMatchers("/error").permitAll();
+                    // orchestrator probes only; /actuator/health itself and any other actuator path need a token
+                    auth.requestMatchers(HttpMethod.GET, "/actuator/health/liveness", "/actuator/health/readiness").permitAll();
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     // public only while springdoc.api-docs.enabled=true; otherwise they fall under authenticated()
                     if (apiDocsEnabled) {

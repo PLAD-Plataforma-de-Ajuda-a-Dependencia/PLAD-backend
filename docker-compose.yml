@@ -5,17 +5,46 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: dbtest
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      # dev-only defaults; the api service reads the same variables, so the two never diverge
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pladdb_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d dbtest"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d dbtest"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # Optional: `docker compose up -d db` starts only the database (for ./mvnw spring-boot:run).
+  # `docker compose up` starts both; JWT_SECRET must be in the environment or in a .env file (not versioned).
+  api:
+    build: .
+    container_name: pladAPI
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/dbtest
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in the environment or in .env (openssl rand -base64 48)}
+      # optional; an empty value falls back to the application default (see docs/deploy.md)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
 volumes:
   pladdb_data:
