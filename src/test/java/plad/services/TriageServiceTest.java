@@ -26,7 +26,6 @@ import plad.exception.InvalidTriageException;
 import plad.exception.TriageAlreadyExistException;
 import plad.exception.TriageNotFoundException;
 import plad.repositories.DependentRepository;
-import plad.repositories.QuestionTriageRepository;
 import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
 
@@ -52,7 +51,7 @@ class TriageServiceTest {
     private static final Long TRIAGE_ID = 99L;
 
     @Mock
-    private QuestionTriageRepository questionTriageRepository;
+    private TriageQuestionCatalog questionCatalog;
     @Mock
     private TriageRepository triageRepository;
     @Mock
@@ -76,7 +75,7 @@ class TriageServiceTest {
 
     @Test
     void getQuestionsMapsOptionsAndKeepsRepositoryOrder() {
-        when(questionTriageRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of(age, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, notes));
 
         List<QuestionResponseDTO> questions = triageService.getQuestions();
 
@@ -305,7 +304,7 @@ class TriageServiceTest {
     void resubmitReplacesAnswersOfExistingTriage() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
 
         TriageResponseDTO response = triageService.resubmit(USER_ID, request(
                 answer(age, "AGE_25_39"),
@@ -325,7 +324,7 @@ class TriageServiceTest {
     void resubmitAcceptsQuestionsIdentifiedByCode() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
 
         TriageResponseDTO response = triageService.resubmit(USER_ID, request(
                 answerByCode(age, "AGE_25_39"),
@@ -344,7 +343,7 @@ class TriageServiceTest {
     void resubmitAcceptsPartialAnswers() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
 
         TriageResponseDTO response = triageService.resubmit(USER_ID, request(answer(notes, "oi")));
 
@@ -381,7 +380,7 @@ class TriageServiceTest {
     private void assertResubmitInvalid(AnswerRequestDTO... answers) {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.findForUpdateByDependentUserId(USER_ID)).thenReturn(Optional.of(existingTriage()));
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
 
         assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answers)))
                 .isInstanceOf(InvalidTriageException.class);
@@ -406,7 +405,7 @@ class TriageServiceTest {
     private void givenDependentWithoutTriage() {
         when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
         when(triageRepository.existsByDependentUserId(USER_ID)).thenReturn(false);
-        when(questionTriageRepository.findAll()).thenReturn(List.of(age, reasons, notes));
+        when(questionCatalog.findAllOrdered()).thenReturn(List.of(age, reasons, notes));
     }
 
     private void givenSaveAssignsId() {

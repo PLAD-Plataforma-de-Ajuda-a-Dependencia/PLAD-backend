@@ -20,7 +20,6 @@ import plad.exception.InvalidTriageException;
 import plad.exception.TriageAlreadyExistException;
 import plad.exception.TriageNotFoundException;
 import plad.repositories.DependentRepository;
-import plad.repositories.QuestionTriageRepository;
 import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
 
@@ -40,15 +39,15 @@ public class TriageService {
     private static final int MAX_FREE_TEXT_LENGTH = 1000;
     private static final String AUDIT_ENTITY = "TRIAGE";
 
-    private final QuestionTriageRepository questionTriageRepository;
+    private final TriageQuestionCatalog questionCatalog;
     private final TriageRepository triageRepository;
     private final ResultQuestionTriageRepository resultQuestionTriageRepository;
     private final DependentRepository dependentRepository;
     private final AuditService auditService;
 
     //constructor injection
-    public TriageService(QuestionTriageRepository questionTriageRepository, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService) {
-        this.questionTriageRepository = questionTriageRepository;
+    public TriageService(TriageQuestionCatalog questionCatalog, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService) {
+        this.questionCatalog = questionCatalog;
         this.triageRepository = triageRepository;
         this.resultQuestionTriageRepository = resultQuestionTriageRepository;
         this.dependentRepository = dependentRepository;
@@ -61,7 +60,7 @@ public class TriageService {
 
     @Transactional(readOnly = true)
     public List<QuestionResponseDTO> getQuestions() {
-        return questionTriageRepository.findAllByOrderByDisplayOrderAsc().stream()
+        return questionCatalog.findAllOrdered().stream()
                 .map(this::toQuestionResponse)
                 .toList();
     }
@@ -123,7 +122,7 @@ public class TriageService {
     }
 
     private List<ValidatedAnswer> validate(TriageRequestDTO request) {
-        Map<Long, QuestionTriage> questions = questionTriageRepository.findAll().stream()
+        Map<Long, QuestionTriage> questions = questionCatalog.findAllOrdered().stream()
                 .collect(Collectors.toMap(QuestionTriage::getId, Function.identity()));
         Map<String, QuestionTriage> questionsByCode = questions.values().stream()
                 .collect(Collectors.toMap(QuestionTriage::getCode, Function.identity()));
