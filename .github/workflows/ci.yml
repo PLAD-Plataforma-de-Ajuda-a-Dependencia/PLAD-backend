@@ -37,6 +37,16 @@ jobs:
           path: target/surefire-reports/
           if-no-files-found: ignore
 
+  # the image must keep building (Dockerfile, pom, base images); it is not pushed anywhere
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build image
+        run: docker build -t plad-api:ci .
+
   dependency-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
