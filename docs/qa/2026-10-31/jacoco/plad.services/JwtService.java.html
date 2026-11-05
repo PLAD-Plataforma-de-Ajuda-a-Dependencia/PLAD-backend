@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.services</a> &gt; <span class="el_source">JwtService.java</span></div><h1>JwtService.java</h1><pre class="source lang-java linenums">package plad.services;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import plad.entity.User;
+import plad.entity.UserType;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Objects;
+
+@Service
+public class JwtService {
+
+    private static final String USER_ID_CLAIM = &quot;userId&quot;;
+    private static final String ROLE_CLAIM = &quot;role&quot;;
+
+    // role is null for tokens issued before the claim existed; the filter treats those as invalid
+<span class="fc" id="L25">    public record TokenClaims(Long userId, UserType role) {}</span>
+
+    private final SecretKey secretKey;
+    private final JwtParser parser;
+    private final long expirationMs;
+
+    public JwtService(
+            @Value(&quot;${jwt.secret}&quot;) String secret,
+            @Value(&quot;${jwt.expiration-ms}&quot;) long expirationMs
+<span class="fc" id="L34">    ) {</span>
+<span class="fc" id="L35">        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L36">        this.parser = Jwts.parser().verifyWith(secretKey).build();</span>
+<span class="fc" id="L37">        this.expirationMs = expirationMs;</span>
+<span class="fc" id="L38">    }</span>
+
+    public String generateToken(User user) {
+<span class="fc" id="L41">        Date now = new Date();</span>
+<span class="fc" id="L42">        Date expiryDate = new Date(now.getTime() + expirationMs);</span>
+
+        // the subject is the user id, not the email: JWT payloads are only base64, so no personal data in them
+<span class="fc" id="L45">        return Jwts.builder()</span>
+<span class="fc" id="L46">                .subject(String.valueOf(user.getId()))</span>
+<span class="fc" id="L47">                .claim(USER_ID_CLAIM, user.getId())</span>
+<span class="fc" id="L48">                .claim(ROLE_CLAIM, Objects.requireNonNull(user.getTypeUser(), &quot;user has no type_user&quot;).name())</span>
+<span class="fc" id="L49">                .issuedAt(now)</span>
+<span class="fc" id="L50">                .expiration(expiryDate)</span>
+<span class="fc" id="L51">                .signWith(secretKey)</span>
+<span class="fc" id="L52">                .compact();</span>
+    }
+
+    // null when the token is valid but has no userId claim
+    public Long extractUserId(String token) {
+<span class="fc" id="L57">        return parse(token).userId();</span>
+    }
+
+    // verifies the signature once; a claim that is missing comes back null, a malformed or unknown one is rejected
+    public TokenClaims parse(String token) {
+        try {
+<span class="fc" id="L63">            Claims claims = parser.parseSignedClaims(token).getPayload();</span>
+<span class="fc" id="L64">            String role = claims.get(ROLE_CLAIM, String.class);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            return new TokenClaims(claims.get(USER_ID_CLAIM, Long.class), role == null ? null : UserType.valueOf(role));</span>
+<span class="fc" id="L66">        } catch (JwtException | IllegalArgumentException e) {</span>
+<span class="fc" id="L67">            throw new IllegalArgumentException(&quot;Invalid or expired token&quot;, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

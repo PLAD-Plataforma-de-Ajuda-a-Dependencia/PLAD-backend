@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequestIdFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.config</a> &gt; <span class="el_source">RequestIdFilter.java</span></div><h1>RequestIdFilter.java</h1><pre class="source lang-java linenums">package plad.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+// Registered as a servlet filter (not inside the Security chain, unlike JwtAuthenticationFilter) and first in line,
+// so 401/403 and CORS rejections also carry the id and every log line of the request has it in the MDC
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+<span class="fc" id="L21">public class RequestIdFilter extends OncePerRequestFilter {</span>
+
+    public static final String HEADER = &quot;X-Request-Id&quot;;
+    public static final String MDC_KEY = &quot;requestId&quot;;
+
+    // a client-supplied id goes into logs and a header: accept only a short, harmless token
+<span class="fc" id="L27">    private static final Pattern VALID_ID = Pattern.compile(&quot;[A-Za-z0-9._-]{1,64}&quot;);</span>
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+<span class="fc" id="L32">        String incoming = request.getHeader(HEADER);</span>
+<span class="fc bfc" id="L33" title="All 4 branches covered.">        String requestId = incoming != null &amp;&amp; VALID_ID.matcher(incoming).matches()</span>
+<span class="fc" id="L34">                ? incoming</span>
+<span class="fc" id="L35">                : UUID.randomUUID().toString();</span>
+<span class="fc" id="L36">        MDC.put(MDC_KEY, requestId);</span>
+<span class="fc" id="L37">        response.setHeader(HEADER, requestId);</span>
+        try {
+<span class="fc" id="L39">            chain.doFilter(request, response);</span>
+        } finally {
+<span class="fc" id="L41">            MDC.remove(MDC_KEY);</span>
+        }
+<span class="fc" id="L43">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

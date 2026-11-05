@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaxBytesValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.validation</a> &gt; <span class="el_source">MaxBytesValidator.java</span></div><h1>MaxBytesValidator.java</h1><pre class="source lang-java linenums">package plad.validation;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import java.nio.charset.StandardCharsets;
+
+<span class="fc" id="L8">public class MaxBytesValidator implements ConstraintValidator&lt;MaxBytes, String&gt; {</span>
+
+    private int max;
+
+    @Override
+    public void initialize(MaxBytes constraint) {
+<span class="fc" id="L14">        this.max = constraint.value();</span>
+<span class="fc" id="L15">    }</span>
+
+    // null is valid: presence is @NotBlank's job
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+<span class="fc bfc" id="L20" title="All 4 branches covered.">        return value == null || value.getBytes(StandardCharsets.UTF_8).length &lt;= max;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

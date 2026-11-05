@@ -1,0 +1,1548 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\josh\\Desktop\\PLAD-frontend\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\playwright.config.ts",
+    "rootDir": "C:/Users/josh/Desktop/PLAD-frontend/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/josh/Desktop/PLAD-frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/josh/Desktop/PLAD-frontend/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e",
+        "snapshotDir": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://localhost:5173",
+          "channel": "msedge",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:5173",
+      "reuseExistingServer": true,
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "api.spec.ts",
+      "file": "api.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "cadastro",
+          "file": "api.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "adulto: 201 com id, nome e e-mail",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2356,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:00.021Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-98957515af36432f29e3",
+              "file": "api.spec.ts",
+              "line": 11,
+              "column": 5
+            },
+            {
+              "title": "quem faz 18 amanhã: 400 VALIDATION_ERROR em birth_date",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 779,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:02.733Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-cec061817e047ae5d880",
+              "file": "api.spec.ts",
+              "line": 20,
+              "column": 5
+            },
+            {
+              "title": "quem faz 18 hoje: 201",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1149,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:03.775Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-05b2abc80c989772235d",
+              "file": "api.spec.ts",
+              "line": 28,
+              "column": 5
+            },
+            {
+              "title": "type_user admin: 400 INVALID_REGISTRATION",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 328,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:05.419Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-5a03142b11fc15d1c5ff",
+              "file": "api.spec.ts",
+              "line": 33,
+              "column": 5
+            },
+            {
+              "title": "e-mail repetido em maiúsculas: 409 EMAIL_IN_USE",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1275,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:05.967Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-b2e3befcd91754a2a027",
+              "file": "api.spec.ts",
+              "line": 39,
+              "column": 5
+            },
+            {
+              "title": "CRP \"06/123456\" e \"06 / 123456\" são o mesmo registro: duplicado 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1226,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:07.396Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-07d03598c3664d0afdb8",
+              "file": "api.spec.ts",
+              "line": 47,
+              "column": 5
+            },
+            {
+              "title": "psicólogo sem número de registro: 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 344,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:08.708Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-587461a669ed887dc153",
+              "file": "api.spec.ts",
+              "line": 56,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "login",
+          "file": "api.spec.ts",
+          "line": 62,
+          "column": 6,
+          "specs": [
+            {
+              "title": "senha errada e e-mail inexistente respondem igual (não revela se a conta existe)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2024,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:09.187Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-d5cd75081c2fa35f5f21",
+              "file": "api.spec.ts",
+              "line": 63,
+              "column": 5
+            },
+            {
+              "title": "6ª tentativa do mesmo IP: 429 RATE_LIMITED com Retry-After",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3426,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:11.377Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-61847809a57bcce4f75a",
+              "file": "api.spec.ts",
+              "line": 76,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "/me e erros",
+          "file": "api.spec.ts",
+          "line": 90,
+          "column": 6,
+          "specs": [
+            {
+              "title": "/me do dependente: sem real_name, com has_triage",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1066,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:14.866Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-9bd71e425f989ab7003b",
+              "file": "api.spec.ts",
+              "line": 91,
+              "column": 5
+            },
+            {
+              "title": "/me do psicólogo: credencial e is_validated=false",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3375,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:16.014Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-1691d85dfebc98ebc977",
+              "file": "api.spec.ts",
+              "line": 103,
+              "column": 5
+            },
+            {
+              "title": "sem token: 401 UNAUTHORIZED em JSON",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 883,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:19.582Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-e956601bf0fcfd5756e4",
+              "file": "api.spec.ts",
+              "line": 115,
+              "column": 5
+            },
+            {
+              "title": "X-Request-Id é devolvido (o enviado, se válido; senão um gerado)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 309,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:20.809Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-afa20827160db0930453",
+              "file": "api.spec.ts",
+              "line": 125,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "triagem",
+          "file": "api.spec.ts",
+          "line": 134,
+          "column": 6,
+          "specs": [
+            {
+              "title": "perguntas não oferecem AGE_UNDER_18",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2069,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:21.524Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-daef7098c3acc583017a",
+              "file": "api.spec.ts",
+              "line": 135,
+              "column": 5
+            },
+            {
+              "title": "POST 201, segundo POST 409, PUT 200",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2682,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:23.652Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-cb1d0b3610d11b7314b0",
+              "file": "api.spec.ts",
+              "line": 145,
+              "column": 5
+            },
+            {
+              "title": "POST vazio: 204 e nada gravado (ainda dá para enviar depois)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3068,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:26.413Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-9e7eb9f2194b9198c403",
+              "file": "api.spec.ts",
+              "line": 160,
+              "column": 5
+            },
+            {
+              "title": "PUT vazio: 400 INVALID_TRIAGE e a triagem guardada permanece",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1295,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:29.535Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-cf81645bdb2a16e90f2f",
+              "file": "api.spec.ts",
+              "line": 170,
+              "column": 5
+            },
+            {
+              "title": "AGE_UNDER_18 como resposta: 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1616,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:30.891Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-ef039091837059345e5d",
+              "file": "api.spec.ts",
+              "line": 179,
+              "column": 5
+            },
+            {
+              "title": "texto livre com 1000 emojis: 201",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2897,
+                      "error": {
+                        "message": "Error: {\"code\":\"INVALID_TRIAGE\",\"message\":\"Question 10 text exceeds 1000 characters\",\"timestamp\":\"2026-10-31T23:39:35.119826500Z\",\"errors\":[],\"trace\":null}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m201\u001b[39m\nReceived: \u001b[31m400\u001b[39m",
+                        "stack": "Error: {\"code\":\"INVALID_TRIAGE\",\"message\":\"Question 10 text exceeds 1000 characters\",\"timestamp\":\"2026-10-31T23:39:35.119826500Z\",\"errors\":[],\"trace\":null}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m201\u001b[39m\nReceived: \u001b[31m400\u001b[39m\n    at C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts:192:48",
+                        "location": {
+                          "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                          "column": 48,
+                          "line": 192
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 190 |\u001b[39m         \u001b[36mconst\u001b[39m free \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m questions(request\u001b[33m,\u001b[39m token))\u001b[33m.\u001b[39mfind((q) \u001b[33m=>\u001b[39m q\u001b[33m.\u001b[39mquestion_type \u001b[33m===\u001b[39m \u001b[32m'free_text'\u001b[39m)\u001b[33m!\u001b[39m\n \u001b[90m 191 |\u001b[39m         \u001b[36mconst\u001b[39m res \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m request\u001b[33m.\u001b[39mpost(\u001b[32m`${API}/triage`\u001b[39m\u001b[33m,\u001b[39m { data\u001b[33m:\u001b[39m { answers\u001b[33m:\u001b[39m [{ question_id\u001b[33m:\u001b[39m free\u001b[33m.\u001b[39mid\u001b[33m,\u001b[39m values\u001b[33m:\u001b[39m [\u001b[32m'😀'\u001b[39m\u001b[33m.\u001b[39mrepeat(\u001b[35m1000\u001b[39m)] }] }\u001b[33m,\u001b[39m headers\u001b[33m:\u001b[39m bearer(token) })\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 192 |\u001b[39m         expect(res\u001b[33m.\u001b[39mstatus()\u001b[33m,\u001b[39m \u001b[36mawait\u001b[39m res\u001b[33m.\u001b[39mtext())\u001b[33m.\u001b[39mtoBe(\u001b[35m201\u001b[39m)\n \u001b[90m     |\u001b[39m                                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 193 |\u001b[39m     })\n \u001b[90m 194 |\u001b[39m\n \u001b[90m 195 |\u001b[39m     test(\u001b[32m'psicólogo não envia triagem: 403'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ request }) \u001b[33m=>\u001b[39m {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                            "column": 48,
+                            "line": 192
+                          },
+                          "message": "Error: {\"code\":\"INVALID_TRIAGE\",\"message\":\"Question 10 text exceeds 1000 characters\",\"timestamp\":\"2026-10-31T23:39:35.119826500Z\",\"errors\":[],\"trace\":null}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m201\u001b[39m\nReceived: \u001b[31m400\u001b[39m\n\n  190 |         const free = (await questions(request, token)).find((q) => q.question_type === 'free_text')!\n  191 |         const res = await request.post(`${API}/triage`, { data: { answers: [{ question_id: free.id, values: ['😀'.repeat(1000)] }] }, headers: bearer(token) })\n> 192 |         expect(res.status(), await res.text()).toBe(201)\n      |                                                ^\n  193 |     })\n  194 |\n  195 |     test('psicólogo não envia triagem: 403', async ({ request }) => {\n    at C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts:192:48"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:32.561Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\test-results\\api-triagem-texto-livre-com-1000-emojis-201\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\test-results\\api-triagem-texto-livre-com-1000-emojis-201\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                        "column": 48,
+                        "line": 192
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-ff39b89414c00abe3fa6",
+              "file": "api.spec.ts",
+              "line": 188,
+              "column": 5
+            },
+            {
+              "title": "psicólogo não envia triagem: 403",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1797,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:41.167Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-b1b2ef1961fe79c1c755",
+              "file": "api.spec.ts",
+              "line": 195,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "/triages e auditoria",
+          "file": "api.spec.ts",
+          "line": 203,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dependente 403; admin 200 sem real_name nem e-mail; psicólogo 200",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14389,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:43.399Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-f172d07fa606e3d48b19",
+              "file": "api.spec.ts",
+              "line": 204,
+              "column": 5
+            },
+            {
+              "title": "TRIAGE_VIEWED em /admin/audit e em /me/access-log (sem actor_id); psicólogo 403 em /admin/audit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5789,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:39:57.897Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-8520fbb5cd1ee22605e5",
+              "file": "api.spec.ts",
+              "line": 223,
+              "column": 5
+            },
+            {
+              "title": "FALHA CONHECIDA: psicólogo recém-cadastrado recebe 403 em /triages",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "Falha conhecida: a validação de psicólogo ainda não existe; hoje qualquer psicólogo lê triagens (200)",
+                      "location": {
+                        "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                        "line": 260,
+                        "column": 14
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3936,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m200\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m200\u001b[39m\n    at C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts:263:30",
+                        "location": {
+                          "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                          "column": 30,
+                          "line": 263
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 261 |\u001b[39m         \u001b[36mconst\u001b[39m psi \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m newSession(request\u001b[33m,\u001b[39m psicologo())\n \u001b[90m 262 |\u001b[39m         \u001b[36mconst\u001b[39m res \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m request\u001b[33m.\u001b[39m\u001b[36mget\u001b[39m(\u001b[32m`${API}/triages`\u001b[39m\u001b[33m,\u001b[39m { headers\u001b[33m:\u001b[39m bearer(psi\u001b[33m.\u001b[39mtoken) })\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 263 |\u001b[39m         expect(res\u001b[33m.\u001b[39mstatus())\u001b[33m.\u001b[39mtoBe(\u001b[35m403\u001b[39m)\n \u001b[90m     |\u001b[39m                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 264 |\u001b[39m     })\n \u001b[90m 265 |\u001b[39m })\n \u001b[90m 266 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                            "column": 30,
+                            "line": 263
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m200\u001b[39m\n\n  261 |         const psi = await newSession(request, psicologo())\n  262 |         const res = await request.get(`${API}/triages`, { headers: bearer(psi.token) })\n> 263 |         expect(res.status()).toBe(403)\n      |                              ^\n  264 |     })\n  265 | })\n  266 |\n    at C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts:263:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:04.002Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "Falha conhecida: a validação de psicólogo ainda não existe; hoje qualquer psicólogo lê triagens (200)",
+                          "location": {
+                            "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                            "line": 260,
+                            "column": 14
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\test-results\\api--triages-e-auditoria-F-39581-trado-recebe-403-em-triages\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\josh\\Desktop\\PLAD-frontend\\e2e\\api.spec.ts",
+                        "column": 30,
+                        "line": 263
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-a21d52e04fddeccd2677",
+              "file": "api.spec.ts",
+              "line": 259,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "documentação",
+          "file": "api.spec.ts",
+          "line": 267,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Swagger UI abre em /swagger-ui/index.html",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 217,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:08.052Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-9d9eca86ccbb1518f413",
+              "file": "api.spec.ts",
+              "line": 268,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ui.spec.ts",
+      "file": "ui.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "cadastro",
+          "file": "ui.spec.ts",
+          "line": 38,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dependente: cria a conta e vai para /login com o e-mail preenchido",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 13316,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:08.420Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-f567e9fdbe5dc4b8d24e",
+              "file": "ui.spec.ts",
+              "line": 39,
+              "column": 5
+            },
+            {
+              "title": "psicólogo: etapa 1 leva à etapa 2 e o cadastro conclui",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8340,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:23.573Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-fc0f75472af77e3ace8c",
+              "file": "ui.spec.ts",
+              "line": 49,
+              "column": 5
+            },
+            {
+              "title": "menor de 18 (faz 18 amanhã): o back recusa e a tela mostra um alerta",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6541,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:31.973Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-e6e4f75e6e8f77113787",
+              "file": "ui.spec.ts",
+              "line": 62,
+              "column": 5
+            },
+            {
+              "title": "e-mail já cadastrado: mostra erro e continua no formulário",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5243,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:38.616Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-944ee32e276d206111c6",
+              "file": "ui.spec.ts",
+              "line": 70,
+              "column": 5
+            },
+            {
+              "title": "campos obrigatórios vazios: o navegador barra o envio sem chamar a API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4867,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:43.961Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-7275276838f5c29ad460",
+              "file": "ui.spec.ts",
+              "line": 80,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "login e triagem",
+          "file": "ui.spec.ts",
+          "line": 90,
+          "column": 6,
+          "specs": [
+            {
+              "title": "senha errada: mensagem de erro e permanece em /login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5823,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:48.907Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-a34fd4e9e94eb1416b57",
+              "file": "ui.spec.ts",
+              "line": 91,
+              "column": 5
+            },
+            {
+              "title": "login → triagem completa (puladas e respondidas) → \"Triagem enviada!\" e token no localStorage",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8471,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:40:54.842Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-070a9aa4d93371a7b5b9",
+              "file": "ui.spec.ts",
+              "line": 100,
+              "column": 5
+            },
+            {
+              "title": "triagem repetida: 409 vira a oferta de substituir e o PUT conclui",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 18238,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:03.392Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-1f8502d8ae5628268bb5",
+              "file": "ui.spec.ts",
+              "line": 119,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "rota protegida",
+          "file": "ui.spec.ts",
+          "line": 144,
+          "column": 6,
+          "specs": [
+            {
+              "title": "sem token, /Triagem redireciona para /login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 10613,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:21.699Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-800a7e7375e4641d8d5f",
+              "file": "ui.spec.ts",
+              "line": 146,
+              "column": 9
+            },
+            {
+              "title": "sem token, /Calendario redireciona para /login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6764,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:32.381Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-eaf69a54bb6bfcc3734d",
+              "file": "ui.spec.ts",
+              "line": 146,
+              "column": 9
+            },
+            {
+              "title": "sem token, /adminPsico redireciona para /login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9190,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:39.230Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-0bf1e6099c0ec588ee70",
+              "file": "ui.spec.ts",
+              "line": 146,
+              "column": 9
+            },
+            {
+              "title": "token vencido é tratado como sem sessão",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8107,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:48.502Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-ec412695c71d5fffd971",
+              "file": "ui.spec.ts",
+              "line": 154,
+              "column": 5
+            },
+            {
+              "title": "rota inexistente volta para a home",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4949,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-31T23:41:56.662Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d425444c687fa36b5882-32dc36f3cec85feb0955",
+              "file": "ui.spec.ts",
+              "line": 163,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-31T23:38:46.238Z",
+    "duration": 202647.801,
+    "expected": 36,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

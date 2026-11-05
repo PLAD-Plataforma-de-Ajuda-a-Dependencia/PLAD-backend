@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TriageService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PLAD Backend</a> &gt; <a href="index.source.html" class="el_package">plad.services</a> &gt; <span class="el_source">TriageService.java</span></div><h1>TriageService.java</h1><pre class="source lang-java linenums">package plad.services;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import plad.dto.AnswerRequestDTO;
+import plad.dto.AnswerResponseDTO;
+import plad.dto.OptionDTO;
+import plad.dto.QuestionResponseDTO;
+import plad.dto.TriageRequestDTO;
+import plad.dto.TriageResponseDTO;
+import plad.entity.AuditAction;
+import plad.entity.Dependent;
+import plad.entity.QuestionTriage;
+import plad.entity.ResultQuestionTriage;
+import plad.entity.Triage;
+import plad.entity.UserType;
+import plad.exception.ForbiddenActionException;
+import plad.exception.InvalidTriageException;
+import plad.exception.TriageAlreadyExistException;
+import plad.exception.TriageNotFoundException;
+import plad.repositories.DependentRepository;
+import plad.repositories.QuestionTriageRepository;
+import plad.repositories.ResultQuestionTriageRepository;
+import plad.repositories.TriageRepository;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class TriageService {
+
+    private static final int MAX_FREE_TEXT_LENGTH = 1000;
+    private static final String AUDIT_ENTITY = &quot;TRIAGE&quot;;
+
+    private final QuestionTriageRepository questionTriageRepository;
+    private final TriageRepository triageRepository;
+    private final ResultQuestionTriageRepository resultQuestionTriageRepository;
+    private final DependentRepository dependentRepository;
+    private final AuditService auditService;
+
+    //constructor injection
+<span class="fc" id="L50">    public TriageService(QuestionTriageRepository questionTriageRepository, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService) {</span>
+<span class="fc" id="L51">        this.questionTriageRepository = questionTriageRepository;</span>
+<span class="fc" id="L52">        this.triageRepository = triageRepository;</span>
+<span class="fc" id="L53">        this.resultQuestionTriageRepository = resultQuestionTriageRepository;</span>
+<span class="fc" id="L54">        this.dependentRepository = dependentRepository;</span>
+<span class="fc" id="L55">        this.auditService = auditService;</span>
+<span class="fc" id="L56">    }</span>
+
+    // a question that passed validation, with the values to persist
+<span class="fc" id="L59">    private record ValidatedAnswer(QuestionTriage question, List&lt;String&gt; values) {</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;QuestionResponseDTO&gt; getQuestions() {
+<span class="fc" id="L64">        return questionTriageRepository.findAllByOrderByDisplayOrderAsc().stream()</span>
+<span class="fc" id="L65">                .map(this::toQuestionResponse)</span>
+<span class="fc" id="L66">                .toList();</span>
+    }
+
+    // empty when nothing was answered: no triage is stored, so the dependent can still do it later
+    @Transactional
+    public Optional&lt;TriageResponseDTO&gt; submit(Long userId, TriageRequestDTO request) {
+<span class="fc" id="L72">        Dependent dependent = findDependent(userId);</span>
+
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        if (triageRepository.existsByDependentUserId(userId)) {</span>
+<span class="fc" id="L75">            throw new TriageAlreadyExistException(&quot;Triage already submitted&quot;);</span>
+        }
+
+<span class="fc" id="L78">        List&lt;ValidatedAnswer&gt; answers = validate(request);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (answers.isEmpty()) {</span>
+<span class="fc" id="L80">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L83">        Triage triage = new Triage();</span>
+<span class="fc" id="L84">        triage.setDependent(dependent);</span>
+        try {
+            // flush now so a concurrent duplicate hits the unique constraint here and not at commit
+<span class="fc" id="L87">            triage = triageRepository.saveAndFlush(triage);</span>
+<span class="fc" id="L88">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L89">            throw new TriageAlreadyExistException(&quot;Triage already submitted&quot;);</span>
+<span class="fc" id="L90">        }</span>
+
+<span class="fc" id="L92">        saveResults(triage, answers);</span>
+<span class="fc" id="L93">        auditTriageWrite(AuditAction.TRIAGE_SUBMITTED, userId, triage);</span>
+<span class="fc" id="L94">        return Optional.of(toTriageResponse(triage, answers));</span>
+    }
+
+    @Transactional
+    public TriageResponseDTO resubmit(Long userId, TriageRequestDTO request) {
+<span class="fc" id="L99">        findDependent(userId);</span>
+
+<span class="fc" id="L101">        Triage triage = triageRepository.findForUpdateByDependentUserId(userId)</span>
+<span class="fc" id="L102">                .orElseThrow(() -&gt; new TriageNotFoundException(&quot;Triage not found&quot;));</span>
+
+<span class="fc" id="L104">        List&lt;ValidatedAnswer&gt; answers = validate(request);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (answers.isEmpty()) {</span>
+<span class="fc" id="L106">            throw new InvalidTriageException(&quot;At least one question must be answered&quot;);</span>
+        }
+
+<span class="fc" id="L109">        resultQuestionTriageRepository.deleteByTriageId(triage.getId());</span>
+<span class="fc" id="L110">        saveResults(triage, answers);</span>
+<span class="fc" id="L111">        auditTriageWrite(AuditAction.TRIAGE_RESUBMITTED, userId, triage);</span>
+<span class="fc" id="L112">        return toTriageResponse(triage, answers);</span>
+    }
+
+    // ids and role only: the answers never reach the audit log
+    private void auditTriageWrite(AuditAction action, Long userId, Triage triage) {
+<span class="fc" id="L117">        auditService.record(action, userId, UserType.dependente, userId, AUDIT_ENTITY, triage.getId(), null);</span>
+<span class="fc" id="L118">    }</span>
+
+    private Dependent findDependent(Long userId) {
+<span class="fc" id="L121">        return dependentRepository.findById(userId)</span>
+<span class="fc" id="L122">                .orElseThrow(() -&gt; new ForbiddenActionException(&quot;Only dependents can answer the triage&quot;));</span>
+    }
+
+    private List&lt;ValidatedAnswer&gt; validate(TriageRequestDTO request) {
+<span class="fc" id="L126">        Map&lt;Long, QuestionTriage&gt; questions = questionTriageRepository.findAll().stream()</span>
+<span class="fc" id="L127">                .collect(Collectors.toMap(QuestionTriage::getId, Function.identity()));</span>
+<span class="fc" id="L128">        Map&lt;String, QuestionTriage&gt; questionsByCode = questions.values().stream()</span>
+<span class="fc" id="L129">                .collect(Collectors.toMap(QuestionTriage::getCode, Function.identity()));</span>
+
+<span class="fc" id="L131">        Set&lt;Long&gt; answered = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L132">        List&lt;ValidatedAnswer&gt; validated = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        for (AnswerRequestDTO answer : request.answers()) {</span>
+<span class="fc" id="L135">            QuestionTriage question = resolveQuestion(answer, questions, questionsByCode);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (!answered.add(question.getId())) {</span>
+<span class="fc" id="L137">                throw new InvalidTriageException(&quot;Duplicate answer for question &quot; + question.getId());</span>
+            }
+<span class="fc" id="L139">            validated.add(new ValidatedAnswer(question, validateValues(question, answer.values())));</span>
+<span class="fc" id="L140">        }</span>
+
+<span class="fc" id="L142">        validated.sort(Comparator.comparingInt(a -&gt; a.question().getDisplayOrder()));</span>
+<span class="fc" id="L143">        return validated;</span>
+    }
+
+    // an answer names its question by id, by code, or by both (which must then agree)
+    private QuestionTriage resolveQuestion(AnswerRequestDTO answer, Map&lt;Long, QuestionTriage&gt; byId, Map&lt;String, QuestionTriage&gt; byCode) {
+<span class="fc bfc" id="L148" title="All 6 branches covered.">        if (answer.questionId() == null &amp;&amp; (answer.questionCode() == null || answer.questionCode().isBlank())) {</span>
+<span class="fc" id="L149">            throw new InvalidTriageException(&quot;Each answer needs question_id or question_code&quot;);</span>
+        }
+
+<span class="fc" id="L152">        QuestionTriage byIdMatch = null;</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (answer.questionId() != null) {</span>
+<span class="fc" id="L154">            byIdMatch = byId.get(answer.questionId());</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            if (byIdMatch == null) {</span>
+<span class="fc" id="L156">                throw new InvalidTriageException(&quot;Unknown question: &quot; + answer.questionId());</span>
+            }
+        }
+
+<span class="fc" id="L160">        QuestionTriage byCodeMatch = null;</span>
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">        if (answer.questionCode() != null &amp;&amp; !answer.questionCode().isBlank()) {</span>
+<span class="fc" id="L162">            byCodeMatch = byCode.get(answer.questionCode());</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">            if (byCodeMatch == null) {</span>
+<span class="fc" id="L164">                throw new InvalidTriageException(&quot;Unknown question: &quot; + answer.questionCode());</span>
+            }
+        }
+
+<span class="fc bfc" id="L168" title="All 6 branches covered.">        if (byIdMatch != null &amp;&amp; byCodeMatch != null &amp;&amp; !byIdMatch.getId().equals(byCodeMatch.getId())) {</span>
+<span class="fc" id="L169">            throw new InvalidTriageException(&quot;question_id &quot; + answer.questionId() + &quot; does not match question_code &quot; + answer.questionCode());</span>
+        }
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        return byIdMatch != null ? byIdMatch : byCodeMatch;</span>
+    }
+
+    private List&lt;String&gt; validateValues(QuestionTriage question, List&lt;String&gt; values) {
+<span class="fc bfc" id="L175" title="All 3 branches covered.">        return switch (question.getQuestionType()) {</span>
+            case single_choice -&gt; {
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                if (values.size() != 1) {</span>
+<span class="fc" id="L178">                    throw new InvalidTriageException(&quot;Question &quot; + question.getId() + &quot; accepts exactly one option&quot;);</span>
+                }
+<span class="fc" id="L180">                requireKnownCodes(question, values);</span>
+<span class="fc" id="L181">                yield values;</span>
+            }
+            case multi_choice -&gt; {
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                if (new HashSet&lt;&gt;(values).size() != values.size()) {</span>
+<span class="fc" id="L185">                    throw new InvalidTriageException(&quot;Question &quot; + question.getId() + &quot; has repeated options&quot;);</span>
+                }
+<span class="fc" id="L187">                requireKnownCodes(question, values);</span>
+<span class="fc" id="L188">                yield values;</span>
+            }
+            case free_text -&gt; {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                if (values.size() != 1) {</span>
+<span class="fc" id="L192">                    throw new InvalidTriageException(&quot;Question &quot; + question.getId() + &quot; accepts exactly one text&quot;);</span>
+                }
+<span class="fc" id="L194">                String text = values.get(0).strip();</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">                if (text.isEmpty()) {</span>
+<span class="fc" id="L196">                    throw new InvalidTriageException(&quot;Question &quot; + question.getId() + &quot; text must not be blank&quot;);</span>
+                }
+<span class="fc bfc" id="L198" title="All 2 branches covered.">                if (text.length() &gt; MAX_FREE_TEXT_LENGTH) {</span>
+<span class="fc" id="L199">                    throw new InvalidTriageException(&quot;Question &quot; + question.getId() + &quot; text exceeds &quot; + MAX_FREE_TEXT_LENGTH + &quot; characters&quot;);</span>
+                }
+<span class="fc" id="L201">                yield List.of(text);</span>
+            }
+        };
+    }
+
+    private void requireKnownCodes(QuestionTriage question, List&lt;String&gt; values) {
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        Set&lt;String&gt; validCodes = question.getOptions() == null</span>
+<span class="nc" id="L208">                ? Set.of()</span>
+<span class="fc" id="L209">                : question.getOptions().stream().map(option -&gt; option.get(&quot;code&quot;)).collect(Collectors.toSet());</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for (String value : values) {</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            if (!validCodes.contains(value)) {</span>
+<span class="fc" id="L212">                throw new InvalidTriageException(&quot;Invalid option '&quot; + value + &quot;' for question &quot; + question.getId());</span>
+            }
+<span class="fc" id="L214">        }</span>
+<span class="fc" id="L215">    }</span>
+
+    private void saveResults(Triage triage, List&lt;ValidatedAnswer&gt; answers) {
+<span class="fc" id="L218">        List&lt;ResultQuestionTriage&gt; rows = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        for (ValidatedAnswer answer : answers) {</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            for (String value : answer.values()) {</span>
+<span class="fc" id="L221">                ResultQuestionTriage row = new ResultQuestionTriage();</span>
+<span class="fc" id="L222">                row.setTriage(triage);</span>
+<span class="fc" id="L223">                row.setQuestion(answer.question());</span>
+<span class="fc" id="L224">                row.setValueResult(value);</span>
+<span class="fc" id="L225">                rows.add(row);</span>
+<span class="fc" id="L226">            }</span>
+<span class="fc" id="L227">        }</span>
+<span class="fc" id="L228">        resultQuestionTriageRepository.saveAll(rows);</span>
+<span class="fc" id="L229">    }</span>
+
+    private QuestionResponseDTO toQuestionResponse(QuestionTriage question) {
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        List&lt;OptionDTO&gt; options = question.getOptions() == null</span>
+<span class="fc" id="L233">                ? List.of()</span>
+<span class="fc" id="L234">                : question.getOptions().stream()</span>
+<span class="fc" id="L235">                        .map(option -&gt; new OptionDTO(option.get(&quot;code&quot;), option.get(&quot;label&quot;)))</span>
+<span class="fc" id="L236">                        .toList();</span>
+<span class="fc" id="L237">        return new QuestionResponseDTO(question.getId(), question.getCode(), question.getQuestionText(), question.getQuestionType(), options, question.getDisplayOrder(), question.isRequired());</span>
+    }
+
+    private TriageResponseDTO toTriageResponse(Triage triage, List&lt;ValidatedAnswer&gt; answers) {
+<span class="fc" id="L241">        List&lt;AnswerResponseDTO&gt; response = answers.stream()</span>
+<span class="fc" id="L242">                .map(a -&gt; new AnswerResponseDTO(a.question().getId(), a.question().getCode(), a.question().getQuestionText(), a.values()))</span>
+<span class="fc" id="L243">                .toList();</span>
+<span class="fc" id="L244">        return new TriageResponseDTO(triage.getId(), triage.getCreatedAt(), response);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

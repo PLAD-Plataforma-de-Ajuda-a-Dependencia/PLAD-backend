@@ -1,0 +1,1272 @@
+Picked up JAVA_TOOL_OPTIONS: -javaagent:C:/Users/josh/.m2/repository/org/jacoco/org.jacoco.agent/0.8.16/org.jacoco.agent-0.8.16-runtime.jar=destfile=C:/Users/josh/Desktop/demo/demo-qa/target/jacoco.exec,includes=plad.*
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< plad:plad-backend >--------------------------
+[INFO] Building PLAD Backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ plad-backend ---
+[INFO] Deleting C:\Users\josh\Desktop\demo\demo-qa\target
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ plad-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 17 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ plad-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 78 source files with javac [debug parameters release 25] to target\classes
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by lombok.permit.Permit
+WARNING: Please consider reporting this to the maintainers of class lombok.permit.Permit
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[INFO] /C:/Users/josh/Desktop/demo/demo-qa/src/main/java/plad/config/JwtAuthenticationFilter.java: Some input files use or override a deprecated API.
+[INFO] /C:/Users/josh/Desktop/demo/demo-qa/src/main/java/plad/config/JwtAuthenticationFilter.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ plad-backend ---
+[INFO] skip non existing resourceDirectory C:\Users\josh\Desktop\demo\demo-qa\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ plad-backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 40 source files with javac [debug parameters release 25] to target\test-classes
+[INFO] /C:/Users/josh/Desktop/demo/demo-qa/src/test/java/plad/config/OpenApiConfigTest.java: C:\Users\josh\Desktop\demo\demo-qa\src\test\java\plad\config\OpenApiConfigTest.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/josh/Desktop/demo/demo-qa/src/test/java/plad/config/OpenApiConfigTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ plad-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+Picked up JAVA_TOOL_OPTIONS: -javaagent:C:/Users/josh/.m2/repository/org/jacoco/org.jacoco.agent/0.8.16/org.jacoco.agent-0.8.16-runtime.jar=destfile=C:/Users/josh/Desktop/demo/demo-qa/target/jacoco.exec,includes=plad.*
+[INFO] Running plad.config.AdminAccessTest
+20:20:32.543 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [plad.config.AdminAccessTest]: AdminAccessTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:20:33.132 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration plad.PladApplication for test class plad.config.AdminAccessTest
+20:20:33.595 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [plad.config.AdminAccessTest]: AdminAccessTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:20:33.608 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration plad.PladApplication for test class plad.config.AdminAccessTest
+20:20:33.772 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:20:34.394-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminAccessTest              : Starting AdminAccessTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:20:34.399-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminAccessTest              : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:20:37.201-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:20:37.382-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 150 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:20:38.707-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.images.PullPolicy     : Image pull policy will be performed by: DefaultPullPolicy()
+2026-10-31T20:20:38.713-03:00  INFO 6076 --- [pladbackend] [           main] []o.t.utility.ImageNameSubstitutor         : Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+2026-10-31T20:20:38.792-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.DockerClientFactory   : Testcontainers version: 2.0.5
+2026-10-31T20:20:39.440-03:00  INFO 6076 --- [pladbackend] [           main] []o.t.d.DockerClientProviderStrategy       : Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+2026-10-31T20:20:40.651-03:00  INFO 6076 --- [pladbackend] [           main] []o.t.d.DockerClientProviderStrategy       : Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+2026-10-31T20:20:40.654-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.DockerClientFactory   : Docker host IP address is localhost
+2026-10-31T20:20:40.689-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.DockerClientFactory   : Connected to docker: 
+  Server Version: 29.6.2
+  API Version: 1.55
+  Operating System: Docker Desktop
+  Total Memory: 5841 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+2026-10-31T20:20:40.968-03:00  INFO 6076 --- [pladbackend] [           main] []tc.testcontainers/ryuk:0.14.0            : Creating container for image: testcontainers/ryuk:0.14.0
+2026-10-31T20:20:41.199-03:00  INFO 6076 --- [pladbackend] [           main] []o.t.utility.RegistryAuthLocator          : Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+2026-10-31T20:20:41.504-03:00  INFO 6076 --- [pladbackend] [           main] []tc.testcontainers/ryuk:0.14.0            : Container testcontainers/ryuk:0.14.0 is starting: 98b199a0a827a88bdc604be489fac0a3a7fd312d43a1788897057030d137c761
+2026-10-31T20:20:42.325-03:00  INFO 6076 --- [pladbackend] [           main] []tc.testcontainers/ryuk:0.14.0            : Container testcontainers/ryuk:0.14.0 started in PT1.3578212S
+2026-10-31T20:20:42.343-03:00  INFO 6076 --- [pladbackend] [           main] []o.t.utility.RyukResourceReaper           : Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+2026-10-31T20:20:42.343-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.DockerClientFactory   : Checking the system...
+2026-10-31T20:20:42.345-03:00  INFO 6076 --- [pladbackend] [           main] []org.testcontainers.DockerClientFactory   : ?? Docker server version should be at least 1.6.0
+2026-10-31T20:20:42.347-03:00  INFO 6076 --- [pladbackend] [           main] []tc.postgres:16                           : Creating container for image: postgres:16
+2026-10-31T20:20:42.571-03:00  INFO 6076 --- [pladbackend] [           main] []tc.postgres:16                           : Container postgres:16 is starting: 32ca4323bb833cc46b4f5ccef0085bdd7343d5d295c3ca7441c9ee17f5afea38
+2026-10-31T20:20:45.523-03:00  INFO 6076 --- [pladbackend] [           main] []tc.postgres:16                           : Container postgres:16 started in PT3.1756895S
+2026-10-31T20:20:45.526-03:00  INFO 6076 --- [pladbackend] [           main] []tc.postgres:16                           : Container is started (JDBC URL: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF)
+2026-10-31T20:20:46.545-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:20:46.738-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-10-31T20:20:46.745-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.094s)
+2026-10-31T20:20:46.777-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-10-31T20:20:46.883-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-10-31T20:20:46.903-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - create enums n users"
+2026-10-31T20:20:46.975-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - create psichologysts"
+2026-10-31T20:20:47.019-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - create dependents"
+2026-10-31T20:20:47.064-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "4 - create triages"
+2026-10-31T20:20:47.123-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "5 - alter table triages"
+2026-10-31T20:20:47.170-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "6 - allow multiple answers"
+2026-10-31T20:20:47.218-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "7 - normalize user emails"
+2026-10-31T20:20:47.260-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "8 - drop psychologist validate time default"
+2026-10-31T20:20:47.292-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "9 - add required to questions triages"
+2026-10-31T20:20:47.328-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "10 - convert timestamps to timestamptz"
+2026-10-31T20:20:47.390-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "11 - add code to questions triages"
+2026-10-31T20:20:47.458-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "12 - remove age under 18 option"
+2026-10-31T20:20:47.502-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "13 - normalize crm crp number"
+2026-10-31T20:20:47.542-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "14 - unique answer by value hash"
+2026-10-31T20:20:47.582-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "15 - make all triage questions optional"
+2026-10-31T20:20:47.623-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "16 - add admin user type"
+2026-10-31T20:20:47.663-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "17 - create audit log"
+2026-10-31T20:20:47.717-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Successfully applied 17 migrations to schema "public", now at version v17 (execution time 00:00.307s)
+2026-10-31T20:20:47.986-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:20:48.134-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-10-31T20:20:49.019-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:20:49.066-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-31T20:20:49.109-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3dc5eb8f
+2026-10-31T20:20:49.112-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-31T20:20:49.208-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:20:51.160-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:20:51.262-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:20:51.414-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-31T20:20:54.683-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 637e597f-2426-4c43-8af2-4de27a0432f5
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:20:54.703-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:20:56.356-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:20:56.357-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:20:56.364-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 7 ms
+2026-10-31T20:20:56.557-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminAccessTest              : Started AdminAccessTest in 22.814 seconds (process running for 28.009)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\josh\.m2\repository\net\bytebuddy\byte-buddy-agent\1.18.10\byte-buddy-agent-1.18.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.53 s -- in plad.config.AdminAccessTest
+[INFO] Running plad.config.AdminBootstrapRunnerTest
+2026-10-31T20:20:58.607-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.AdminBootstrapRunnerTest]: AdminBootstrapRunnerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:20:58.629-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.AdminBootstrapRunnerTest
+2026-10-31T20:20:58.639-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.AdminBootstrapRunnerTest]: AdminBootstrapRunnerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:20:58.678-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.AdminBootstrapRunnerTest
+2026-10-31T20:20:58.745-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:20:58.915-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminBootstrapRunnerTest     : Starting AdminBootstrapRunnerTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:20:58.916-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminBootstrapRunnerTest     : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:20:59.776-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:20:59.839-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 58 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:00.382-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:00.472-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.045s)
+2026-10-31T20:21:00.562-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:00.565-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:00.637-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:00.692-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:00.694-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-10-31T20:21:00.740-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@357f5ef4
+2026-10-31T20:21:00.741-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-10-31T20:21:00.761-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:00.955-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:01.000-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:01.575-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 3f964c8d-70a8-4039-8b11-4ccd478e6ad9
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:01.577-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:01.907-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:21:01.908-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:21:01.910-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-10-31T20:21:01.969-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.AdminBootstrapRunnerTest     : Started AdminBootstrapRunnerTest in 3.225 seconds (process running for 33.42)
+2026-10-31T20:21:02.258-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin created
+2026-10-31T20:21:02.289-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin skipped: the ADMIN_EMAIL account already exists
+2026-10-31T20:21:03.032-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin created
+2026-10-31T20:21:03.255-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin created
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.909 s -- in plad.config.AdminBootstrapRunnerTest
+[INFO] Running plad.config.AdminBootstrapRunnerWiringTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.367 s -- in plad.config.AdminBootstrapRunnerWiringTest
+[INFO] Running plad.config.CorsConfigTest
+2026-10-31T20:21:03.903-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.CorsConfigTest]: CorsConfigTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:03.941-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.CorsConfigTest
+2026-10-31T20:21:03.947-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.CorsConfigTest]: CorsConfigTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:03.969-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.CorsConfigTest
+2026-10-31T20:21:03.987-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:04.084-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.CorsConfigTest               : Starting CorsConfigTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:04.084-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.CorsConfigTest               : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:05.179-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:05.287-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 104 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:06.192-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:06.285-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.047s)
+2026-10-31T20:21:06.351-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:06.354-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:06.517-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:06.611-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:06.614-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-10-31T20:21:06.666-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@478cd2e8
+2026-10-31T20:21:06.667-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-10-31T20:21:06.698-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:07.006-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:07.073-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:07.899-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: a7601445-4970-4cd5-895f-b290b8fa5810
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:07.904-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:08.645-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:21:08.646-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:21:08.653-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 7 ms
+2026-10-31T20:21:08.765-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.CorsConfigTest               : Started CorsConfigTest in 4.78 seconds (process running for 40.216)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.928 s -- in plad.config.CorsConfigTest
+[INFO] Running plad.config.ForwardedClientIpTrustedProxyTest
+2026-10-31T20:21:08.829-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ForwardedClientIpTrustedProxyTest]: ForwardedClientIpTrustedProxyTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:08.844-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ForwardedClientIpTrustedProxyTest
+2026-10-31T20:21:08.846-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ForwardedClientIpTrustedProxyTest]: ForwardedClientIpTrustedProxyTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:08.866-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ForwardedClientIpTrustedProxyTest
+2026-10-31T20:21:09.076-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:09.136-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpTrustedProxyTest    : Starting ForwardedClientIpTrustedProxyTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:09.136-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpTrustedProxyTest    : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:09.827-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:09.886-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 53 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:10.424-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 0 (http)
+2026-10-31T20:21:10.474-03:00  INFO 6076 --- [pladbackend] [           main] []o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-31T20:21:10.476-03:00  INFO 6076 --- [pladbackend] [           main] []o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-10-31T20:21:10.723-03:00  INFO 6076 --- [pladbackend] [           main] []b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1583 ms
+2026-10-31T20:21:11.246-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:11.355-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.049s)
+2026-10-31T20:21:11.437-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:11.440-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:11.511-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:11.565-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:11.567-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-10-31T20:21:11.604-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@2319092a
+2026-10-31T20:21:11.606-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-10-31T20:21:11.627-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:11.906-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:11.971-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:12.565-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 12d38b18-ec48-4d10-9fdf-408cf3a1a508
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:12.567-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:12.919-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 60303 (http) with context path '/'
+2026-10-31T20:21:12.929-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpTrustedProxyTest    : Started ForwardedClientIpTrustedProxyTest in 3.854 seconds (process running for 44.38)
+2026-10-31T20:21:13.379-03:00  INFO 6076 --- [pladbackend] [o-auto-1-exec-1] []o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-31T20:21:13.380-03:00  INFO 6076 --- [pladbackend] [o-auto-1-exec-1] []o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-31T20:21:13.382-03:00  INFO 6076 --- [pladbackend] [o-auto-1-exec-1] []o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.202 s -- in plad.config.ForwardedClientIpTrustedProxyTest
+[INFO] Running plad.config.ForwardedClientIpUntrustedPeerTest
+2026-10-31T20:21:14.034-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ForwardedClientIpUntrustedPeerTest]: ForwardedClientIpUntrustedPeerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:14.046-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ForwardedClientIpUntrustedPeerTest
+2026-10-31T20:21:14.048-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ForwardedClientIpUntrustedPeerTest]: ForwardedClientIpUntrustedPeerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:14.060-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ForwardedClientIpUntrustedPeerTest
+2026-10-31T20:21:14.073-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:14.125-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpUntrustedPeerTest   : Starting ForwardedClientIpUntrustedPeerTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:14.125-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpUntrustedPeerTest   : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:14.744-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:14.792-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:14.943-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 0 (http)
+2026-10-31T20:21:14.944-03:00  INFO 6076 --- [pladbackend] [           main] []o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-31T20:21:14.944-03:00  INFO 6076 --- [pladbackend] [           main] []o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-10-31T20:21:15.045-03:00  INFO 6076 --- [pladbackend] [           main] []b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 917 ms
+2026-10-31T20:21:15.549-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:15.658-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.054s)
+2026-10-31T20:21:15.733-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:15.736-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:15.816-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:15.884-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:15.886-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-10-31T20:21:15.927-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@58072e51
+2026-10-31T20:21:15.927-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-10-31T20:21:15.950-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:16.157-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:16.208-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:16.631-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: cfde1c81-55ce-4179-a4d8-721788775e34
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:16.632-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:16.926-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 60328 (http) with context path '/'
+2026-10-31T20:21:16.930-03:00  INFO 6076 --- [pladbackend] [           main] []p.c.ForwardedClientIpUntrustedPeerTest   : Started ForwardedClientIpUntrustedPeerTest in 2.857 seconds (process running for 48.381)
+2026-10-31T20:21:16.943-03:00  INFO 6076 --- [pladbackend] [o-auto-2-exec-1] []o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-31T20:21:16.943-03:00  INFO 6076 --- [pladbackend] [o-auto-2-exec-1] []o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-31T20:21:16.944-03:00  INFO 6076 --- [pladbackend] [o-auto-2-exec-1] []o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.059 s -- in plad.config.ForwardedClientIpUntrustedPeerTest
+[INFO] Running plad.config.GlobalExceptionHandlerTest
+2026-10-31T20:21:17.101-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.GlobalExceptionHandlerTest]: GlobalExceptionHandlerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.116-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.GlobalExceptionHandlerTest
+2026-10-31T20:21:17.117-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.GlobalExceptionHandlerTest]: GlobalExceptionHandlerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.134-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.GlobalExceptionHandlerTest
+2026-10-31T20:21:17.152-03:00 ERROR 6076 --- [pladbackend] [           main] []plad.config.GlobalExceptionHandler       : Unhandled exception requestId=7accd703-6229-4c4d-8763-1c0e9c4872b2 method= route=
+
+java.lang.RuntimeException: secret detail
+	at plad.config.GlobalExceptionHandlerTest.unexpectedExceptionIsInternalErrorWithoutItsMessage(GlobalExceptionHandlerTest.java:110) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.6.jar:3.5.6]
+
+2026-10-31T20:21:17.202-03:00  WARN 6076 --- [pladbackend] [           main] []plad.config.GlobalExceptionHandler       : Unhandled data integrity violation (constraint: unknown)
+2026-10-31T20:21:17.262-03:00  WARN 6076 --- [pladbackend] [           main] []plad.config.GlobalExceptionHandler       : Unhandled data integrity violation (constraint: users_email_key)
+2026-10-31T20:21:17.276-03:00  WARN 6076 --- [pladbackend] [           main] [af40e23b-ac33-44cb-8854-2f5d4833235c]o.s.web.servlet.PageNotFound             : Request method 'DELETE' is not supported
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.188 s -- in plad.config.GlobalExceptionHandlerTest
+[INFO] Running plad.config.JwtAuthenticationFilterTest
+2026-10-31T20:21:17.289-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.JwtAuthenticationFilterTest]: JwtAuthenticationFilterTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.301-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.JwtAuthenticationFilterTest
+2026-10-31T20:21:17.302-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.JwtAuthenticationFilterTest]: JwtAuthenticationFilterTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.312-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.JwtAuthenticationFilterTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 s -- in plad.config.JwtAuthenticationFilterTest
+[INFO] Running plad.config.OpenApiConfigTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in plad.config.OpenApiConfigTest
+[INFO] Running plad.config.OpenApiContractTest
+2026-10-31T20:21:17.454-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.OpenApiContractTest]: OpenApiContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.470-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.OpenApiContractTest
+2026-10-31T20:21:17.472-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.OpenApiContractTest]: OpenApiContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:17.485-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.OpenApiContractTest
+2026-10-31T20:21:19.867-03:00  INFO 6076 --- [pladbackend] [           main] [f8c67b29-3ae3-4dc9-95b2-77820a44259f]o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 2352 ms
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.770 s -- in plad.config.OpenApiContractTest
+[INFO] Running plad.config.OpenApiDisabledTest
+2026-10-31T20:21:20.227-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.OpenApiDisabledTest]: OpenApiDisabledTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:20.242-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.OpenApiDisabledTest
+2026-10-31T20:21:20.245-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.OpenApiDisabledTest]: OpenApiDisabledTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:20.259-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.OpenApiDisabledTest
+2026-10-31T20:21:20.264-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:20.311-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.OpenApiDisabledTest          : Starting OpenApiDisabledTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:20.312-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.OpenApiDisabledTest          : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:20.760-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:20.807-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:21.248-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:21.332-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.045s)
+2026-10-31T20:21:21.422-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:21.425-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:21.541-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:21.626-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:21.629-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-10-31T20:21:21.683-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@7e7e248b
+2026-10-31T20:21:21.684-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-10-31T20:21:21.714-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:22.015-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:22.111-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:22.723-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 7440b0a1-e1ac-4195-8761-39176d83a59b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:22.725-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:23.286-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:21:23.288-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:21:23.309-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 15 ms
+2026-10-31T20:21:23.405-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.OpenApiDisabledTest          : Started OpenApiDisabledTest in 3.142 seconds (process running for 54.856)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.249 s -- in plad.config.OpenApiDisabledTest
+[INFO] Running plad.config.RequestIdFilterTest
+2026-10-31T20:21:23.495-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.RequestIdFilterTest]: RequestIdFilterTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:23.530-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.RequestIdFilterTest
+2026-10-31T20:21:23.543-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.RequestIdFilterTest]: RequestIdFilterTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:23.574-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.RequestIdFilterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.221 s -- in plad.config.RequestIdFilterTest
+[INFO] Running plad.config.SecurityErrorHandlerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in plad.config.SecurityErrorHandlerTest
+[INFO] Running plad.config.ServiceUnavailableAndTraceTest
+2026-10-31T20:21:23.758-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ServiceUnavailableAndTraceTest]: ServiceUnavailableAndTraceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:23.774-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ServiceUnavailableAndTraceTest
+2026-10-31T20:21:23.775-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.ServiceUnavailableAndTraceTest]: ServiceUnavailableAndTraceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:23.784-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.ServiceUnavailableAndTraceTest
+2026-10-31T20:21:23.792-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:23.834-03:00  INFO 6076 --- [pladbackend] [           main] []p.config.ServiceUnavailableAndTraceTest  : Starting ServiceUnavailableAndTraceTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:23.835-03:00  INFO 6076 --- [pladbackend] [           main] []p.config.ServiceUnavailableAndTraceTest  : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:24.393-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:24.431-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 35 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:25.229-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:25.292-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.031s)
+2026-10-31T20:21:25.354-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:25.357-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:25.434-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:25.489-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:25.492-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-10-31T20:21:25.533-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@69ff5aca
+2026-10-31T20:21:25.533-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-10-31T20:21:25.557-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:25.825-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:25.888-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:26.261-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 8721ee67-1464-43a6-895a-24de9cb837d1
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:26.263-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:26.506-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:21:26.506-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:21:26.508-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-10-31T20:21:26.544-03:00  INFO 6076 --- [pladbackend] [           main] []p.config.ServiceUnavailableAndTraceTest  : Started ServiceUnavailableAndTraceTest in 2.753 seconds (process running for 57.995)
+2026-10-31T20:21:26.565-03:00  WARN 6076 --- [pladbackend] [           main] [5a3ad31b-ecca-4eed-af19-0f81dd7576ce]plad.config.GlobalExceptionHandler       : Database unavailable (JpaSystemException)
+2026-10-31T20:21:26.578-03:00  WARN 6076 --- [pladbackend] [           main] [f1a0e709-5afa-4369-bc5f-89faa2995b7e]plad.config.GlobalExceptionHandler       : Database unavailable (CannotGetJdbcConnectionException)
+2026-10-31T20:21:26.588-03:00  WARN 6076 --- [pladbackend] [           main] [13c88219-98e9-474a-8700-ff998c6cfb0d]plad.config.GlobalExceptionHandler       : Database unavailable (CannotCreateTransactionException)
+2026-10-31T20:21:26.598-03:00  WARN 6076 --- [pladbackend] [           main] [b311e874-e25c-4765-a6bd-1aecccf9b067]plad.config.GlobalExceptionHandler       : Database unavailable (QueryTimeoutException)
+2026-10-31T20:21:26.608-03:00 ERROR 6076 --- [pladbackend] [           main] [client-req-42]plad.config.GlobalExceptionHandler       : Unhandled exception requestId=client-req-42 method=GET route=/triage/questions
+
+java.lang.RuntimeException: boom
+	at plad.services.TriageService.getQuestions(TriageService.java:64) ~[classes/:na]
+	at plad.controllers.TriageController.getQuestions(TriageController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:892) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:622) ~[tomcat-embed-core-11.0.22.jar:6.1]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72) ~[spring-test-7.0.8.jar:7.0.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710) ~[tomcat-embed-core-11.0.22.jar:6.1]
+	at org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at plad.config.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:42) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at plad.config.RequestIdFilter.doFilterInternal(RequestIdFilter.java:39) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:199) ~[spring-test-7.0.8.jar:7.0.8]
+	at plad.config.ServiceUnavailableAndTraceTest.requestIdSentByTheClientBecomesTheTrace(ServiceUnavailableAndTraceTest.java:73) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.6.jar:3.5.6]
+
+2026-10-31T20:21:26.621-03:00 ERROR 6076 --- [pladbackend] [           main] [4e59c066-c8e7-4a5e-bbcf-b7f9bdada89c]plad.config.GlobalExceptionHandler       : Unhandled exception requestId=4e59c066-c8e7-4a5e-bbcf-b7f9bdada89c method=GET route=/triage/questions
+
+java.lang.RuntimeException: secret detail
+	at plad.services.TriageService.getQuestions(TriageService.java:64) ~[classes/:na]
+	at plad.controllers.TriageController.getQuestions(TriageController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:892) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:622) ~[tomcat-embed-core-11.0.22.jar:6.1]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874) ~[spring-webmvc-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72) ~[spring-test-7.0.8.jar:7.0.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710) ~[tomcat-embed-core-11.0.22.jar:6.1]
+	at org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at plad.config.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:42) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.1.0.jar:7.1.0]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at plad.config.RequestIdFilter.doFilterInternal(RequestIdFilter.java:39) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:160) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:127) ~[spring-test-7.0.8.jar:7.0.8]
+	at org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:199) ~[spring-test-7.0.8.jar:7.0.8]
+	at plad.config.ServiceUnavailableAndTraceTest.unexpectedFailureReturnsTheTraceThatAppearsInTheLog(ServiceUnavailableAndTraceTest.java:53) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.6.jar:3.5.6]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.6.jar:3.5.6]
+
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.885 s -- in plad.config.ServiceUnavailableAndTraceTest
+[INFO] Running plad.config.TestDataRunner
+2026-10-31T20:21:26.647-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.TestDataRunner]: TestDataRunner does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:26.695-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.TestDataRunner
+2026-10-31T20:21:26.697-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.config.TestDataRunner]: TestDataRunner does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:26.747-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.config.TestDataRunner
+2026-10-31T20:21:26.753-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:26.806-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.TestDataRunner               : Starting TestDataRunner using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:26.807-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.TestDataRunner               : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:27.058-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:27.111-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:27.426-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:27.487-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.030s)
+2026-10-31T20:21:27.541-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:27.543-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:27.588-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:27.649-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:27.650-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-10-31T20:21:27.686-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@6817304
+2026-10-31T20:21:27.686-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-10-31T20:21:27.704-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:27.869-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:27.927-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:28.107-03:00  INFO 6076 --- [pladbackend] [           main] []plad.config.TestDataRunner               : Started TestDataRunner in 1.355 seconds (process running for 59.558)
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: select u1_0.id,u1_0.birth_date,u1_0.created_at,u1_0.email,u1_0.gender,u1_0.password_hash,u1_0.real_name,u1_0.type_user from users u1_0 where u1_0.email=?
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.537 s -- in plad.config.TestDataRunner
+[INFO] Running plad.controllers.AdminAuditControllerTest
+2026-10-31T20:21:28.185-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.AdminAuditControllerTest]: AdminAuditControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:28.222-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.AdminAuditControllerTest
+2026-10-31T20:21:28.224-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.AdminAuditControllerTest]: AdminAuditControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:28.240-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.AdminAuditControllerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.694 s -- in plad.controllers.AdminAuditControllerTest
+[INFO] Running plad.controllers.AuthControllerTest
+2026-10-31T20:21:28.879-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.AuthControllerTest]: AuthControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:28.895-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.AuthControllerTest
+2026-10-31T20:21:28.897-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.AuthControllerTest]: AuthControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:28.908-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.AuthControllerTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.983 s -- in plad.controllers.AuthControllerTest
+[INFO] Running plad.controllers.LoginControllerTest
+2026-10-31T20:21:29.862-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.LoginControllerTest]: LoginControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:29.872-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.LoginControllerTest
+2026-10-31T20:21:29.873-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.LoginControllerTest]: LoginControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:29.881-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.LoginControllerTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.451 s -- in plad.controllers.LoginControllerTest
+[INFO] Running plad.controllers.MeAccessLogTest
+2026-10-31T20:21:36.315-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.MeAccessLogTest]: MeAccessLogTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:36.322-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.MeAccessLogTest
+2026-10-31T20:21:36.324-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.MeAccessLogTest]: MeAccessLogTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:36.330-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.MeAccessLogTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.313 s -- in plad.controllers.MeAccessLogTest
+[INFO] Running plad.controllers.MeControllerTest
+2026-10-31T20:21:36.630-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.MeControllerTest]: MeControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:36.641-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.MeControllerTest
+2026-10-31T20:21:36.642-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.MeControllerTest]: MeControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:36.650-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.MeControllerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in plad.controllers.MeControllerTest
+[INFO] Running plad.controllers.RegisterMinAgeTest
+2026-10-31T20:21:36.917-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.RegisterMinAgeTest
+2026-10-31T20:21:36.928-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.RegisterMinAgeTest
+2026-10-31T20:21:36.934-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:36.976-03:00  INFO 6076 --- [pladbackend] [           main] []plad.controllers.RegisterMinAgeTest      : Starting RegisterMinAgeTest using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:36.976-03:00  INFO 6076 --- [pladbackend] [           main] []plad.controllers.RegisterMinAgeTest      : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:37.520-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:37.568-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:37.957-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:38.038-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.044s)
+2026-10-31T20:21:38.099-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:38.101-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:38.156-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:38.202-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:38.204-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-10-31T20:21:38.236-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@4d4b0e1a
+2026-10-31T20:21:38.236-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-10-31T20:21:38.255-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:38.526-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:38.574-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:38.880-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 9e626a2e-07e1-43d2-9448-efbe9244cbbd
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:38.881-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:39.176-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-31T20:21:39.176-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-31T20:21:39.178-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-10-31T20:21:39.222-03:00  INFO 6076 --- [pladbackend] [           main] []plad.controllers.RegisterMinAgeTest      : Started RegisterMinAgeTest in 2.288 seconds (process running for 70.673)
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.747 s -- in plad.controllers.RegisterMinAgeTest
+[INFO] Running plad.controllers.TriageAuditTest
+2026-10-31T20:21:39.657-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageAuditTest]: TriageAuditTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:39.666-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageAuditTest
+2026-10-31T20:21:39.667-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageAuditTest]: TriageAuditTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:39.674-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageAuditTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.362 s -- in plad.controllers.TriageAuditTest
+[INFO] Running plad.controllers.TriageControllerTest
+2026-10-31T20:21:40.021-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageControllerTest]: TriageControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:40.030-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageControllerTest
+2026-10-31T20:21:40.031-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageControllerTest]: TriageControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:40.041-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageControllerTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.896 s -- in plad.controllers.TriageControllerTest
+[INFO] Running plad.controllers.TriageReadControllerTest
+2026-10-31T20:21:41.920-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageReadControllerTest]: TriageReadControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:41.932-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageReadControllerTest
+2026-10-31T20:21:41.934-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.controllers.TriageReadControllerTest]: TriageReadControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:41.945-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.controllers.TriageReadControllerTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.336 s -- in plad.controllers.TriageReadControllerTest
+[INFO] Running plad.exception.ErrorCodeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in plad.exception.ErrorCodeTest
+[INFO] Running plad.PladApplicationTests
+2026-10-31T20:21:43.263-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.PladApplicationTests]: PladApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:43.291-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.PladApplicationTests
+2026-10-31T20:21:43.293-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.PladApplicationTests]: PladApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:43.303-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.PladApplicationTests
+2026-10-31T20:21:43.309-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-31T20:21:43.353-03:00  INFO 6076 --- [pladbackend] [           main] []plad.PladApplicationTests                : Starting PladApplicationTests using Java 26.0.2 with PID 6076 (started by josh in C:\Users\josh\Desktop\demo\demo-qa)
+2026-10-31T20:21:43.354-03:00  INFO 6076 --- [pladbackend] [           main] []plad.PladApplicationTests                : No active profile set, falling back to 1 default profile: "default"
+2026-10-31T20:21:44.142-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-31T20:21:44.267-03:00  INFO 6076 --- [pladbackend] [           main] [].s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 120 ms. Found 7 JPA repository interfaces.
+2026-10-31T20:21:44.709-03:00  INFO 6076 --- [pladbackend] [           main] []org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:65385/test?loggerLevel=OFF (PostgreSQL 16.15)
+2026-10-31T20:21:44.763-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbValidate     : Successfully validated 17 migrations (execution time 00:00.025s)
+2026-10-31T20:21:44.811-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Current version of schema "public": 17
+2026-10-31T20:21:44.813-03:00  INFO 6076 --- [pladbackend] [           main] []o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-31T20:21:44.872-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-31T20:21:44.920-03:00  INFO 6076 --- [pladbackend] [           main] []o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-31T20:21:44.924-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-10-31T20:21:45.023-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection org.postgresql.jdbc.PgConnection@f3c6b85
+2026-10-31T20:21:45.023-03:00  INFO 6076 --- [pladbackend] [           main] []com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-10-31T20:21:45.057-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:65385/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-31T20:21:45.251-03:00  INFO 6076 --- [pladbackend] [           main] []org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-31T20:21:45.302-03:00  INFO 6076 --- [pladbackend] [           main] []j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-31T20:21:45.661-03:00  WARN 6076 --- [pladbackend] [           main] [].s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 3f001659-32c2-4286-b87f-6106f494abc8
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-31T20:21:45.663-03:00  INFO 6076 --- [pladbackend] [           main] []r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-31T20:21:45.939-03:00  INFO 6076 --- [pladbackend] [           main] []plad.PladApplicationTests                : Started PladApplicationTests in 2.631 seconds (process running for 77.39)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.685 s -- in plad.PladApplicationTests
+[INFO] Running plad.repositories.AuditLogTriggerTest
+2026-10-31T20:21:45.951-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.AuditLogTriggerTest]: AuditLogTriggerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:45.994-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.AuditLogTriggerTest
+2026-10-31T20:21:45.994-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.AuditLogTriggerTest]: AuditLogTriggerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:46.020-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.AuditLogTriggerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.254 s -- in plad.repositories.AuditLogTriggerTest
+[INFO] Running plad.repositories.InstantRoundTripTest
+2026-10-31T20:21:46.204-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.InstantRoundTripTest]: InstantRoundTripTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:46.237-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.InstantRoundTripTest
+2026-10-31T20:21:46.238-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.InstantRoundTripTest]: InstantRoundTripTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:46.261-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.InstantRoundTripTest
+Hibernate: select u1_0.id,u1_0.birth_date,u1_0.created_at,u1_0.email,u1_0.gender,u1_0.password_hash,u1_0.real_name,u1_0.type_user from users u1_0 where u1_0.id=?
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into psychologists (credential_type,crm_crp_number,graduate,is_validate,validate_time,user_id) values (?,?,?,?,?,?)
+Hibernate: select p1_0.user_id,p1_0.credential_type,p1_0.crm_crp_number,p1_0.graduate,p1_0.is_validate,p1_0.validate_time from psychologists p1_0 where p1_0.user_id=?
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.160 s -- in plad.repositories.InstantRoundTripTest
+[INFO] Running plad.repositories.TriageRepositoryTest
+2026-10-31T20:21:46.366-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.TriageRepositoryTest]: TriageRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:46.400-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.TriageRepositoryTest
+2026-10-31T20:21:46.401-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.repositories.TriageRepositoryTest]: TriageRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:46.441-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.repositories.TriageRepositoryTest
+Hibernate: select qt1_0.id,qt1_0.code,qt1_0.created_at,qt1_0.display_order,qt1_0.options,qt1_0.question_text,qt1_0.question_type,qt1_0.required from questions_triages qt1_0 order by qt1_0.display_order
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into triages (created_at,dependent_id) values (?,?)
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into triages (created_at,dependent_id) values (?,?)
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+Hibernate: delete from result_questions_triages rqt1_0 where rqt1_0.triage_id=?
+Hibernate: select rqt1_0.id,rqt1_0.question_id,rqt1_0.triage_id,rqt1_0.value_result from result_questions_triages rqt1_0 where rqt1_0.triage_id=?
+Hibernate: select rqt1_0.id,rqt1_0.question_id,rqt1_0.triage_id,rqt1_0.value_result from result_questions_triages rqt1_0 where rqt1_0.triage_id=?
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+Hibernate: select qt1_0.id,qt1_0.code,qt1_0.created_at,qt1_0.display_order,qt1_0.options,qt1_0.question_text,qt1_0.question_type,qt1_0.required from questions_triages qt1_0 order by qt1_0.display_order
+Hibernate: select qt1_0.id,qt1_0.code,qt1_0.created_at,qt1_0.display_order,qt1_0.options,qt1_0.question_text,qt1_0.question_type,qt1_0.required from questions_triages qt1_0 order by qt1_0.display_order
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into triages (created_at,dependent_id) values (?,?)
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+2026-10-31T20:21:46.583-03:00  WARN 6076 --- [pladbackend] [           main] []org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 23505
+2026-10-31T20:21:46.583-03:00  WARN 6076 --- [pladbackend] [           main] []org.hibernate.orm.jdbc.error             : ERROR: duplicate key value violates unique constraint "uq_result_triage_question_value"
+  Detalhe: Key (triage_id, question_id, md5(value_result))=(36, 1, e3e19db53421defd5360fed36d62cd7d) already exists.
+Hibernate: select qt1_0.id,qt1_0.code,qt1_0.created_at,qt1_0.display_order,qt1_0.options,qt1_0.question_text,qt1_0.question_type,qt1_0.required from questions_triages qt1_0 order by qt1_0.display_order
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into triages (created_at,dependent_id) values (?,?)
+Hibernate: select t1_0.id from triages t1_0 where t1_0.dependent_id=? fetch first ? rows only
+Hibernate: select t1_0.id from triages t1_0 where t1_0.dependent_id=? fetch first ? rows only
+Hibernate: select qt1_0.id,qt1_0.code,qt1_0.created_at,qt1_0.display_order,qt1_0.options,qt1_0.question_text,qt1_0.question_type,qt1_0.required from questions_triages qt1_0 order by qt1_0.display_order
+Hibernate: insert into users (birth_date,created_at,email,gender,password_hash,real_name,type_user) values (?,?,?,?,?,?,?)
+Hibernate: insert into dependents (created_at,user_id) values (?,?)
+Hibernate: insert into triages (created_at,dependent_id) values (?,?)
+Hibernate: insert into result_questions_triages (question_id,triage_id,value_result) values (?,?,?)
+Hibernate: select rqt1_0.id,rqt1_0.question_id,rqt1_0.triage_id,rqt1_0.value_result from result_questions_triages rqt1_0 where rqt1_0.triage_id=?
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.394 s -- in plad.repositories.TriageRepositoryTest
+[INFO] Running plad.services.AdminBootstrapServiceTest
+2026-10-31T20:21:47.281-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin skipped: the ADMIN_EMAIL account already exists
+2026-10-31T20:21:47.294-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin skipped: created concurrently by another instance
+2026-10-31T20:21:47.302-03:00  INFO 6076 --- [pladbackend] [           main] []plad.services.AdminBootstrapService      : First admin created
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.538 s -- in plad.services.AdminBootstrapServiceTest
+[INFO] Running plad.services.AuditServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.232 s -- in plad.services.AuditServiceTest
+[INFO] Running plad.services.AuditServiceTransactionTest
+2026-10-31T20:21:47.544-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.services.AuditServiceTransactionTest]: AuditServiceTransactionTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:47.583-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.services.AuditServiceTransactionTest
+2026-10-31T20:21:47.584-03:00  INFO 6076 --- [pladbackend] [           main] []t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [plad.services.AuditServiceTransactionTest]: AuditServiceTransactionTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-31T20:21:47.595-03:00  INFO 6076 --- [pladbackend] [           main] [].b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration plad.PladApplication for test class plad.services.AuditServiceTransactionTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in plad.services.AuditServiceTransactionTest
+[INFO] Running plad.services.AuthServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.493 s -- in plad.services.AuthServiceTest
+[INFO] Running plad.services.CrmCrpNumbersTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in plad.services.CrmCrpNumbersTest
+[INFO] Running plad.services.JwtServiceTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in plad.services.JwtServiceTest
+[INFO] Running plad.services.RateLimiterServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in plad.services.RateLimiterServiceTest
+[INFO] Running plad.services.TriageServiceTest
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.189 s -- in plad.services.TriageServiceTest
+[INFO] Running plad.validation.MaxBytesValidatorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in plad.validation.MaxBytesValidatorTest
+[INFO] Running plad.validation.MinAgeValidatorTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in plad.validation.MinAgeValidatorTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 265, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ plad-backend ---
+[INFO] Building jar: C:\Users\josh\Desktop\demo\demo-qa\target\plad-backend-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.1.0:repackage (repackage) @ plad-backend ---
+[INFO] Replacing main artifact C:\Users\josh\Desktop\demo\demo-qa\target\plad-backend-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\josh\Desktop\demo\demo-qa\target\plad-backend-0.0.1-SNAPSHOT.jar.original
+[INFO] 
+[INFO] --- jacoco:0.8.16:report (default-cli) @ plad-backend ---
+[INFO] Loading execution data file C:\Users\josh\Desktop\demo\demo-qa\target\jacoco.exec
+[INFO] Analyzed bundle 'PLAD Backend' with 73 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:48 min
+[INFO] Finished at: 2026-10-31T20:21:54-03:00
+[INFO] ------------------------------------------------------------------------
+exit=0

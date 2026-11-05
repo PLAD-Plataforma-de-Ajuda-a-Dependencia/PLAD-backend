@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>SecurityErrorHandler.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package plad.config;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.servlet.http.HttpServletRequest;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.servlet.http.HttpServletResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.http.HttpStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.http.MediaType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.access.AccessDeniedException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.core.AuthenticationException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.web.AuthenticationEntryPoint;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.web.access.AccessDeniedHandler;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.stereotype.Component;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import plad.dto.ErrorResponseDTO;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import plad.exception.ErrorCode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import tools.jackson.databind.json.JsonMapper;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.io.IOException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.nio.charset.StandardCharsets;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.Instant;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>// 401/403 are raised inside the security filter chain, before MVC, so GlobalExceptionHandler never sees them;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>// this writes the same ErrorResponseDTO JSON with the application&#39;s JsonMapper (snake_case, ISO instants)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Component</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDeniedHandler {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final JsonMapper jsonMapper;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    public SecurityErrorHandler(JsonMapper jsonMapper) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.jsonMapper = jsonMapper;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void commence(HttpServletRequest request, HttpServletResponse response,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                         AuthenticationException authException) throws IOException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_34'/>
+34
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_34'>1</a>
+<span>
+
+1. commence : removed call to plad/config/SecurityErrorHandler::write &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        write(response, HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, &#34;Authentication required&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void handle(HttpServletRequest request, HttpServletResponse response,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                       AccessDeniedException accessDeniedException) throws IOException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_40'/>
+40
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_40'>1</a>
+<span>
+
+1. handle : removed call to plad/config/SecurityErrorHandler::write &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        write(response, HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, &#34;Access denied&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private void write(HttpServletResponse response, HttpStatus status, ErrorCode code, String message)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            throws IOException {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_45'/>
+45
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_45'>1</a>
+<span>
+
+1. write : removed call to jakarta/servlet/http/HttpServletResponse::setStatus &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        response.setStatus(status.value());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_46'/>
+46
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_46'>1</a>
+<span>
+
+1. write : removed call to jakarta/servlet/http/HttpServletResponse::setContentType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_47'/>
+47
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_47'>1</a>
+<span>
+
+1. write : removed call to jakarta/servlet/http/HttpServletResponse::setCharacterEncoding &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>        response.setCharacterEncoding(StandardCharsets.UTF_8.name());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_48'>1</a>
+<span>
+
+1. write : removed call to tools/jackson/databind/json/JsonMapper::writeValue &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        jsonMapper.writeValue(response.getOutputStream(),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                new ErrorResponseDTO(code.name(), message, Instant.now()));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6d695ec4_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_34'>34</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_34'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>commence<br/><b>Killed by : </b>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()]</span></span> removed call to plad/config/SecurityErrorHandler::write &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_40'>40</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_40'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>handle<br/><b>Killed by : </b>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:accessDeniedHandlerWritesForbiddenJson()]</span></span> removed call to plad/config/SecurityErrorHandler::write &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_45'>45</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_45'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>write<br/><b>Killed by : </b>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()]</span></span> removed call to jakarta/servlet/http/HttpServletResponse::setStatus &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_46'>46</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_46'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>write<br/><b>Killed by : </b>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()]</span></span> removed call to jakarta/servlet/http/HttpServletResponse::setContentType &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_47'>47</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_47'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>write<br/><b>Killed by : </b>none</span></span> removed call to jakarta/servlet/http/HttpServletResponse::setCharacterEncoding &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=plad.config.SecurityErrorHandler,-method=write,-methodDesc=(Ljakarta/servlet/http/HttpServletResponse;Lorg/springframework/http/HttpStatus;Lplad/exception/ErrorCode;Ljava/lang/String;)V],-indexes=[17],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=plad.config.SecurityErrorHandler,-method=write,-methodDesc=(Ljakarta/servlet/http/HttpServletResponse;Lorg/springframework/http/HttpStatus;Lplad/exception/ErrorCode;Ljava/lang/String;)V],-indexes=[17],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=plad.config.SecurityErrorHandler,-method=write,-methodDesc=(Ljakarta/servlet/http/HttpServletResponse;Lorg/springframework/http/HttpStatus;Lplad/exception/ErrorCode;Ljava/lang/String;)V],-indexes=[17],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:bodyDoesNotEchoTheSecurityExceptionMessage()]</li> <li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()]</li> <li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:accessDeniedHandlerWritesForbiddenJson()]</li> <li>plad.config.OpenApiDisabledTest.[engine:junit-jupiter]/[class:plad.config.OpenApiDisabledTest]/[method:apiDocsRequireAuthenticationWhenDisabled()]</li> <li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:mdcIsClearedAfterTheRequest()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:missingTokenIsUnauthorized()]</li> <li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:missingRequestIdIsGenerated()]</li> <li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:unauthenticatedResponseAlsoCarriesTheId()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:nonBearerSchemeIsUnauthorized()]</li> <li>plad.controllers.MeControllerTest.[engine:junit-jupiter]/[class:plad.controllers.MeControllerTest]/[method:withoutTokenIsUnauthorized()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithoutRoleIsUnauthorized()]</li> <li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:clientRequestIdIsReusedInTheResponse()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithUnknownRoleIsUnauthorized()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:malformedTokenIsUnauthorized()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:tokenSignedWithAnotherKeyIsUnauthorized()]</li> <li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithoutUserIdIsUnauthorized()]</li> <li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:unsafeRequestIdIsReplaced()]</li> <li>plad.controllers.MeControllerTest.[engine:junit-jupiter]/[class:plad.controllers.MeControllerTest]/[method:invalidTokenIsUnauthorized()]</li> <li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:anonymousGetsUnauthorizedOnAdminRoutes()]</li> <li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:dependentGetsForbiddenOnAdminRoutes()]</li> <li>plad.controllers.TriageReadControllerTest.[engine:junit-jupiter]/[class:plad.controllers.TriageReadControllerTest]/[method:withoutTokenIsUnauthorized()]</li> <li>plad.controllers.TriageControllerTest.[engine:junit-jupiter]/[class:plad.controllers.TriageControllerTest]/[method:getQuestionsWithoutTokenIsUnauthorized()]</li> <li>plad.config.OpenApiDisabledTest.[engine:junit-jupiter]/[class:plad.config.OpenApiDisabledTest]/[method:swaggerUiRequiresAuthenticationWhenDisabled()]</li> <li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:dependentGetsForbidden()]</li> <li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:anonymousGetsUnauthorized()]</li> <li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:psychologistGetsForbidden()]</li> <li>plad.controllers.MeAccessLogTest.[engine:junit-jupiter]/[class:plad.controllers.MeAccessLogTest]/[method:anonymousGetsUnauthorized()]</li> <li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:psychologistGetsForbiddenOnAdminRoutes()]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6d695ec4_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6d695ec4_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>write<br/><b>Killed by : </b>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()]</span></span> removed call to tools/jackson/databind/json/JsonMapper::writeValue &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+
+<li class='mutator'>EMPTY_RETURNS</li>
+
+<li class='mutator'>FALSE_RETURNS</li>
+
+<li class='mutator'>INCREMENTS</li>
+
+<li class='mutator'>INVERT_NEGS</li>
+
+<li class='mutator'>MATH</li>
+
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+
+<li class='mutator'>NULL_RETURNS</li>
+
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+
+<li class='mutator'>TRUE_RETURNS</li>
+
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:bodyDoesNotEchoTheSecurityExceptionMessage()] (6 ms)</li><li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:entryPointWritesUnauthorizedJson()] (8 ms)</li><li>plad.config.SecurityErrorHandlerTest.[engine:junit-jupiter]/[class:plad.config.SecurityErrorHandlerTest]/[method:accessDeniedHandlerWritesForbiddenJson()] (22 ms)</li><li>plad.config.OpenApiDisabledTest.[engine:junit-jupiter]/[class:plad.config.OpenApiDisabledTest]/[method:apiDocsRequireAuthenticationWhenDisabled()] (6 ms)</li><li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:mdcIsClearedAfterTheRequest()] (6 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:missingTokenIsUnauthorized()] (6 ms)</li><li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:missingRequestIdIsGenerated()] (7 ms)</li><li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:unauthenticatedResponseAlsoCarriesTheId()] (10 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:nonBearerSchemeIsUnauthorized()] (10 ms)</li><li>plad.controllers.MeControllerTest.[engine:junit-jupiter]/[class:plad.controllers.MeControllerTest]/[method:withoutTokenIsUnauthorized()] (11 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithoutRoleIsUnauthorized()] (8 ms)</li><li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:clientRequestIdIsReusedInTheResponse()] (11 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithUnknownRoleIsUnauthorized()] (11 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:malformedTokenIsUnauthorized()] (13 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:tokenSignedWithAnotherKeyIsUnauthorized()] (10 ms)</li><li>plad.config.JwtAuthenticationFilterTest.[engine:junit-jupiter]/[class:plad.config.JwtAuthenticationFilterTest]/[method:signedTokenWithoutUserIdIsUnauthorized()] (12 ms)</li><li>plad.config.RequestIdFilterTest.[engine:junit-jupiter]/[class:plad.config.RequestIdFilterTest]/[method:unsafeRequestIdIsReplaced()] (16 ms)</li><li>plad.controllers.MeControllerTest.[engine:junit-jupiter]/[class:plad.controllers.MeControllerTest]/[method:invalidTokenIsUnauthorized()] (20 ms)</li><li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:anonymousGetsUnauthorizedOnAdminRoutes()] (30 ms)</li><li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:dependentGetsForbiddenOnAdminRoutes()] (27 ms)</li><li>plad.controllers.TriageReadControllerTest.[engine:junit-jupiter]/[class:plad.controllers.TriageReadControllerTest]/[method:withoutTokenIsUnauthorized()] (35 ms)</li><li>plad.controllers.TriageControllerTest.[engine:junit-jupiter]/[class:plad.controllers.TriageControllerTest]/[method:getQuestionsWithoutTokenIsUnauthorized()] (38 ms)</li><li>plad.config.OpenApiDisabledTest.[engine:junit-jupiter]/[class:plad.config.OpenApiDisabledTest]/[method:swaggerUiRequiresAuthenticationWhenDisabled()] (20 ms)</li><li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:dependentGetsForbidden()] (45 ms)</li><li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:anonymousGetsUnauthorized()] (89 ms)</li><li>plad.controllers.AdminAuditControllerTest.[engine:junit-jupiter]/[class:plad.controllers.AdminAuditControllerTest]/[method:psychologistGetsForbidden()] (171 ms)</li><li>plad.controllers.MeAccessLogTest.[engine:junit-jupiter]/[class:plad.controllers.MeAccessLogTest]/[method:anonymousGetsUnauthorized()] (373 ms)</li><li>plad.config.AdminAccessTest.[engine:junit-jupiter]/[class:plad.config.AdminAccessTest]/[method:psychologistGetsForbiddenOnAdminRoutes()] (856 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.30.1 <a href='https://github.com/sponsors/hcoles'>support</a>
+
+</body>
+</html>
