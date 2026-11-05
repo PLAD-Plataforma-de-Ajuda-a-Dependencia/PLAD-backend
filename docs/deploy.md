@@ -9,7 +9,7 @@ Como subir a API em contêiner. O perfil `prod` não tem valor padrão para banc
 | `DB_URL` | sim (prod) | URL JDBC, ex.: `jdbc:postgresql://host:5432/banco` |
 | `DB_USER` | sim (prod) | usuário do banco |
 | `DB_PASSWORD` | sim (prod) | senha do banco |
-| `JWT_SECRET` | sim | segredo do JWT, no mínimo 32 bytes (`openssl rand -base64 48`) |
+| `JWT_SECRET` | sim | segredo do JWT, no mínimo 32 bytes (`openssl rand -base64 48`). Vazio, curto demais ou o valor de exemplo antigo (`troque-por-...`) abortam a subida com `JWT_SECRET ausente ou com menos de 32 bytes`, sem imprimir o valor |
 | `CORS_ALLOWED_ORIGINS` | não, mas defina em prod | origens do front, separadas por vírgula, sem `*`. O padrão é `http://localhost:5173` |
 | `ADMIN_EMAIL` + `ADMIN_PASSWORD` | não | criam o primeiro admin na subida. As duas ou nenhuma |
 | `TRUSTED_PROXIES` | não | proxies em que a API confia para ler o IP do cliente (seção abaixo) |
@@ -36,7 +36,7 @@ docker run --rm -p 8080:8080 \
 
 ## docker compose
 
-`docker compose up` sobe o banco (`pladDB`) e a API (`pladAPI`, porta 8080 só em `127.0.0.1`). A API espera o banco ficar saudável e só fica `healthy` quando a readiness responde `UP`. `DB_PASSWORD` e `JWT_SECRET` são obrigatórios: copie `.env.example` para `.env` (ignorado pelo git) e troque o `JWT_SECRET`. Variáveis exportadas no shell têm prioridade sobre o `.env`.
+`docker compose up` sobe o banco (`pladDB`) e a API (`pladAPI`, porta 8080 só em `127.0.0.1`). A API espera o banco ficar saudável e só fica `healthy` quando a readiness responde `UP`. `DB_PASSWORD` e `JWT_SECRET` são obrigatórios: copie `.env.example` para `.env` (ignorado pelo git) e preencha o `JWT_SECRET` com um valor gerado: o do exemplo é recusado na subida. Variáveis exportadas no shell têm prioridade sobre o `.env`.
 
 ```
 cp .env.example .env      # PowerShell: Copy-Item .env.example .env

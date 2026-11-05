@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class JwtServiceTest {
 
     private static final String SECRET = "unit-test-secret-0123456789-0123456789-0123456789";
+    private static final String OLD_EXAMPLE_SECRET = "troque-por-saida-de-openssl-rand-base64-48";
     private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     private final JwtService jwtService = new JwtService(SECRET, 60_000);
@@ -117,6 +118,40 @@ class JwtServiceTest {
         user.setId(1L);
 
         assertThatThrownBy(() -> jwtService.generateToken(user)).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void secretOfExactly32BytesIsAccepted() {
+        String secret = "a".repeat(32);
+
+        assertThat(new JwtService(secret, 60_000).generateToken(user(1L))).isNotBlank();
+    }
+
+    @Test
+    void secretWithMultiByteCharactersCountsBytesNotCharacters() {
+        // 16 characters, 32 bytes in UTF-8
+        assertThat(new JwtService("é".repeat(16), 60_000).generateToken(user(1L))).isNotBlank();
+        // 31 characters, 31 bytes
+        assertThatThrownBy(() -> new JwtService("a".repeat(31), 60_000)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void weakSecretsAreRefusedWithoutEchoingTheValue() {
+        for (String weak : new String[]{"a".repeat(31), "short", OLD_EXAMPLE_SECRET, "  " + OLD_EXAMPLE_SECRET + "  "}) {
+            assertThatThrownBy(() -> new JwtService(weak, 60_000))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("JWT_SECRET ausente ou com menos de 32 bytes; gere com openssl rand -base64 48")
+                    .hasMessageNotContaining(weak.strip());
+        }
+    }
+
+    @Test
+    void missingOrBlankSecretIsRefused() {
+        for (String missing : new String[]{null, "", "   "}) {
+            assertThatThrownBy(() -> new JwtService(missing, 60_000))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("JWT_SECRET");
+        }
     }
 
     private static User user(Long id) {

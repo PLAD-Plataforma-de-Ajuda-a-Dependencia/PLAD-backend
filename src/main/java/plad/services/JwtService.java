@@ -21,6 +21,9 @@ public class JwtService {
     private static final String USER_ID_CLAIM = "userId";
     private static final String ROLE_CLAIM = "role";
     private static final String TOKEN_VERSION_CLAIM = "tv";
+    private static final int MIN_SECRET_BYTES = 32;
+    // the placeholder .env.example used to ship; long enough to pass the length check, so refused by name
+    private static final String OLD_EXAMPLE_SECRET = "troque-por-saida-de-openssl-rand-base64-48";
 
     // role and tokenVersion are null for tokens issued before the claims existed; the filter treats those as invalid
     public record TokenClaims(Long userId, UserType role, Integer tokenVersion) {}
@@ -33,9 +36,19 @@ public class JwtService {
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms}") long expirationMs
     ) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.secretKey = Keys.hmacShaKeyFor(requireStrongSecret(secret));
         this.parser = Jwts.parser().verifyWith(secretKey).build();
         this.expirationMs = expirationMs;
+    }
+
+    // the message is fixed on purpose: it must never carry the configured value
+    private static byte[] requireStrongSecret(String secret) {
+        byte[] bytes = secret == null ? new byte[0] : secret.getBytes(StandardCharsets.UTF_8);
+        if (secret == null || secret.isBlank() || bytes.length < MIN_SECRET_BYTES || OLD_EXAMPLE_SECRET.equals(secret.strip())) {
+            throw new IllegalStateException(
+                    "JWT_SECRET ausente ou com menos de 32 bytes; gere com openssl rand -base64 48");
+        }
+        return bytes;
     }
 
     public String generateToken(User user) {
