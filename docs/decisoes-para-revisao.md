@@ -1,7 +1,7 @@
 # Decisões para revisão
 
 Decisões de domínio que o time tomou e que o orientador ou um psicólogo do projeto precisa revisar. Cada linha diz o que o sistema faz hoje, onde isso está no código e qual teste falha se alguém mudar a decisão.
-Conferida em 2026-11-04, no commit `f08dd99` (branch `feat/refresh-tokens`).
+Conferida em 2026-11-05, no commit `da52444` (branch `feat/change-password`).
 
 **Regra de manutenção:** toda regra de domínio nova entra nesta tabela no mesmo PR, com o teste que a fixa. Mudar uma decisão é mudar o teste: o teste e a linha da tabela mudam juntos.
 
