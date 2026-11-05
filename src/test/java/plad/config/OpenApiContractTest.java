@@ -10,6 +10,7 @@ import plad.dto.AccessLogEntryDTO;
 import plad.dto.AnswerRequestDTO;
 import plad.dto.AnswerResponseDTO;
 import plad.dto.AuditLogResponseDTO;
+import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
@@ -149,6 +150,7 @@ class OpenApiContractTest {
         samples.put("RegisterRequestDTO", new RegisterRequestDTO(
                 "name", "a@b.com", "password-123", LocalDate.of(1990, 5, 20), Sex.nao_binario,
                 UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia", "1.0", "1.0"));
+        samples.put("ChangePasswordRequestDTO", new ChangePasswordRequestDTO("password-123", "password-456"));
         samples.put("ConsentRequestDTO", new ConsentRequestDTO("1.0", "1.0"));
         samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
