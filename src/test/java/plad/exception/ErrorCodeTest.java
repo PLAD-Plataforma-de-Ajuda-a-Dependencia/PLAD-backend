@@ -12,6 +12,7 @@ class ErrorCodeTest {
         assertThat(new EmailAlreadyInUseException("m").getCode()).isEqualTo(ErrorCode.EMAIL_IN_USE);
         assertThat(new InvalidCredentialsException("m").getCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS);
         assertThat(new InvalidRefreshTokenException("m").getCode()).isEqualTo(ErrorCode.INVALID_REFRESH_TOKEN);
+        assertThat(new InvalidPasswordChangeException("m").getCode()).isEqualTo(ErrorCode.INVALID_PASSWORD_CHANGE);
         assertThat(new InvalidRegistrationException("m").getCode()).isEqualTo(ErrorCode.INVALID_REGISTRATION);
         assertThat(new InvalidTriageException("m").getCode()).isEqualTo(ErrorCode.INVALID_TRIAGE);
         assertThat(new ConsentRequiredException("m").getCode()).isEqualTo(ErrorCode.CONSENT_REQUIRED);

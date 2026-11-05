@@ -12,19 +12,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import plad.config.RefreshCookieFactory;
 import plad.dto.AccessLogEntryDTO;
+import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
 import plad.dto.ErrorResponseDTO;
+import plad.dto.LoginResponseDTO;
 import plad.dto.MeResponseDTO;
 import plad.dto.NicknameResponseDTO;
 import plad.dto.PageResponseDTO;
@@ -32,6 +37,8 @@ import plad.services.AuditService;
 import plad.services.ConsentService;
 import plad.services.MeService;
 import plad.services.NicknameService;
+import plad.services.PasswordChangeService;
+import plad.services.RefreshTokenService;
 
 @Tag(name = "Me", description = "Data about the logged-in user's own data; requires a Bearer token")
 @RestController
@@ -42,9 +49,14 @@ public class MeController {
     private final MeService meService;
     private final NicknameService nicknameService;
     private final ConsentService consentService;
+    private final PasswordChangeService passwordChangeService;
+    private final RefreshCookieFactory cookies;
 
     public MeController(AuditService auditService, MeService meService, NicknameService nicknameService,
-                        ConsentService consentService) {
+                        ConsentService consentService, PasswordChangeService passwordChangeService,
+                        RefreshCookieFactory cookies) {
+        this.passwordChangeService = passwordChangeService;
+        this.cookies = cookies;
         this.consentService = consentService;
         this.nicknameService = nicknameService;
         this.auditService = auditService;
@@ -115,6 +127,41 @@ public class MeController {
         consentService.accept(userId, request.acceptedTermsVersion(), request.acceptedPrivacyVersion(),
                 httpRequest.getRemoteAddr());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(operationId = "changePassword", summary = "Change my password",
+            description = "Any account type. Needs the current password. Ends every session of the user (the access tokens "
+                    + "issued so far and all refresh tokens stop working) and starts a new one for this request: "
+                    + "the new access token comes in the body and the new refresh token in the HttpOnly cookie, as in the login. "
+                    + "Wrong current passwords count against the same per-e-mail budget as the login (10 failures per 15 minutes). "
+                    + "The new password follows the registration rule and must differ from the current one")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password changed; new session",
+                    headers = @Header(name = HttpHeaders.SET_COOKIE,
+                            description = "Opaque refresh token: HttpOnly, Secure, SameSite=Strict, Path=/auth",
+                            schema = @Schema(type = "string")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LoginResponseDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid body (weak new password), or (INVALID_PASSWORD_CHANGE) the new password equals the current one",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token, or wrong current password",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Too many wrong passwords for this e-mail",
+                    headers = @Header(name = "Retry-After", description = "Seconds until the next attempt",
+                            schema = @Schema(type = "integer")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PutMapping("/password")
+    public ResponseEntity<LoginResponseDTO> changePassword(@AuthenticationPrincipal Long userId,
+                                                           @Valid @RequestBody ChangePasswordRequestDTO request) {
+        RefreshTokenService.Session session = passwordChangeService.change(userId, request);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookies.issue(session.refreshToken(), session.refreshTtl()))
+                .body(new LoginResponseDTO(session.accessToken()));
     }
 
     @Operation(summary = "When someone else read my triage, and in which role",

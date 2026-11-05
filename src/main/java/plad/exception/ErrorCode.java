@@ -4,6 +4,7 @@ package plad.exception;
 public enum ErrorCode {
     EMAIL_IN_USE,
     INVALID_CREDENTIALS,
+    INVALID_PASSWORD_CHANGE,
     INVALID_REFRESH_TOKEN,
     INVALID_REGISTRATION,
     INVALID_TRIAGE,
