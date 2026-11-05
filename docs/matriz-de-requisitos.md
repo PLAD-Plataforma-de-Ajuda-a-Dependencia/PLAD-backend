@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Conferida em 2026-11-05, no commit `3f40940` (branch `feat/data-subject-rights`).
+Conferida em 2026-11-05, no commit `ff905f1` (branch `develop`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
 

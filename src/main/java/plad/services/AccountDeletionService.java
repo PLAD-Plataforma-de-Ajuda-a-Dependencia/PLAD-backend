@@ -39,7 +39,7 @@ public class AccountDeletionService {
 
         // the password is checked with the same per-account budget as login, so a stolen access token cannot be used
         // to guess it; the slot comes back on a correct password (only failures count)
-        String emailKey = RateLimiterService.LOGIN_EMAIL_PREFIX + user.getEmail();
+        String emailKey = RateLimiterService.LOGIN_EMAIL_PREFIX + Emails.normalize(user.getEmail());
         rateLimiterService.consume(emailKey);
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new InvalidCredentialsException("Wrong password");
