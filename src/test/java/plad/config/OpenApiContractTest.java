@@ -19,6 +19,14 @@ import plad.dto.LoginResponseDTO;
 import plad.dto.AdminTriageReadResponseDTO;
 import plad.dto.DependentIdentityDTO;
 import plad.dto.DependentNicknameDTO;
+import plad.dto.DeleteAccountRequestDTO;
+import plad.dto.MeExportAccountDTO;
+import plad.dto.MeExportConsentDTO;
+import plad.dto.MeExportDependentDTO;
+import plad.dto.MeExportNicknameDTO;
+import plad.dto.MeExportPsychologistDTO;
+import plad.dto.MeExportResponseDTO;
+import plad.dto.MeExportTriageDTO;
 import plad.dto.MeResponseDTO;
 import plad.dto.NicknameResponseDTO;
 import plad.dto.OptionDTO;
@@ -152,6 +160,7 @@ class OpenApiContractTest {
                 UserType.psicologo, CrmCrpType.CRP, "06/123456", "Psicologia", "1.0", "1.0"));
         samples.put("ChangePasswordRequestDTO", new ChangePasswordRequestDTO("password-123", "password-456"));
         samples.put("ConsentRequestDTO", new ConsentRequestDTO("1.0", "1.0"));
+        samples.put("DeleteAccountRequestDTO", new DeleteAccountRequestDTO("password-123"));
         samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
     }
@@ -174,6 +183,22 @@ class OpenApiContractTest {
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false, null,
                 "name", CrmCrpType.CRP, "06123456", false, false));
+        MeExportNicknameDTO exportNickname = new MeExportNicknameDTO("Morcego Sereno", Instant.now(), Instant.now());
+        MeExportConsentDTO exportConsent = new MeExportConsentDTO("terms", "1.0", Instant.now(), "203.0.113.7");
+        MeExportAccountDTO exportAccount = new MeExportAccountDTO(1L, "a@b.com", UserType.dependente,
+                LocalDate.of(1990, 5, 20), Sex.feminino, Instant.now());
+        MeExportDependentDTO exportDependent = new MeExportDependentDTO("Morcego Sereno", Instant.now(), List.of(exportNickname));
+        MeExportPsychologistDTO exportPsychologist = new MeExportPsychologistDTO(
+                "name", CrmCrpType.CRP, "06123456", "Psicologia", false, Instant.now());
+        MeExportTriageDTO exportTriage = new MeExportTriageDTO(1L, Instant.now(), Instant.now(), List.of(answer));
+        samples.put("MeExportAccountDTO", exportAccount);
+        samples.put("MeExportConsentDTO", exportConsent);
+        samples.put("MeExportDependentDTO", exportDependent);
+        samples.put("MeExportNicknameDTO", exportNickname);
+        samples.put("MeExportPsychologistDTO", exportPsychologist);
+        samples.put("MeExportResponseDTO", new MeExportResponseDTO(Instant.now(), exportAccount, exportDependent,
+                exportPsychologist, List.of(exportConsent), exportTriage));
+        samples.put("MeExportTriageDTO", exportTriage);
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
