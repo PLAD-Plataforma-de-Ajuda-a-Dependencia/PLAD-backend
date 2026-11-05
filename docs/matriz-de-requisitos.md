@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Conferida em 2026-11-05, no commit `da52444` (branch `feat/change-password`).
+Conferida em 2026-11-05, no commit `3167b73` (branch `feat/change-password`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
 
