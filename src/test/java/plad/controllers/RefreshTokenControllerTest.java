@@ -311,13 +311,14 @@ class RefreshTokenControllerTest {
     // --- CORS credentials only where needed
 
     @Test
-    void credentialsAreAllowedOnLoginRefreshAndLogoutOnly() throws Exception {
-        for (String path : List.of("/auth/login", "/auth/refresh", "/auth/logout")) {
+    void credentialsAreAllowedOnTheRoutesThatSetOrUseTheRefreshCookieOnly() throws Exception {
+        // PUT /me/password sets the refresh cookie like the login does
+        for (String path : List.of("/auth/login", "/auth/refresh", "/auth/logout", "/me/password")) {
             preflight(path).andExpect(status().isOk())
                     .andExpect(header().string("Access-Control-Allow-Credentials", "true"))
                     .andExpect(header().string("Access-Control-Allow-Origin", ORIGIN));
         }
-        for (String path : List.of("/auth/register", "/triage", "/me")) {
+        for (String path : List.of("/auth/register", "/triage", "/me", "/me/consents")) {
             preflight(path).andExpect(status().isOk())
                     .andExpect(header().doesNotExist("Access-Control-Allow-Credentials"));
         }

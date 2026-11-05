@@ -57,7 +57,7 @@ O login devolve no corpo um JWT de 15 minutos (o front o guarda só em memória)
 - **`CORS_ALLOWED_ORIGINS` precisa ter a origem exata do front** (esquema + host + porta). `/auth/refresh` e `/auth/logout` respondem 403 a qualquer `Origin` fora da lista, ou sem `Origin`. O front deve chamar login, refresh e logout com `credentials: 'include'`.
 - **HTTPS.** O cookie é `Secure`: em HTTP puro o navegador não o guarda (exceto em `localhost` no Chrome e no Firefox). Para desenvolver em HTTP fora de `localhost`, `AUTH_REFRESH_COOKIE_SECURE=false`; nunca em produção.
 - **Limpeza.** Todo dia às 03:00 (America/Sao_Paulo) um job apaga refresh tokens expirados ou revogados há mais de 7 dias (`auth.refresh-token.cleanup-retention-days`) e loga quantos apagou. Com mais de uma instância, o job roda em cada uma; apagar é idempotente.
-- **Derrubar todas as sessões de um usuário** (troca de senha): `UserSessionService#revokeAllSessions`. Ele incrementa `users.token_version`, o que invalida os access tokens, e revoga os refresh tokens.
+- **Derrubar todas as sessões de um usuário**: `UserSessionService#revokeAllSessions`. Ele incrementa `users.token_version`, o que invalida os access tokens, e revoga os refresh tokens. É o que `PUT /me/password` chama ao trocar a senha (a sessão que trocou recebe um par novo; as outras caem). Esse endpoint responde com `Set-Cookie`, então o front deve chamá-lo com `credentials: 'include'`, como login, refresh e logout.
 
 ## Health
 

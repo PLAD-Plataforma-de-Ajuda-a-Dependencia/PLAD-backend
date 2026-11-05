@@ -27,9 +27,10 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // login sets the refresh cookie, refresh rotates it, logout clears it: a cross-origin fetch only stores or sends
-    // the cookie when the response allows credentials
-    private static final List<String> CREDENTIALED_PATHS = List.of("/auth/login", "/auth/refresh", "/auth/logout");
+    // login and the password change set the refresh cookie, refresh rotates it, logout clears it: a cross-origin fetch
+    // only stores or sends the cookie when the response allows credentials
+    private static final List<String> CREDENTIALED_PATHS =
+            List.of("/auth/login", "/auth/refresh", "/auth/logout", "/me/password");
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
