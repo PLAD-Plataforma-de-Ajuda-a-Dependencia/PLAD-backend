@@ -273,6 +273,20 @@
           }
         }
       },
+      "DeleteAccountRequestDTO": {
+        "properties": {
+          "password": {
+            "description": "The current password, to confirm that the account holder is the one deleting it",
+            "example": "senha-segura-123",
+            "maxLength": 72,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
       "DependentIdentityDTO": {
         "description": "Who answered the triage, as seen by a psychologist",
         "properties": {
@@ -397,6 +411,282 @@
         },
         "required": [
           "token"
+        ]
+      },
+      "MeExportAccountDTO": {
+        "description": "The account data every type has. The password hash is never exported",
+        "properties": {
+          "birth_date": {
+            "description": "Birth date given at registration",
+            "example": "1990-05-20",
+            "format": "date",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the account was created (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "description": "Normalized (lowercase) e-mail",
+            "example": "maria@example.com",
+            "type": "string"
+          },
+          "gender": {
+            "description": "Gender given at registration",
+            "enum": [
+              "masculino",
+              "feminino",
+              "nao_binario",
+              "transexual",
+              "outro"
+            ],
+            "example": "feminino",
+            "type": "string"
+          },
+          "id": {
+            "description": "User id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "type_user": {
+            "description": "Account type",
+            "enum": [
+              "dependente",
+              "psicologo",
+              "admin"
+            ],
+            "example": "dependente",
+            "type": "string"
+          }
+        },
+        "required": [
+          "birth_date",
+          "created_at",
+          "email",
+          "gender",
+          "id",
+          "type_user"
+        ]
+      },
+      "MeExportConsentDTO": {
+        "properties": {
+          "accepted_at": {
+            "description": "When it was accepted (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "document": {
+            "description": "Which document was accepted: terms or privacy",
+            "example": "terms",
+            "type": "string"
+          },
+          "ip": {
+            "description": "Client IP recorded at the acceptance",
+            "example": "203.0.113.7",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "description": "Version accepted",
+            "example": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accepted_at",
+          "document",
+          "ip",
+          "version"
+        ]
+      },
+      "MeExportDependentDTO": {
+        "description": "Dependent-specific data",
+        "properties": {
+          "created_at": {
+            "description": "When the dependent profile was created (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "nickname": {
+            "description": "The anonymous nickname in use now",
+            "example": "Morcego Sereno",
+            "type": "string"
+          },
+          "nickname_history": {
+            "description": "Every nickname the dependent had, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/MeExportNicknameDTO"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "created_at",
+          "nickname",
+          "nickname_history"
+        ]
+      },
+      "MeExportNicknameDTO": {
+        "properties": {
+          "assigned_at": {
+            "description": "When it was assigned (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "nickname": {
+            "description": "A nickname the dependent had",
+            "example": "Morcego Sereno",
+            "type": "string"
+          },
+          "replaced_at": {
+            "description": "When it was replaced (UTC); null for the nickname in use now",
+            "example": "2026-10-28T10:00:00Z",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "assigned_at",
+          "nickname",
+          "replaced_at"
+        ]
+      },
+      "MeExportPsychologistDTO": {
+        "description": "Psychologist-specific data",
+        "properties": {
+          "credential_type": {
+            "description": "CRM or CRP",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": "string"
+          },
+          "crm_crp_number": {
+            "description": "Normalized credential number",
+            "example": "06123456",
+            "type": "string"
+          },
+          "graduate": {
+            "description": "Graduation given at registration",
+            "example": "Psicologia",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_validated": {
+            "description": "Whether the credential was validated",
+            "example": false,
+            "type": "boolean"
+          },
+          "real_name": {
+            "description": "Full name given at registration",
+            "example": "Maria Silva",
+            "type": "string"
+          },
+          "validated_at": {
+            "description": "When the validation state was last set (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "credential_type",
+          "crm_crp_number",
+          "graduate",
+          "is_validated",
+          "real_name",
+          "validated_at"
+        ]
+      },
+      "MeExportResponseDTO": {
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/MeExportAccountDTO"
+          },
+          "consents": {
+            "description": "Every acceptance of the terms and the privacy policy, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/MeExportConsentDTO"
+            },
+            "type": "array"
+          },
+          "dependent": {
+            "$ref": "#/components/schemas/MeExportDependentDTO"
+          },
+          "exported_at": {
+            "description": "When this export was generated (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "psychologist": {
+            "$ref": "#/components/schemas/MeExportPsychologistDTO"
+          },
+          "triage": {
+            "$ref": "#/components/schemas/MeExportTriageDTO"
+          }
+        },
+        "required": [
+          "account",
+          "consents",
+          "dependent",
+          "exported_at",
+          "psychologist",
+          "triage"
+        ]
+      },
+      "MeExportTriageDTO": {
+        "description": "The dependent's triage with the text of each question",
+        "properties": {
+          "answers": {
+            "description": "Stored answers, one entry per question, with the question text",
+            "items": {
+              "$ref": "#/components/schemas/AnswerResponseDTO"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "description": "When the triage was first submitted (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Triage id",
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated_at": {
+            "description": "When the triage was last resubmitted (UTC); equals created_at if never",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "answers",
+          "created_at",
+          "id",
+          "updated_at"
         ]
       },
       "MeResponseDTO": {
@@ -1706,6 +1996,116 @@
       }
     },
     "/me": {
+      "delete": {
+        "description": "Any account type except admin. Erases the account and everything tied to it in one transaction (LGPD art. 18, VI): the user, the dependent or psychologist data, the triage and its answers, the consents, the nickname history and the sessions. The audit trail is not erased: it keeps ids only. Requires the current password. Afterwards every token of the account stops working and the e-mail is free to register again. Cannot be undone. The password is checked against the same per-account attempt budget as login",
+        "operationId": "deleteMyAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Deleted; the refresh cookie is cleared",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Empty refresh_token cookie with Max-Age=0 (same attributes)",
+                "schema": {
+                  "type": "string"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or blank password"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, the user no longer exists, or (INVALID_CREDENTIALS) wrong password; nothing is deleted"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is an admin"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Too many wrong passwords for this account",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete my account",
+        "tags": [
+          "Me"
+        ]
+      },
       "get": {
         "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists. consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents)",
         "operationId": "me",
@@ -1943,6 +2343,67 @@
           }
         },
         "summary": "Accept the terms and privacy policy in force",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/me/export": {
+      "get": {
+        "description": "Any account type. A copy of everything the platform holds about the logged-in user (LGPD art. 18): account, nickname history (dependents), credential data (psychologists), consents and, for a dependent that submitted it, the triage with the text of each question. A dependent's real name is not part of it. Blocks that do not apply to the account type are null. Reading your own data writes no audit entry",
+        "operationId": "exportMyData",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeExportResponseDTO"
+                }
+              }
+            },
+            "description": "The user's own data"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or the user no longer exists"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Export my data",
         "tags": [
           "Me"
         ]

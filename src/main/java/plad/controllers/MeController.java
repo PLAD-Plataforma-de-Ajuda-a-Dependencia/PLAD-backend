@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,13 +29,17 @@ import plad.config.RefreshCookieFactory;
 import plad.dto.AccessLogEntryDTO;
 import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
+import plad.dto.DeleteAccountRequestDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.LoginResponseDTO;
+import plad.dto.MeExportResponseDTO;
 import plad.dto.MeResponseDTO;
 import plad.dto.NicknameResponseDTO;
 import plad.dto.PageResponseDTO;
+import plad.services.AccountDeletionService;
 import plad.services.AuditService;
 import plad.services.ConsentService;
+import plad.services.MeExportService;
 import plad.services.MeService;
 import plad.services.NicknameService;
 import plad.services.PasswordChangeService;
@@ -50,12 +55,17 @@ public class MeController {
     private final NicknameService nicknameService;
     private final ConsentService consentService;
     private final PasswordChangeService passwordChangeService;
+    private final AccountDeletionService accountDeletionService;
+    private final MeExportService meExportService;
     private final RefreshCookieFactory cookies;
 
     public MeController(AuditService auditService, MeService meService, NicknameService nicknameService,
                         ConsentService consentService, PasswordChangeService passwordChangeService,
+                        AccountDeletionService accountDeletionService, MeExportService meExportService,
                         RefreshCookieFactory cookies) {
         this.passwordChangeService = passwordChangeService;
+        this.accountDeletionService = accountDeletionService;
+        this.meExportService = meExportService;
         this.cookies = cookies;
         this.consentService = consentService;
         this.nicknameService = nicknameService;
@@ -162,6 +172,60 @@ public class MeController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookies.issue(session.refreshToken(), session.refreshTtl()))
                 .body(new LoginResponseDTO(session.accessToken()));
+    }
+
+    @Operation(operationId = "exportMyData", summary = "Export my data",
+            description = "Any account type. A copy of everything the platform holds about the logged-in user (LGPD art. 18): "
+                    + "account, nickname history (dependents), credential data (psychologists), consents and, for a dependent "
+                    + "that submitted it, the triage with the text of each question. A dependent's real name is not part of it. "
+                    + "Blocks that do not apply to the account type are null. Reading your own data writes no audit entry")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "The user's own data",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeExportResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token, or the user no longer exists",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @GetMapping("/export")
+    public ResponseEntity<MeExportResponseDTO> exportMyData(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(meExportService.export(userId));
+    }
+
+    @Operation(operationId = "deleteMyAccount", summary = "Delete my account",
+            description = "Any account type except admin. Erases the account and everything tied to it in one transaction "
+                    + "(LGPD art. 18, VI): the user, the dependent or psychologist data, the triage and its answers, the consents, "
+                    + "the nickname history and the sessions. The audit trail is not erased: it keeps ids only. "
+                    + "Requires the current password. Afterwards every token of the account stops working and the e-mail is free to register again. "
+                    + "Cannot be undone. The password is checked against the same per-account attempt budget as login")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Deleted; the refresh cookie is cleared",
+                    headers = @Header(name = HttpHeaders.SET_COOKIE, description = "Empty refresh_token cookie with Max-Age=0 (same attributes)",
+                            schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "400", description = "Missing or blank password",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Missing or invalid token, the user no longer exists, or (INVALID_CREDENTIALS) wrong password; nothing is deleted",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "The user is an admin",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Too many wrong passwords for this account",
+                    headers = @Header(name = "Retry-After", description = "Seconds until the next attempt",
+                            schema = @Schema(type = "integer")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMyAccount(@AuthenticationPrincipal Long userId,
+                                                @Valid @RequestBody DeleteAccountRequestDTO request) {
+        accountDeletionService.delete(userId, request.password());
+        // the token is already useless (its row is gone); clearing the cookie just tidies the browser
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookies.clear())
+                .build();
     }
 
     @Operation(summary = "When someone else read my triage, and in which role",
