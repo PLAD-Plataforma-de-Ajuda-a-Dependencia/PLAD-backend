@@ -20,12 +20,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import plad.config.RefreshCookieFactory;
 import plad.dto.AccessLogEntryDTO;
+import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
 import plad.dto.DeleteAccountRequestDTO;
 import plad.dto.ErrorResponseDTO;
@@ -39,6 +41,8 @@ import plad.services.ConsentService;
 import plad.services.MeExportService;
 import plad.services.MeService;
 import plad.services.NicknameService;
+import plad.services.PasswordChangeService;
+import plad.services.RefreshTokenService;
 
 @Tag(name = "Me", description = "Data about the logged-in user's own data; requires a Bearer token")
 @RestController

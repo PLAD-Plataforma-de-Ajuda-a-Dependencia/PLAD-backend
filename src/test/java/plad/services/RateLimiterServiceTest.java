@@ -3,7 +3,11 @@ package plad.services;
 import org.junit.jupiter.api.Test;
 import plad.exception.TooManyRequestException;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -113,6 +117,52 @@ class RateLimiterServiceTest {
         rateLimiterService.refund("client-a");
 
         assertThat(rateLimiterService.trackedKeys()).isZero();
+    }
+
+    // refund counts as activity: the bucket it touched must survive the next sweep
+    @Test
+    void refundRefreshesLastUseSoTheBucketSurvivesTheNextSweep() throws Exception {
+        rateLimiterService.consume("client-a");
+        // as if the bucket had been idle for exactly one refill period: a sweep now would drop it
+        lastSeen("client-a").set(System.nanoTime() - Duration.ofMinutes(1).toNanos());
+
+        rateLimiterService.refund("client-a");
+        rateLimiterService.evictIdleBuckets(System.nanoTime());
+
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(1);
+    }
+
+    @Test
+    void bucketIdleExactlyOneRefillPeriodIsEvicted() throws Exception {
+        rateLimiterService.consume("client-a");
+        rateLimiterService.consume(RateLimiterService.LOGIN_EMAIL_PREFIX + "a@example.com");
+        long seen = 1_000_000_000L;
+        lastSeen("client-a").set(seen);
+        lastSeen(RateLimiterService.LOGIN_EMAIL_PREFIX + "a@example.com").set(seen);
+
+        rateLimiterService.evictIdleBuckets(seen + Duration.ofMinutes(1).toNanos() - 1);
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(2);
+
+        // the default bucket (1 min) is idle for exactly its period; the e-mail one (15 min) is not
+        rateLimiterService.evictIdleBuckets(seen + Duration.ofMinutes(1).toNanos());
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(1);
+
+        rateLimiterService.evictIdleBuckets(seen + Duration.ofMinutes(15).toNanos() - 1);
+        assertThat(rateLimiterService.trackedKeys()).isEqualTo(1);
+
+        rateLimiterService.evictIdleBuckets(seen + Duration.ofMinutes(15).toNanos());
+        assertThat(rateLimiterService.trackedKeys()).isZero();
+    }
+
+    // the last-use clock lives in a private record inside a private map, so the tests reach it by reflection
+    @SuppressWarnings("unchecked")
+    private AtomicLong lastSeen(String key) throws Exception {
+        Field field = RateLimiterService.class.getDeclaredField("buckets");
+        field.setAccessible(true);
+        Object entry = ((Map<String, Object>) field.get(rateLimiterService)).get(key);
+        Method accessor = entry.getClass().getDeclaredMethod("lastSeenNanos");
+        accessor.setAccessible(true);
+        return (AtomicLong) accessor.invoke(entry);
     }
 
     private void consumeFiveTimes(String key) {

@@ -196,7 +196,7 @@ public class TriageService {
                 if (text.isEmpty()) {
                     throw new InvalidTriageException("Question " + question.getId() + " text must not be blank");
                 }
-                if (text.length() > MAX_FREE_TEXT_LENGTH) {
+                if (text.codePointCount(0, text.length()) > MAX_FREE_TEXT_LENGTH) {
                     throw new InvalidTriageException("Question " + question.getId() + " text exceeds " + MAX_FREE_TEXT_LENGTH + " characters");
                 }
                 yield List.of(text);

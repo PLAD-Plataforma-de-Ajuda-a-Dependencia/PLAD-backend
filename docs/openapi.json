@@ -233,6 +233,28 @@
           "subject_user_id"
         ]
       },
+      "ChangePasswordRequestDTO": {
+        "properties": {
+          "current_password": {
+            "description": "The password in use now; at most 72 bytes in UTF-8",
+            "example": "senha-segura-123",
+            "maxLength": 72,
+            "minLength": 1,
+            "type": "string"
+          },
+          "new_password": {
+            "description": "At least 8 characters and at most 72 bytes in UTF-8, and different from the current one",
+            "example": "outra-senha-456",
+            "maxLength": 2147483647,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_password",
+          "new_password"
+        ]
+      },
       "ConsentRequestDTO": {
         "properties": {
           "accepted_privacy_version": {
@@ -2472,6 +2494,115 @@
           }
         },
         "summary": "Draw a new anonymous nickname",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/me/password": {
+      "put": {
+        "description": "Any account type. Needs the current password. Ends every session of the user (the access tokens issued so far and all refresh tokens stop working) and starts a new one for this request: the new access token comes in the body and the new refresh token in the HttpOnly cookie, as in the login. Wrong current passwords count against the same per-e-mail budget as the login (10 failures per 15 minutes). The new password follows the registration rule and must differ from the current one",
+        "operationId": "changePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              }
+            },
+            "description": "Password changed; new session",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Opaque refresh token: HttpOnly, Secure, SameSite=Strict, Path=/auth",
+                "schema": {
+                  "type": "string"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body (weak new password), or (INVALID_PASSWORD_CHANGE) the new password equals the current one"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or wrong current password"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Too many wrong passwords for this e-mail",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Change my password",
         "tags": [
           "Me"
         ]

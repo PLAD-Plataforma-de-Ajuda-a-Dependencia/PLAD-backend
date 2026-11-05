@@ -6,7 +6,7 @@ import plad.repositories.UserRepository;
 
 // Ends every session of a user: access tokens carry the token_version they were issued with and stop being accepted
 // once it is bumped, and the refresh tokens are revoked so no new access token can be minted.
-// Meant for the password change (there is no such endpoint yet); call it in the same transaction as the change.
+// Called by the password change (PasswordChangeService), in the same transaction as the change.
 @Service
 public class UserSessionService {
 

@@ -82,6 +82,50 @@ class AdminBootstrapServiceTest {
     }
 
     @Test
+    void passwordWithExactlyEightCharactersIsAccepted() {
+        when(passwordEncoder.encode("a".repeat(8))).thenReturn("hash");
+
+        service.createIfAbsent("admin@example.com", "a".repeat(8));
+
+        verify(userRepository).saveAndFlush(any(User.class));
+    }
+
+    @Test
+    void passwordWithSevenCharactersIsRefused() {
+        assertThatThrownBy(() -> service.createIfAbsent("admin@example.com", "a".repeat(7)))
+                .isInstanceOf(IllegalStateException.class);
+        verify(userRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void passwordWithExactly72BytesIsAccepted() {
+        when(passwordEncoder.encode("a".repeat(72))).thenReturn("hash");
+
+        service.createIfAbsent("admin@example.com", "a".repeat(72));
+
+        verify(userRepository).saveAndFlush(any(User.class));
+    }
+
+    @Test
+    void passwordWith73BytesIsRefused() {
+        assertThatThrownBy(() -> service.createIfAbsent("admin@example.com", "a".repeat(73)))
+                .isInstanceOf(IllegalStateException.class);
+        verify(userRepository, never()).saveAndFlush(any());
+    }
+
+    // the limit counts UTF-8 bytes, not characters: 36 "ç" are 36 characters but exactly 72 bytes
+    @Test
+    void multiByteLimitCountsBytesNotCharacters() {
+        when(passwordEncoder.encode("ç".repeat(36))).thenReturn("hash");
+
+        service.createIfAbsent("admin@example.com", "ç".repeat(36));
+        verify(userRepository).saveAndFlush(any(User.class));
+
+        assertThatThrownBy(() -> service.createIfAbsent("outro@example.com", "ç".repeat(37)))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void concurrentCreationByAnotherInstanceIsNotAnError() {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(userRepository.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("users_email_key"));

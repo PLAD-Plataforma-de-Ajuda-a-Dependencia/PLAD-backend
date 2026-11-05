@@ -75,6 +75,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ex); // 400
     }
 
+    @ExceptionHandler(InvalidPasswordChangeException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidPasswordChange(InvalidPasswordChangeException ex) {
+        return error(HttpStatus.BAD_REQUEST, ex);
+    }
+
     @ExceptionHandler(InvalidTriageException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidTriage(InvalidTriageException ex) {
         return error(HttpStatus.BAD_REQUEST, ex);

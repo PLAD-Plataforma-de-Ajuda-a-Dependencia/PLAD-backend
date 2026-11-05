@@ -263,6 +263,31 @@ class TriageControllerTest {
                 .andExpect(jsonPath("$.answers.length()").value(1));
     }
 
+    // the free text limit counts code points (visible characters), not UTF-16 units: an emoji is 1, not 2
+
+    @Test
+    void submitWithFreeTextOf1000EmojisIsCreated() throws Exception {
+        submit(newDependentToken(), answerBody(freeTextId, "\"" + emojis(1000) + "\""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(1));
+    }
+
+    @Test
+    void submitWithFreeTextOf1001EmojisIsBadRequest() throws Exception {
+        submit(newDependentToken(), answerBody(freeTextId, "\"" + emojis(1001) + "\""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TRIAGE"));
+    }
+
+    @Test
+    void submitWithFreeTextOf1000AccentedLettersIsCreated() throws Exception {
+        String accented = "áéíóú".repeat(200);
+
+        submit(newDependentToken(), answerBody(freeTextId, "\"" + accented + "\""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.answers.length()").value(1));
+    }
+
     @Test
     void submitWithTooManyAnswersIsBadRequest() throws Exception {
         String answer = "{\"question_id\": %d, \"values\": [\"AGE_18_24\"]}".formatted(singleChoiceId);
@@ -429,6 +454,13 @@ class TriageControllerTest {
         assertThat(stored.getUpdatedAt()).isAfter(createdAt);
     }
     // helpers
+
+    // varied emojis (one supplementary code point, two UTF-16 units each) so the value is not one repeated character
+    private static String emojis(int count) {
+        return new java.util.Random(42).ints(count, 0x1F300, 0x1F650)
+                .mapToObj(Character::toString)
+                .collect(Collectors.joining());
+    }
 
     private ResultActions submit(String token, String body) throws Exception {
         return mockMvc.perform(post("/triage")
