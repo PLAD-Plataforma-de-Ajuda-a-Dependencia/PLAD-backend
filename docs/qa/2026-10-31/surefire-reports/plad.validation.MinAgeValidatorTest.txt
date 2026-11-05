@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: plad.validation.MinAgeValidatorTest
--------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.256 s -- in plad.validation.MinAgeValidatorTest

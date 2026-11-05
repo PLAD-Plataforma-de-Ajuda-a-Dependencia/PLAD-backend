@@ -23,7 +23,7 @@ Resumo dos achados:
 
 ## 2. Regressão e cobertura
 
-### 2.1 Regressão (`docs/qa/2026-10-31/mvn-verify.log`, `surefire-reports/`)
+### 2.1 Regressão (log do `mvn verify` e XML do surefire, removidos do repositório; veja "Como conferir")
 
 BUILD SUCCESS: 265 testes, 0 falhas, 0 erros, 0 ignorados, 39 classes. Os `ERROR` no log vêm de testes que exercitam o handler do 500 (`GlobalExceptionHandlerTest`, `ServiceUnavailableAndTraceTest`): ruído esperado.
 
@@ -77,10 +77,10 @@ Observação de ambiente: só há JDK 26.0.2. O parent do Boot compila com `rele
 
 Duas tentativas, ambas registradas:
 
-1. **Como pedido** (`jacoco:prepare-agent verify jacoco:report`, `mvn-jacoco-attemptA.log`): o `prepare-agent` define a propriedade `argLine`, mas o `maven-surefire-plugin` do HEAD fixa `<argLine>-Duser.timezone=…</argLine>` sem `@{argLine}`. O agente nunca chega à JVM dos testes, não gera `jacoco.exec` e o `report` pula com "missing execution data file". Esse é o motivo pelo qual o pom modificado no seu working tree tem `@{argLine}`.
-2. **Alternativa sem tocar no pom** (`mvn-jacoco-attemptB.log`): `JAVA_TOOL_OPTIONS=-javaagent:org.jacoco.agent-0.8.16-runtime.jar=destfile=…,includes=plad.*` + `jacoco:report`. Funcionou com JDK 26 (73 classes analisadas, 265 testes).
+1. **Como pedido** (`jacoco:prepare-agent verify jacoco:report`; log da tentativa A, removido do repositório): o `prepare-agent` define a propriedade `argLine`, mas o `maven-surefire-plugin` do HEAD fixa `<argLine>-Duser.timezone=…</argLine>` sem `@{argLine}`. O agente nunca chega à JVM dos testes, não gera `jacoco.exec` e o `report` pula com "missing execution data file". Esse é o motivo pelo qual o pom modificado no seu working tree tem `@{argLine}`.
+2. **Alternativa sem tocar no pom** (log da tentativa B, removido do repositório): `JAVA_TOOL_OPTIONS=-javaagent:org.jacoco.agent-0.8.16-runtime.jar=destfile=…,includes=plad.*` + `jacoco:report`. Funcionou com JDK 26 (73 classes analisadas, 265 testes).
 
-Por pacote (`jacoco/jacoco.csv`):
+Por pacote (do `jacoco.csv` da execução, removido do repositório):
 
 | Pacote | Classes | Linhas | Branches | Instruções |
 |---|---:|---|---|---:|
@@ -127,7 +127,7 @@ Leitura: as classes 1 a 7 são o `main` e getters/setters/`equals` das entidades
 | plad.controllers | 12 | 12 | 0 | 0 | **100%** |
 | **Total** | 306 | 285 | 17 | 4 | **93,1%** |
 
-Os 21 mutantes não mortos estão em `pit-summary.txt`; o relatório navegável está em `pit-reports/index.html`.
+Os 21 mutantes não mortos estão em `pit-summary.txt`; o relatório HTML do PIT não foi versionado (veja "Como conferir").
 
 ## 4. Pontos fracos de teste (mutantes que indicam teste fraco)
 
@@ -146,7 +146,7 @@ Os 21 mutantes não mortos estão em `pit-summary.txt`; o relatório navegável 
 
 | Mutante | Por que ignorei |
 |---|---|
-| **`OpenApiConfig`**: L62, L69-70, L113 e as lambdas `internalServerErrorResponse` (L143, L149) e `serviceUnavailableResponse` (L157, L166), 10 sobreviventes + 1 sem cobertura | **Falsos sobreviventes do PIT, não teste fraco.** Esse código roda uma vez, na criação do contexto Spring / geração do documento springdoc, que fica em cache entre os testes; o PIT muta a classe depois. **Verifiquei à mão** o mutante de L143 (inverti a condição de `containsKey("500")`): `OpenApiContractTest` falha numa JVM nova (`manual-mutant-openapi-143.log`). Os demais seguem o mesmo mecanismo, mas só L143 foi comprovado; L69-70 (`sort` das tags) pode ser equivalente neste SO porque a ordem de varredura já sai ordenada. |
+| **`OpenApiConfig`**: L62, L69-70, L113 e as lambdas `internalServerErrorResponse` (L143, L149) e `serviceUnavailableResponse` (L157, L166), 10 sobreviventes + 1 sem cobertura | **Falsos sobreviventes do PIT, não teste fraco.** Esse código roda uma vez, na criação do contexto Spring / geração do documento springdoc, que fica em cache entre os testes; o PIT muta a classe depois. **Verifiquei à mão** o mutante de L143 (inverti a condição de `containsKey("500")`): `OpenApiContractTest` falha numa JVM nova (log da verificação manual, removido do repositório). Os demais seguem o mesmo mecanismo, mas só L143 foi comprovado; L69-70 (`sort` das tags) pode ser equivalente neste SO porque a ordem de varredura já sai ordenada. |
 | `RateLimiterService.refund` L51: removido `lastSeenNanos.set(...)` | Equivalente na prática: o `refund` ocorre logo após o `consume` (que já atualizou o `lastSeen`) e a evicção só age após um período de refill inteiro (minutos). Só um relógio injetável distinguiria. |
 | `SecurityErrorHandler.write` L47: removido `setCharacterEncoding(UTF-8)` | Equivalente: o corpo vai por `getOutputStream()` já em UTF-8 e as mensagens dos handlers são ASCII ("Access denied"); só mudaria o parâmetro `charset` do `Content-Type`. |
 | `MeService.findMe` L36 (psicólogo sem linha em `psychologists`): sem cobertura | Ramo defensivo inalcançável: `@MapsId` + FK impedem o estado. Não vale teste. |
@@ -217,12 +217,14 @@ Observações (não são quebras):
 
 ## Como conferir
 
-| Número | Arquivo |
+Os relatórios gerados (HTML do JaCoCo, PIT e Playwright, XML do surefire, logs do Maven) saíram do repositório; só ficam `numeros-verificados.txt`, `pit-summary.txt` e as screenshots em `front/`.
+
+| Número | Onde está |
 |---|---|
-| 265 testes / 39 classes | `surefire-reports/*.xml`, `mvn-verify.log` |
-| Cobertura | `jacoco/jacoco.csv`, `jacoco/index.html` |
-| Mutação | `pit-reports/mutations.xml`, `pit-summary.txt`, `mvn-pit-full.log` |
-| Playwright | `playwright-results.json`, `playwright-report/index.html` |
+| 265 testes / 39 classes | não versionado; `./mvnw verify` regenera o XML em `target/surefire-reports/` |
+| Cobertura | não versionado; o HTML é publicado como artifact `jacoco-report` do job `build` no CI (14 dias) e `./mvnw verify` o regenera em `target/site/jacoco/` |
+| Mutação | `pit-summary.txt` (versionado); o HTML/XML completo do PIT não foi mantido |
+| Playwright | não versionado; regenere com o comando abaixo. As screenshots citadas ficam em `front/` |
 | Cálculos | `numeros-verificados.txt` (gerado por script a partir dos arquivos acima) |
 
 Os testes Playwright estão no repositório do front, branch `test/qa-suite`: `e2e/api.spec.ts`, `e2e/ui.spec.ts`, `e2e/helpers.ts`, `playwright.config.ts`. Para reproduzir: backend com perfil dev e `ADMIN_EMAIL`/`ADMIN_PASSWORD`; `API_URL=http://localhost:<porta> VITE_API_URL=http://localhost:<porta> npx playwright test`. O Playwright usa o Edge (`channel: 'msedge'`) porque não há Chrome instalado no caminho padrão; `PW_CHANNEL=chrome` troca.

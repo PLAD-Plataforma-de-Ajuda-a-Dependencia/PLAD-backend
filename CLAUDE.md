@@ -92,7 +92,6 @@ Package root is `plad` (layers: `controllers` → `services` → `repositories` 
 - Every new domain rule enters `docs/decisoes-para-revisao.md` in the same PR (what the system does, basis, code location, status), together with the test that pins it. Changing a decision means changing that test and its row there; keep the count table at the top in sync.
 - The "Conferida em" line at the top of `docs/matriz-de-requisitos.md` and of `docs/decisoes-para-revisao.md` is replaced, never stacked: one line per file, with the date and the commit it was checked against (`no commit <hash> (branch develop)`), and no mention of changes "not yet committed". Re-check the rows against the code before updating it.
 - Out of scope: triage risk classification (low/moderate/high) and risk-based redirection (RF003/RF004 scoring). Do not implement or suggest it.
-- One plan item per branch and PR. Do not touch files unrelated to the item.
 - Before editing, present a short plan (files, new migrations, new tests, new dependencies) and wait for approval.
 - Check the highest V{n} on develop before creating a migration.
 

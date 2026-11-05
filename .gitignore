@@ -44,6 +44,13 @@ build/
 .claude/settings.local.json
 CLAUDE.local.md
 
+### QA reports (generated; CI publishes the JaCoCo HTML as an artifact) ###
+docs/qa/**/jacoco/
+docs/qa/**/pit-reports/
+docs/qa/**/playwright-report/
+docs/qa/**/surefire-reports/
+docs/qa/**/*.log
+
 ### OS ###
 .DS_Store
 Thumbs.db
