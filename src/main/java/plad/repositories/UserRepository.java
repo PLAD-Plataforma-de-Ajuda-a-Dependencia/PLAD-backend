@@ -22,4 +22,11 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update User u set u.tokenVersion = u.tokenVersion + 1 where u.id = :id")
     int incrementTokenVersion(@Param("id") Long id);
+
+    // Account deletion. A bulk delete, not repository.delete(entity): the subtype, triage, consent, nickname history
+    // and refresh token rows go with it through the ON DELETE CASCADE foreign keys (V24), which the persistence
+    // context knows nothing about, so it is cleared afterwards.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from User u where u.id = :id")
+    int deleteAccountById(@Param("id") Long id);
 }

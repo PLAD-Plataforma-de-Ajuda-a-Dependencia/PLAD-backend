@@ -23,7 +23,8 @@ class RealNameExposureTest {
             "RegisterRequestDTO",   // input: what the person typed when signing up
             "UserResponseDTO",      // answer to the registration: the person's own name, echoed back to them
             "MeResponseDTO",        // GET /me: only filled for psychologists; a dependent gets null
-            "DependentIdentityDTO"  // triage as read by a psychologist: the only place another person sees it
+            "DependentIdentityDTO", // triage as read by a psychologist: the only place another person sees it
+            "MeExportPsychologistDTO" // GET /me/export: a psychologist's own name, to that psychologist; the dependent block has none
     );
 
     @Test
@@ -43,7 +44,8 @@ class RealNameExposureTest {
     @Test
     void adminAndNicknameOnlyDtosNeverCarryOne() {
         for (Class<?> dto : List.of(AdminTriageReadResponseDTO.class, DependentNicknameDTO.class, NicknameResponseDTO.class,
-                AccessLogEntryDTO.class, AuditLogResponseDTO.class)) {
+                AccessLogEntryDTO.class, AuditLogResponseDTO.class, MeExportDependentDTO.class,
+                MeExportNicknameDTO.class, MeExportTriageDTO.class, MeExportConsentDTO.class)) {
             assertThat(Arrays.stream(dto.getRecordComponents()).map(RecordComponent::getName))
                     .as(dto.getSimpleName())
                     .noneMatch(name -> name.toLowerCase().contains("realname"))
