@@ -31,6 +31,7 @@ import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
 import plad.dto.DeleteAccountRequestDTO;
 import plad.dto.ErrorResponseDTO;
+import plad.dto.LoginResponseDTO;
 import plad.dto.MeExportResponseDTO;
 import plad.dto.MeResponseDTO;
 import plad.dto.NicknameResponseDTO;
@@ -53,13 +54,16 @@ public class MeController {
     private final MeService meService;
     private final NicknameService nicknameService;
     private final ConsentService consentService;
+    private final PasswordChangeService passwordChangeService;
     private final AccountDeletionService accountDeletionService;
     private final MeExportService meExportService;
     private final RefreshCookieFactory cookies;
 
     public MeController(AuditService auditService, MeService meService, NicknameService nicknameService,
-                        ConsentService consentService, AccountDeletionService accountDeletionService,
-                        MeExportService meExportService, RefreshCookieFactory cookies) {
+                        ConsentService consentService, PasswordChangeService passwordChangeService,
+                        AccountDeletionService accountDeletionService, MeExportService meExportService,
+                        RefreshCookieFactory cookies) {
+        this.passwordChangeService = passwordChangeService;
         this.accountDeletionService = accountDeletionService;
         this.meExportService = meExportService;
         this.cookies = cookies;
@@ -133,6 +137,41 @@ public class MeController {
         consentService.accept(userId, request.acceptedTermsVersion(), request.acceptedPrivacyVersion(),
                 httpRequest.getRemoteAddr());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(operationId = "changePassword", summary = "Change my password",
+            description = "Any account type. Needs the current password. Ends every session of the user (the access tokens "
+                    + "issued so far and all refresh tokens stop working) and starts a new one for this request: "
+                    + "the new access token comes in the body and the new refresh token in the HttpOnly cookie, as in the login. "
+                    + "Wrong current passwords count against the same per-e-mail budget as the login (10 failures per 15 minutes). "
+                    + "The new password follows the registration rule and must differ from the current one")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password changed; new session",
+                    headers = @Header(name = HttpHeaders.SET_COOKIE,
+                            description = "Opaque refresh token: HttpOnly, Secure, SameSite=Strict, Path=/auth",
+                            schema = @Schema(type = "string")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LoginResponseDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid body (weak new password), or (INVALID_PASSWORD_CHANGE) the new password equals the current one",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token, or wrong current password",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Too many wrong passwords for this e-mail",
+                    headers = @Header(name = "Retry-After", description = "Seconds until the next attempt",
+                            schema = @Schema(type = "integer")),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PutMapping("/password")
+    public ResponseEntity<LoginResponseDTO> changePassword(@AuthenticationPrincipal Long userId,
+                                                           @Valid @RequestBody ChangePasswordRequestDTO request) {
+        RefreshTokenService.Session session = passwordChangeService.change(userId, request);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookies.issue(session.refreshToken(), session.refreshTtl()))
+                .body(new LoginResponseDTO(session.accessToken()));
     }
 
     @Operation(operationId = "exportMyData", summary = "Export my data",
