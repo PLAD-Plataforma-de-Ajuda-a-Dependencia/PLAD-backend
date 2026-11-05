@@ -88,6 +88,17 @@ class AuthControllerTest {
     }
 
     @Test
+    void registerPsychologistStoresTheGraduate() throws Exception {
+        String body = register(nextClient(), psychologistBody(newEmail(), newCredentialNumber(), "Psicologia - USP"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long id = ((Number) JsonPath.read(body, "$.id")).longValue();
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT graduate FROM psychologists WHERE user_id = ?", String.class, id)).isEqualTo("Psicologia - USP");
+    }
+
+    @Test
     void credentialNumberDifferingOnlyInFormattingIsRejected() throws Exception {
         String client = nextClient();
         register(client, psychologistBody(newEmail(), "06/12345")).andExpect(status().isCreated());
@@ -301,10 +312,15 @@ class AuthControllerTest {
     }
 
     private static String psychologistBody(String email, String crmCrpNumber) {
+        return psychologistBody(email, crmCrpNumber, "Psicologia");
+    }
+
+    private static String psychologistBody(String email, String crmCrpNumber, String graduate) {
         return """
                 {"real_name": "Psi Teste", "email": "%s", "password": "senha-dev-123",
                  "birth_date": "1985-03-10", "gender": "feminino", "type_user": "psicologo",
-                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "Psicologia",
-                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}""".formatted(email, crmCrpNumber);
+                 "credential_type": "CRP", "crm_crp_number": "%s", "graduate": "%s",
+                 "accepted_terms_version": "1.0", "accepted_privacy_version": "1.0"}"""
+                .formatted(email, crmCrpNumber, graduate);
     }
 }
