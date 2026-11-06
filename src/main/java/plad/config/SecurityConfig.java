@@ -3,6 +3,7 @@ package plad.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -73,6 +74,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // without this a browser hides both from the front end: Retry-After (429, 503) and the id for support (500)
+        config.setExposedHeaders(List.of(HttpHeaders.RETRY_AFTER, RequestIdFilter.HEADER));
         config.setAllowCredentials(allowCredentials);
         return config;
     }

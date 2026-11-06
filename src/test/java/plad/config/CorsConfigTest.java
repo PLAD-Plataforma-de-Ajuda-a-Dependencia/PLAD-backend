@@ -9,7 +9,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,6 +46,33 @@ class CorsConfigTest {
         preflight("https://evil.example.com")
                 .andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    }
+
+    @Test
+    void actualRequestFromAllowedOriginExposesRetryAfterAndRequestId() throws Exception {
+        // the CORS filter runs before authentication, so the 401 of an anonymous request already carries the headers
+        mockMvc.perform(get("/me").header("Origin", "http://localhost:5173"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(header().string("Access-Control-Expose-Headers", containsString("Retry-After")))
+                .andExpect(header().string("Access-Control-Expose-Headers", containsString("X-Request-Id")));
+    }
+
+    @Test
+    void credentialedRouteExposesRetryAfterAndRequestId() throws Exception {
+        // /me/password is one of the routes that allow credentials: a second CorsConfiguration, same exposed headers
+        mockMvc.perform(put("/me/password").header("Origin", "http://localhost:5173"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("Access-Control-Allow-Credentials", "true"))
+                .andExpect(header().string("Access-Control-Expose-Headers", containsString("Retry-After")))
+                .andExpect(header().string("Access-Control-Expose-Headers", containsString("X-Request-Id")));
+    }
+
+    @Test
+    void actualRequestFromDisallowedOriginExposesNothing() throws Exception {
+        mockMvc.perform(get("/me").header("Origin", "https://evil.example.com"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Expose-Headers"));
     }
 
     // helpers
