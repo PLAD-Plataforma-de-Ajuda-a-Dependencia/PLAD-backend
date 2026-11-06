@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Conferida em 2026-11-06, no commit `fa24fb2` (branch `develop`).
+Conferida em 2026-11-06, no commit `2a6376c` (branch `develop`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
 
