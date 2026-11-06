@@ -18,6 +18,9 @@ class ErrorCodeTest {
         assertThat(new ConsentRequiredException("m").getCode()).isEqualTo(ErrorCode.CONSENT_REQUIRED);
         assertThat(new TriageAlreadyExistException("m").getCode()).isEqualTo(ErrorCode.TRIAGE_ALREADY_EXISTS);
         assertThat(new TriageNotFoundException("m").getCode()).isEqualTo(ErrorCode.TRIAGE_NOT_FOUND);
+        assertThat(new InvalidMeetingException("capacity", "m").getCode()).isEqualTo(ErrorCode.INVALID_MEETING);
+        assertThat(new MeetingNotFoundException("m").getCode()).isEqualTo(ErrorCode.MEETING_NOT_FOUND);
+        assertThat(new MeetingConflictException("m").getCode()).isEqualTo(ErrorCode.MEETING_CONFLICT);
         assertThat(new ForbiddenActionException("m").getCode()).isEqualTo(ErrorCode.FORBIDDEN);
         assertThat(new TooManyRequestException("m", 1).getCode()).isEqualTo(ErrorCode.RATE_LIMITED);
     }

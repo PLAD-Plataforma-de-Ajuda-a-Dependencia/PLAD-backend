@@ -115,7 +115,10 @@ class AccountDeletionTest {
         psychologistRepository.save(psychologist);
         consentService.record(user, "198.51.100.7");
         refreshTokenService.start(user);
-        assertThat(nonEmpty(user)).containsExactlyInAnyOrder("users", "psychologists", "consents", "refresh_tokens");
+        // a meeting they host goes with them (meetings.psychologist_id cascades, V25)
+        jdbc.update("INSERT INTO meetings (psychologist_id, title, starts_at, ends_at, capacity) "
+                + "VALUES (?, 'Grupo', now() + interval '1 day', now() + interval '1 day 1 hour', 5)", user.getId());
+        assertThat(nonEmpty(user)).containsExactlyInAnyOrder("users", "psychologists", "consents", "refresh_tokens", "meetings");
 
         delete(jwtService.generateToken(user), PASSWORD).andExpect(status().isNoContent());
 
@@ -335,6 +338,7 @@ class AccountDeletionTest {
         counts.put("consents", count("SELECT count(*) FROM consents WHERE user_id = ?", id));
         counts.put("dependent_nickname_history", count("SELECT count(*) FROM dependent_nickname_history WHERE dependent_id = ?", id));
         counts.put("refresh_tokens", count("SELECT count(*) FROM refresh_tokens WHERE user_id = ?", id));
+        counts.put("meetings", count("SELECT count(*) FROM meetings WHERE psychologist_id = ?", id));
         return counts;
     }
 

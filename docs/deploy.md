@@ -17,6 +17,8 @@ Como subir a API em contêiner. O perfil `prod` não tem valor padrão para banc
 
 Se `DB_URL`, `DB_USER` ou `DB_PASSWORD` faltarem com o perfil `prod`, `ProdEnvironmentCheck` aborta a subida listando os nomes que faltam.
 
+**Extensão do banco:** a migração V25 (reuniões) executa `CREATE EXTENSION IF NOT EXISTS btree_gist`, que impede duas reuniões agendadas do mesmo psicólogo de se cruzarem. O usuário de `DB_USER` precisa poder criá-la: `btree_gist` é extensão confiável desde o PostgreSQL 13, então o dono do banco basta; em serviços gerenciados que bloqueiam isso, crie a extensão antes com um superusuário (`CREATE EXTENSION btree_gist;`) e a migração só confere que ela existe.
+
 ## Perfis
 
 - sem perfil: valores locais (`localhost:5432/dbtest`, `postgres`/`postgres`), docs fechadas. É o que os testes e o `./mvnw spring-boot:run` usam.

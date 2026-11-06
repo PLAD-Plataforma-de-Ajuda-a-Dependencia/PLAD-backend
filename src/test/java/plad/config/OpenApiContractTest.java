@@ -26,6 +26,8 @@ import plad.dto.MeExportDependentDTO;
 import plad.dto.MeExportNicknameDTO;
 import plad.dto.MeExportPsychologistDTO;
 import plad.dto.MeExportResponseDTO;
+import plad.dto.MeetingRequestDTO;
+import plad.dto.MeetingResponseDTO;
 import plad.dto.MeExportTriageDTO;
 import plad.dto.MeResponseDTO;
 import plad.dto.NicknameResponseDTO;
@@ -39,6 +41,7 @@ import plad.dto.TriageResponseDTO;
 import plad.dto.UserResponseDTO;
 import plad.entity.AuditAction;
 import plad.entity.CrmCrpType;
+import plad.entity.MeetingStatus;
 import plad.entity.QuestionType;
 import plad.entity.Sex;
 import plad.entity.UserType;
@@ -161,6 +164,8 @@ class OpenApiContractTest {
         samples.put("ChangePasswordRequestDTO", new ChangePasswordRequestDTO("password-123", "password-456"));
         samples.put("ConsentRequestDTO", new ConsentRequestDTO("1.0", "1.0"));
         samples.put("DeleteAccountRequestDTO", new DeleteAccountRequestDTO("password-123"));
+        samples.put("MeetingRequestDTO", new MeetingRequestDTO("Grupo de apoio", "Roda semanal",
+                Instant.now(), Instant.now(), 12));
         samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
     }
@@ -201,6 +206,8 @@ class OpenApiContractTest {
         samples.put("MeExportTriageDTO", exportTriage);
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
+        samples.put("MeetingResponseDTO", new MeetingResponseDTO(1L, "Grupo de apoio", "Roda semanal", Instant.now(),
+                Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("PageResponseDTOAdminTriageReadResponseDTO", new PageResponseDTO<>(List.of(adminTriageRead), 0, 20, 1L, 1));

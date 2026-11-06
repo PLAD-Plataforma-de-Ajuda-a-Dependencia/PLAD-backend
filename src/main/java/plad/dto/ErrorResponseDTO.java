@@ -15,7 +15,7 @@ public record ErrorResponseDTO(
     String message,
     @Schema(description = "When the error was produced (UTC)", example = "2026-10-27T21:15:30Z")
     Instant timestamp,
-    @ArraySchema(arraySchema = @Schema(description = "Per-field details; empty unless the code is VALIDATION_ERROR"))
+    @ArraySchema(arraySchema = @Schema(description = "Per-field details; empty unless the code is VALIDATION_ERROR or INVALID_MEETING"))
     List<FieldErrorDTO> errors,
     @Schema(description = "Request id to give to support; null unless the code is INTERNAL_ERROR",
             example = "3f0c9a52-6b1e-4d7a-9a52-0d8c1f6e2b47", nullable = true)

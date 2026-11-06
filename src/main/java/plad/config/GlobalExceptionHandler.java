@@ -42,6 +42,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final Pattern CAMEL_CASE_BOUNDARY = Pattern.compile("([a-z0-9])([A-Z])");
     private static final int DB_RETRY_AFTER_SECONDS = 5;
+    static final String MEETING_OVERLAP_CONSTRAINT = "meetings_no_overlap"; // V25
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidCredentials(InvalidCredentialsException ex) {
@@ -85,6 +86,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ex);
     }
 
+    // the one 400 besides VALIDATION_ERROR that fills `errors`: the form marks each field
+    @ExceptionHandler(InvalidMeetingException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidMeeting(InvalidMeetingException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) // 400
+                .body(new ErrorResponseDTO(ex.getCode().name(), ex.getMessage(), Instant.now(), ex.getErrors()));
+    }
+
+    @ExceptionHandler(MeetingNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingNotFound(MeetingNotFoundException ex) {
+        return error(HttpStatus.NOT_FOUND, ex);
+    }
+
+    @ExceptionHandler(MeetingConflictException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingConflict(MeetingConflictException ex) {
+        return error(HttpStatus.CONFLICT, ex);
+    }
+
     @ExceptionHandler(TriageAlreadyExistException.class)
     public ResponseEntity<ErrorResponseDTO> handleTriageExists(TriageAlreadyExistException ex) {
         return error(HttpStatus.CONFLICT, ex);
@@ -111,7 +129,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(DataIntegrityViolationException ex) {
         // the Postgres message carries the offending value (e.g. a duplicated e-mail): log the constraint name only
-        log.warn("Unhandled data integrity violation (constraint: {})", violatedConstraint(ex));
+        String constraint = violatedConstraint(ex);
+        if (MEETING_OVERLAP_CONSTRAINT.equals(constraint)) {
+            // two requests passed MeetingService's overlap check at the same time; the database settled it
+            return error(HttpStatus.CONFLICT, ErrorCode.MEETING_CONFLICT,
+                    "You already have a scheduled meeting that overlaps this time"); // 409
+        }
+        log.warn("Unhandled data integrity violation (constraint: {})", constraint);
         return error(HttpStatus.CONFLICT, ErrorCode.DATA_CONFLICT, "Request conflicts with existing data"); // 409
     }
 

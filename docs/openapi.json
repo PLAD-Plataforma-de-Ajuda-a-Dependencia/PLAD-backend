@@ -327,7 +327,7 @@
             "type": "string"
           },
           "errors": {
-            "description": "Per-field details; empty unless the code is VALIDATION_ERROR",
+            "description": "Per-field details; empty unless the code is VALIDATION_ERROR or INVALID_MEETING",
             "items": {
               "$ref": "#/components/schemas/FieldErrorDTO"
             },
@@ -788,6 +788,118 @@
           "nickname",
           "real_name",
           "type_user"
+        ]
+      },
+      "MeetingRequestDTO": {
+        "properties": {
+          "capacity": {
+            "description": "Maximum number of participants, 2 to 30",
+            "example": 12,
+            "format": "int32",
+            "type": "integer"
+          },
+          "description": {
+            "description": "What the meeting is about; optional",
+            "example": "Roda de conversa para quem está no primeiro mês",
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ends_at": {
+            "description": "End (ISO-8601 instant). Between 15 and 180 minutes after the start",
+            "example": "2026-11-12T23:00:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "starts_at": {
+            "description": "Start (ISO-8601 instant). At least 60 minutes from now when creating",
+            "example": "2026-11-12T22:00:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "Meeting title",
+            "example": "Grupo de apoio semanal",
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "capacity",
+          "ends_at",
+          "starts_at",
+          "title"
+        ]
+      },
+      "MeetingResponseDTO": {
+        "properties": {
+          "capacity": {
+            "description": "Maximum number of participants",
+            "example": 12,
+            "format": "int32",
+            "type": "integer"
+          },
+          "description": {
+            "description": "What the meeting is about; null when none was given",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ends_at": {
+            "description": "End (UTC)",
+            "example": "2026-11-12T23:00:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "host": {
+            "description": "Name of the psychologist who hosts the meeting",
+            "example": "Dra. Helena Duarte",
+            "type": "string"
+          },
+          "id": {
+            "description": "Meeting id",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "owned_by_me": {
+            "description": "True when the caller is the host and can edit, cancel or end it",
+            "example": false,
+            "type": "boolean"
+          },
+          "starts_at": {
+            "description": "Start (UTC)",
+            "example": "2026-11-12T22:00:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "scheduled, cancelled (the host cancelled it) or ended (the host closed it)",
+            "enum": [
+              "scheduled",
+              "cancelled",
+              "ended"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Meeting title",
+            "example": "Grupo de apoio semanal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capacity",
+          "description",
+          "ends_at",
+          "host",
+          "id",
+          "owned_by_me",
+          "starts_at",
+          "status",
+          "title"
         ]
       },
       "NicknameResponseDTO": {
@@ -2608,6 +2720,608 @@
         ]
       }
     },
+    "/meetings": {
+      "get": {
+        "description": "Any authenticated role. Meetings whose start is in [from, to), ordered by start, cancelled and ended ones included. The window is at most 62 days",
+        "operationId": "listMeetings",
+        "parameters": [
+          {
+            "description": "Start of the window, inclusive (ISO-8601 instant)",
+            "example": "2026-11-01T03:00:00Z",
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End of the window, exclusive (ISO-8601 instant)",
+            "example": "2026-12-13T03:00:00Z",
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MeetingResponseDTO"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "The meetings"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing/malformed from or to, or INVALID_MEETING (to not after from, or window over 62 days)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the meetings that start in a window",
+        "tags": [
+          "Meetings"
+        ]
+      },
+      "post": {
+        "description": "The start must be at least 60 minutes from now, the duration 15 to 180 minutes and the capacity 2 to 30. The same psychologist cannot have two scheduled meetings that overlap (touching ones, ending when the next starts, are fine)",
+        "operationId": "createMeeting",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeetingRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "VALIDATION_ERROR (shape) or INVALID_MEETING (a limit, with the fields in errors)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a psychologist"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT: overlaps another scheduled meeting of yours"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}": {
+      "get": {
+        "operationId": "findMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Read one meeting",
+        "tags": [
+          "Meetings"
+        ]
+      },
+      "put": {
+        "description": "Host only, while scheduled and before it starts. Same body and limits as the creation; the 60-minute lead time applies only when the start is moved",
+        "operationId": "updateMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeetingRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "VALIDATION_ERROR or INVALID_MEETING"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT: not scheduled, already started, or overlaps another meeting of yours"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Edit a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/cancel": {
+      "post": {
+        "description": "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled",
+        "operationId": "cancelMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting, now cancelled"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT: not scheduled or already ended"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cancel a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/end": {
+      "post": {
+        "description": "Host only, while scheduled and once it has started",
+        "operationId": "endMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting, now ended"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT: not scheduled or not started yet"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "End a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
     "/triage": {
       "post": {
         "description": "Every question is optional. A dependent can submit once; use PUT to change it afterwards. With no answers nothing is stored, so the dependent can still submit later",
@@ -3101,6 +3815,10 @@
     {
       "description": "Data about the logged-in user's own data; requires a Bearer token",
       "name": "Me"
+    },
+    {
+      "description": "Create and manage meetings (psychologist) and read the calendar (any role)",
+      "name": "Meetings"
     },
     {
       "description": "Dependents' one-time triage questionnaire; requires a Bearer token",

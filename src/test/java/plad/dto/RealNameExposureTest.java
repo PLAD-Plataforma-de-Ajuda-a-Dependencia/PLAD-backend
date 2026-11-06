@@ -45,7 +45,9 @@ class RealNameExposureTest {
     void adminAndNicknameOnlyDtosNeverCarryOne() {
         for (Class<?> dto : List.of(AdminTriageReadResponseDTO.class, DependentNicknameDTO.class, NicknameResponseDTO.class,
                 AccessLogEntryDTO.class, AuditLogResponseDTO.class, MeExportDependentDTO.class,
-                MeExportNicknameDTO.class, MeExportTriageDTO.class, MeExportConsentDTO.class)) {
+                MeExportNicknameDTO.class, MeExportTriageDTO.class, MeExportConsentDTO.class,
+                // the host's name goes out as `host` (decision 23, covered by MeetingControllerTest), never a real_name/email key
+                MeetingRequestDTO.class, MeetingResponseDTO.class)) {
             assertThat(Arrays.stream(dto.getRecordComponents()).map(RecordComponent::getName))
                     .as(dto.getSimpleName())
                     .noneMatch(name -> name.toLowerCase().contains("realname"))
