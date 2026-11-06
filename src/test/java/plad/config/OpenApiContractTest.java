@@ -23,9 +23,11 @@ import plad.dto.DeleteAccountRequestDTO;
 import plad.dto.MeExportAccountDTO;
 import plad.dto.MeExportConsentDTO;
 import plad.dto.MeExportDependentDTO;
+import plad.dto.MeExportMeetingRegistrationDTO;
 import plad.dto.MeExportNicknameDTO;
 import plad.dto.MeExportPsychologistDTO;
 import plad.dto.MeExportResponseDTO;
+import plad.dto.MeetingParticipantResponseDTO;
 import plad.dto.MeetingRequestDTO;
 import plad.dto.MeetingResponseDTO;
 import plad.dto.MeExportTriageDTO;
@@ -192,13 +194,17 @@ class OpenApiContractTest {
         MeExportConsentDTO exportConsent = new MeExportConsentDTO("terms", "1.0", Instant.now(), "203.0.113.7");
         MeExportAccountDTO exportAccount = new MeExportAccountDTO(1L, "a@b.com", UserType.dependente,
                 LocalDate.of(1990, 5, 20), Sex.feminino, Instant.now());
-        MeExportDependentDTO exportDependent = new MeExportDependentDTO("Morcego Sereno", Instant.now(), List.of(exportNickname));
+        MeExportMeetingRegistrationDTO exportRegistration = new MeExportMeetingRegistrationDTO(
+                1L, "Grupo de apoio", Instant.now(), Instant.now());
+        MeExportDependentDTO exportDependent = new MeExportDependentDTO("Morcego Sereno", Instant.now(),
+                List.of(exportNickname), List.of(exportRegistration));
         MeExportPsychologistDTO exportPsychologist = new MeExportPsychologistDTO(
                 "name", CrmCrpType.CRP, "06123456", "Psicologia", false, Instant.now());
         MeExportTriageDTO exportTriage = new MeExportTriageDTO(1L, Instant.now(), Instant.now(), List.of(answer));
         samples.put("MeExportAccountDTO", exportAccount);
         samples.put("MeExportConsentDTO", exportConsent);
         samples.put("MeExportDependentDTO", exportDependent);
+        samples.put("MeExportMeetingRegistrationDTO", exportRegistration);
         samples.put("MeExportNicknameDTO", exportNickname);
         samples.put("MeExportPsychologistDTO", exportPsychologist);
         samples.put("MeExportResponseDTO", new MeExportResponseDTO(Instant.now(), exportAccount, exportDependent,
@@ -206,8 +212,10 @@ class OpenApiContractTest {
         samples.put("MeExportTriageDTO", exportTriage);
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
+        samples.put("MeetingParticipantResponseDTO", new MeetingParticipantResponseDTO("Morcego Sereno", "Maria Silva",
+                Instant.now()));
         samples.put("MeetingResponseDTO", new MeetingResponseDTO(1L, "Grupo de apoio", "Roda semanal", Instant.now(),
-                Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true));
+                Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true, 7, false));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("PageResponseDTOAdminTriageReadResponseDTO", new PageResponseDTO<>(List.of(adminTriageRead), 0, 20, 1L, 1));

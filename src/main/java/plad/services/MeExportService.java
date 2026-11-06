@@ -6,6 +6,7 @@ import plad.dto.AnswerResponseDTO;
 import plad.dto.MeExportAccountDTO;
 import plad.dto.MeExportConsentDTO;
 import plad.dto.MeExportDependentDTO;
+import plad.dto.MeExportMeetingRegistrationDTO;
 import plad.dto.MeExportNicknameDTO;
 import plad.dto.MeExportPsychologistDTO;
 import plad.dto.MeExportResponseDTO;
@@ -20,6 +21,7 @@ import plad.exception.InvalidCredentialsException;
 import plad.repositories.ConsentRepository;
 import plad.repositories.DependentNicknameHistoryRepository;
 import plad.repositories.DependentRepository;
+import plad.repositories.MeetingRegistrationRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
@@ -47,13 +49,15 @@ public class MeExportService {
     private final ConsentRepository consentRepository;
     private final TriageRepository triageRepository;
     private final ResultQuestionTriageRepository resultQuestionTriageRepository;
+    private final MeetingRegistrationRepository meetingRegistrationRepository;
     private final Clock clock;
 
     public MeExportService(UserRepository userRepository, DependentRepository dependentRepository,
                            PsychologistRepository psychologistRepository,
                            DependentNicknameHistoryRepository nicknameHistoryRepository,
                            ConsentRepository consentRepository, TriageRepository triageRepository,
-                           ResultQuestionTriageRepository resultQuestionTriageRepository, Clock clock) {
+                           ResultQuestionTriageRepository resultQuestionTriageRepository,
+                           MeetingRegistrationRepository meetingRegistrationRepository, Clock clock) {
         this.userRepository = userRepository;
         this.dependentRepository = dependentRepository;
         this.psychologistRepository = psychologistRepository;
@@ -61,6 +65,7 @@ public class MeExportService {
         this.consentRepository = consentRepository;
         this.triageRepository = triageRepository;
         this.resultQuestionTriageRepository = resultQuestionTriageRepository;
+        this.meetingRegistrationRepository = meetingRegistrationRepository;
         this.clock = clock;
     }
 
@@ -97,7 +102,11 @@ public class MeExportService {
         List<MeExportNicknameDTO> history = nicknameHistoryRepository.findByDependentIdOrderByAssignedAtAscIdAsc(userId).stream()
                 .map(h -> new MeExportNicknameDTO(h.getNickname(), h.getAssignedAt(), h.getReplacedAt()))
                 .toList();
-        return new MeExportDependentDTO(dependent.getNickname(), dependent.getCreatedAt(), history);
+        List<MeExportMeetingRegistrationDTO> registrations = meetingRegistrationRepository.findByDependent(userId).stream()
+                .map(r -> new MeExportMeetingRegistrationDTO(r.getMeeting().getId(), r.getMeeting().getTitle(),
+                        r.getMeeting().getStartsAt(), r.getRegisteredAt()))
+                .toList();
+        return new MeExportDependentDTO(dependent.getNickname(), dependent.getCreatedAt(), history, registrations);
     }
 
     private MeExportPsychologistDTO exportPsychologist(User user) {

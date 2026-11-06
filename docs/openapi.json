@@ -9,7 +9,8 @@
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
               "TRIAGE_VIEWED",
-              "NICKNAME_REROLLED"
+              "NICKNAME_REROLLED",
+              "MEETING_PARTICIPANTS_VIEWED"
             ],
             "example": "TRIAGE_VIEWED",
             "type": "string"
@@ -152,7 +153,8 @@
               "TRIAGE_SUBMITTED",
               "TRIAGE_RESUBMITTED",
               "TRIAGE_VIEWED",
-              "NICKNAME_REROLLED"
+              "NICKNAME_REROLLED",
+              "MEETING_PARTICIPANTS_VIEWED"
             ],
             "example": "TRIAGE_SUBMITTED",
             "type": "string"
@@ -514,6 +516,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "meeting_registrations": {
+            "description": "Every meeting the dependent registered for, oldest registration first",
+            "items": {
+              "$ref": "#/components/schemas/MeExportMeetingRegistrationDTO"
+            },
+            "type": "array"
+          },
           "nickname": {
             "description": "The anonymous nickname in use now",
             "example": "Morcego Sereno",
@@ -529,8 +538,43 @@
         },
         "required": [
           "created_at",
+          "meeting_registrations",
           "nickname",
           "nickname_history"
+        ]
+      },
+      "MeExportMeetingRegistrationDTO": {
+        "description": "A meeting the dependent registered for",
+        "properties": {
+          "meeting_id": {
+            "description": "Meeting id",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "registered_at": {
+            "description": "When the dependent registered (UTC)",
+            "example": "2026-11-06T14:30:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "starts_at": {
+            "description": "When the meeting starts (UTC)",
+            "example": "2026-11-12T22:00:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "Meeting title",
+            "example": "Grupo de apoio semanal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meeting_id",
+          "registered_at",
+          "starts_at",
+          "title"
         ]
       },
       "MeExportNicknameDTO": {
@@ -790,6 +834,31 @@
           "type_user"
         ]
       },
+      "MeetingParticipantResponseDTO": {
+        "properties": {
+          "nickname": {
+            "description": "Anonymous nickname, the name every other user sees",
+            "example": "Morcego Sereno",
+            "type": "string"
+          },
+          "real_name": {
+            "description": "Real name, shown only to the psychologist who hosts the meeting",
+            "example": "Maria Silva",
+            "type": "string"
+          },
+          "registered_at": {
+            "description": "When the dependent registered (UTC)",
+            "example": "2026-11-06T14:30:00Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname",
+          "real_name",
+          "registered_at"
+        ]
+      },
       "MeetingRequestDTO": {
         "properties": {
           "capacity": {
@@ -869,6 +938,17 @@
             "example": false,
             "type": "boolean"
           },
+          "registered_by_me": {
+            "description": "True when the caller is a dependent registered in this meeting; always false for psychologists and admins",
+            "example": false,
+            "type": "boolean"
+          },
+          "registered_count": {
+            "description": "How many dependents are registered. Every role sees only this number; who they are is for the host (GET /meetings/{id}/participants)",
+            "example": 7,
+            "format": "int32",
+            "type": "integer"
+          },
           "starts_at": {
             "description": "Start (UTC)",
             "example": "2026-11-12T22:00:00Z",
@@ -897,6 +977,8 @@
           "host",
           "id",
           "owned_by_me",
+          "registered_by_me",
+          "registered_count",
           "starts_at",
           "status",
           "title"
@@ -1406,7 +1488,8 @@
                 "TRIAGE_SUBMITTED",
                 "TRIAGE_RESUBMITTED",
                 "TRIAGE_VIEWED",
-                "NICKNAME_REROLLED"
+                "NICKNAME_REROLLED",
+                "MEETING_PARTICIPANTS_VIEWED"
               ],
               "type": "string"
             }
@@ -3080,7 +3163,7 @@
                 }
               }
             },
-            "description": "MEETING_CONFLICT: not scheduled, already started, or overlaps another meeting of yours"
+            "description": "MEETING_CONFLICT (not scheduled, already started, or overlaps another meeting of yours) or MEETING_CAPACITY_TOO_LOW (fewer seats than registered dependents)"
           },
           "500": {
             "content": {
@@ -3317,6 +3400,296 @@
           }
         },
         "summary": "End a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/participants": {
+      "get": {
+        "description": "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname and real name (the only place besides the triage where a psychologist sees it). Every call writes one MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. Everyone else only gets registered_count in the meeting",
+        "operationId": "listMeetingParticipants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MeetingParticipantResponseDTO"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "The registered dependents, oldest registration first"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist (dependents and admins included), or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Who is registered in a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/registration": {
+      "delete": {
+        "description": "Dependents only, before the meeting starts. Idempotent: 204 also when the caller was not registered",
+        "operationId": "cancelMeetingRegistration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The caller is not registered any more"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT: the meeting already started"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cancel the registration in a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      },
+      "post": {
+        "description": "Dependents only. The meeting must be scheduled and not started. Idempotent: registering again changes nothing and answers 200 with the same meeting, even when it is full. The triage is not required. The capacity holds even when requests for the last seat arrive at the same time",
+        "operationId": "registerForMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingResponseDTO"
+                }
+              }
+            },
+            "description": "The meeting, with registered_count and registered_by_me up to date"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_CONFLICT (not scheduled, or already started) or MEETING_FULL (no seat left and the caller is not already registered)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Register for a meeting",
         "tags": [
           "Meetings"
         ]
@@ -3817,7 +4190,7 @@
       "name": "Me"
     },
     {
-      "description": "Create and manage meetings (psychologist) and read the calendar (any role)",
+      "description": "Create and manage meetings (psychologist), read the calendar (any role) and register for a meeting (dependent)",
       "name": "Meetings"
     },
     {

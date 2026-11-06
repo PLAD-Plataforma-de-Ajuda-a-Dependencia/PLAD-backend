@@ -8,7 +8,10 @@ public enum AuditAction {
     // an admin or psychologist read the triage (GET /triages, GET /triages/{id}); shown to the owner in GET /me/access-log
     TRIAGE_VIEWED(true),
     // a dependent drew a new anonymous nickname (POST /me/nickname/reroll); the nickname is never stored in the entry
-    NICKNAME_REROLLED(false);
+    NICKNAME_REROLLED(false),
+    // the host psychologist listed who is registered in their meeting (GET /meetings/{id}/participants); one entry per
+    // dependent listed, shown to each of them in GET /me/access-log. details: meeting_id and actor_role only
+    MEETING_PARTICIPANTS_VIEWED(true);
 
     private final boolean thirdPartyRead;
 

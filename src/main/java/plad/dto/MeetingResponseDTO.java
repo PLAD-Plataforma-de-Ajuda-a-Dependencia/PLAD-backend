@@ -24,5 +24,11 @@ public record MeetingResponseDTO(
         @Schema(description = "Name of the psychologist who hosts the meeting", example = "Dra. Helena Duarte")
         String host,
         @Schema(description = "True when the caller is the host and can edit, cancel or end it", example = "false")
-        boolean ownedByMe
+        boolean ownedByMe,
+        @Schema(description = "How many dependents are registered. Every role sees only this number; who they are is "
+                + "for the host (GET /meetings/{id}/participants)", example = "7")
+        int registeredCount,
+        @Schema(description = "True when the caller is a dependent registered in this meeting; always false for "
+                + "psychologists and admins", example = "false")
+        boolean registeredByMe
 ) {}

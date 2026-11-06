@@ -93,13 +93,17 @@ class AccountDeletionTest {
         submitTriage(token);
         refreshTokenService.start(user);
         auditService.record(AuditAction.TRIAGE_VIEWED, 999_001L, UserType.psicologo, user.getId(), "TRIAGE", 1L, null);
+        // signed up for a meeting of someone else's: the registration goes, the meeting stays
+        long meeting = seedMeeting(newHost());
+        register(meeting, user);
         assertThat(nonEmpty(user)).as("the fixture has a row in every table of a dependent").containsExactlyInAnyOrder(
                 "users", "dependents", "triages", "result_questions_triages", "consents",
-                "dependent_nickname_history", "refresh_tokens");
+                "dependent_nickname_history", "refresh_tokens", "meeting_registrations");
 
         delete(token, PASSWORD).andExpect(status().isNoContent());
 
         assertThat(nonEmpty(user)).isEmpty();
+        assertThat(count("SELECT count(*) FROM meetings WHERE id = ?", meeting)).as("the meeting is not theirs").isEqualTo(1L);
         // the record that someone read the triage stays: ids only, no FK to users
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_log WHERE subject_user_id = ?", Long.class, user.getId()))
                 .isEqualTo(2L); // TRIAGE_SUBMITTED + TRIAGE_VIEWED
@@ -115,14 +119,20 @@ class AccountDeletionTest {
         psychologistRepository.save(psychologist);
         consentService.record(user, "198.51.100.7");
         refreshTokenService.start(user);
-        // a meeting they host goes with them (meetings.psychologist_id cascades, V25)
-        jdbc.update("INSERT INTO meetings (psychologist_id, title, starts_at, ends_at, capacity) "
-                + "VALUES (?, 'Grupo', now() + interval '1 day', now() + interval '1 day 1 hour', 5)", user.getId());
-        assertThat(nonEmpty(user)).containsExactlyInAnyOrder("users", "psychologists", "consents", "refresh_tokens", "meetings");
+        // a meeting they host goes with them (meetings.psychologist_id cascades, V25), and so do its registrations (V26)
+        long meeting = seedMeeting(user);
+        User attendee = newUser(UserType.dependente);
+        newDependent(attendee);
+        register(meeting, attendee);
+        assertThat(nonEmpty(user)).containsExactlyInAnyOrder(
+                "users", "psychologists", "consents", "refresh_tokens", "meetings", "meeting_registrations");
 
         delete(jwtService.generateToken(user), PASSWORD).andExpect(status().isNoContent());
 
         assertThat(nonEmpty(user)).isEmpty();
+        // the dependent who had signed up is still there; only their seat in that meeting is gone
+        assertThat(count("SELECT count(*) FROM dependents WHERE user_id = ?", attendee.getId())).isEqualTo(1L);
+        assertThat(count("SELECT count(*) FROM meeting_registrations WHERE dependent_id = ?", attendee.getId())).isZero();
     }
 
     @Test
@@ -339,7 +349,31 @@ class AccountDeletionTest {
         counts.put("dependent_nickname_history", count("SELECT count(*) FROM dependent_nickname_history WHERE dependent_id = ?", id));
         counts.put("refresh_tokens", count("SELECT count(*) FROM refresh_tokens WHERE user_id = ?", id));
         counts.put("meetings", count("SELECT count(*) FROM meetings WHERE psychologist_id = ?", id));
+        // as a dependent who signed up, or as the host of the meeting they signed up for
+        counts.put("meeting_registrations", jdbc.queryForObject("""
+                SELECT count(*) FROM meeting_registrations r WHERE r.dependent_id = ?
+                   OR r.meeting_id IN (SELECT id FROM meetings WHERE psychologist_id = ?)""", Long.class, id, id));
         return counts;
+    }
+
+    private User newHost() {
+        User host = newUser(UserType.psicologo);
+        Psychologist psychologist = new Psychologist();
+        psychologist.setUser(host);
+        psychologist.setCredentialType(CrmCrpType.CRP);
+        psychologist.setCrmCrpNumber("06" + UUID.randomUUID().toString().replace("-", "").substring(0, 10));
+        psychologistRepository.saveAndFlush(psychologist); // the JDBC insert of a meeting needs the row to be there
+        return host;
+    }
+
+    private long seedMeeting(User host) {
+        return jdbc.queryForObject("INSERT INTO meetings (psychologist_id, title, starts_at, ends_at, capacity) "
+                + "VALUES (?, 'Grupo', now() + interval '1 day', now() + interval '1 day 1 hour', 5) RETURNING id",
+                Long.class, host.getId());
+    }
+
+    private void register(long meeting, User dependent) {
+        jdbc.update("INSERT INTO meeting_registrations (meeting_id, dependent_id) VALUES (?, ?)", meeting, dependent.getId());
     }
 
     private long count(String sql, Long id) {

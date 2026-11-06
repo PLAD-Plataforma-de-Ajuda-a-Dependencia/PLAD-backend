@@ -24,7 +24,8 @@ class RealNameExposureTest {
             "UserResponseDTO",      // answer to the registration: the person's own name, echoed back to them
             "MeResponseDTO",        // GET /me: only filled for psychologists; a dependent gets null
             "DependentIdentityDTO", // triage as read by a psychologist: the only place another person sees it
-            "MeExportPsychologistDTO" // GET /me/export: a psychologist's own name, to that psychologist; the dependent block has none
+            "MeExportPsychologistDTO", // GET /me/export: a psychologist's own name, to that psychologist; the dependent block has none
+            "MeetingParticipantResponseDTO" // GET /meetings/{id}/participants: the host psychologist only (decision 26), audited (27)
     );
 
     @Test
@@ -46,6 +47,7 @@ class RealNameExposureTest {
         for (Class<?> dto : List.of(AdminTriageReadResponseDTO.class, DependentNicknameDTO.class, NicknameResponseDTO.class,
                 AccessLogEntryDTO.class, AuditLogResponseDTO.class, MeExportDependentDTO.class,
                 MeExportNicknameDTO.class, MeExportTriageDTO.class, MeExportConsentDTO.class,
+                MeExportMeetingRegistrationDTO.class,
                 // the host's name goes out as `host` (decision 23, covered by MeetingControllerTest), never a real_name/email key
                 MeetingRequestDTO.class, MeetingResponseDTO.class)) {
             assertThat(Arrays.stream(dto.getRecordComponents()).map(RecordComponent::getName))

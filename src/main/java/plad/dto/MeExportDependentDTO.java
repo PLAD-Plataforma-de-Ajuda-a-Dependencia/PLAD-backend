@@ -14,6 +14,8 @@ public record MeExportDependentDTO(
         @Schema(description = "When the dependent profile was created (UTC)", example = "2026-10-27T21:15:30Z")
         Instant createdAt,
         @ArraySchema(arraySchema = @Schema(description = "Every nickname the dependent had, oldest first"))
-        List<MeExportNicknameDTO> nicknameHistory
+        List<MeExportNicknameDTO> nicknameHistory,
+        @ArraySchema(arraySchema = @Schema(description = "Every meeting the dependent registered for, oldest registration first"))
+        List<MeExportMeetingRegistrationDTO> meetingRegistrations
 ) {
 }

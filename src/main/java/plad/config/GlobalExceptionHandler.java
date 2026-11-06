@@ -103,6 +103,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.CONFLICT, ex);
     }
 
+    @ExceptionHandler(MeetingFullException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingFull(MeetingFullException ex) {
+        return error(HttpStatus.CONFLICT, ex);
+    }
+
+    @ExceptionHandler(MeetingCapacityTooLowException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingCapacityTooLow(MeetingCapacityTooLowException ex) {
+        return error(HttpStatus.CONFLICT, ex);
+    }
+
     @ExceptionHandler(TriageAlreadyExistException.class)
     public ResponseEntity<ErrorResponseDTO> handleTriageExists(TriageAlreadyExistException ex) {
         return error(HttpStatus.CONFLICT, ex);

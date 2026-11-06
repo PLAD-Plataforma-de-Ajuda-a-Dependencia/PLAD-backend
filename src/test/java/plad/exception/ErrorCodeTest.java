@@ -21,6 +21,8 @@ class ErrorCodeTest {
         assertThat(new InvalidMeetingException("capacity", "m").getCode()).isEqualTo(ErrorCode.INVALID_MEETING);
         assertThat(new MeetingNotFoundException("m").getCode()).isEqualTo(ErrorCode.MEETING_NOT_FOUND);
         assertThat(new MeetingConflictException("m").getCode()).isEqualTo(ErrorCode.MEETING_CONFLICT);
+        assertThat(new MeetingFullException("m").getCode()).isEqualTo(ErrorCode.MEETING_FULL);
+        assertThat(new MeetingCapacityTooLowException("m").getCode()).isEqualTo(ErrorCode.MEETING_CAPACITY_TOO_LOW);
         assertThat(new ForbiddenActionException("m").getCode()).isEqualTo(ErrorCode.FORBIDDEN);
         assertThat(new TooManyRequestException("m", 1).getCode()).isEqualTo(ErrorCode.RATE_LIMITED);
     }
