@@ -27,6 +27,7 @@ import plad.dto.MeExportMeetingRegistrationDTO;
 import plad.dto.MeExportNicknameDTO;
 import plad.dto.MeExportPsychologistDTO;
 import plad.dto.MeExportResponseDTO;
+import plad.dto.MeetingJoinResponseDTO;
 import plad.dto.MeetingParticipantResponseDTO;
 import plad.dto.MeetingRequestDTO;
 import plad.dto.MeetingResponseDTO;
@@ -36,6 +37,7 @@ import plad.dto.NicknameResponseDTO;
 import plad.dto.OptionDTO;
 import plad.dto.PageResponseDTO;
 import plad.dto.QuestionResponseDTO;
+import plad.dto.SpeakPermissionRequestDTO;
 import plad.dto.RegisterRequestDTO;
 import plad.dto.TriageReadResponseDTO;
 import plad.dto.TriageRequestDTO;
@@ -168,6 +170,7 @@ class OpenApiContractTest {
         samples.put("DeleteAccountRequestDTO", new DeleteAccountRequestDTO("password-123"));
         samples.put("MeetingRequestDTO", new MeetingRequestDTO("Grupo de apoio", "Roda semanal",
                 Instant.now(), Instant.now(), 12));
+        samples.put("SpeakPermissionRequestDTO", new SpeakPermissionRequestDTO(true));
         samples.put("TriageRequestDTO", new TriageRequestDTO(List.of(new AnswerRequestDTO(1L, "AGE_RANGE", List.of("AGE_25_39")))));
         return samples;
     }
@@ -212,8 +215,9 @@ class OpenApiContractTest {
         samples.put("MeExportTriageDTO", exportTriage);
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
-        samples.put("MeetingParticipantResponseDTO", new MeetingParticipantResponseDTO("Morcego Sereno", "Maria Silva",
-                Instant.now()));
+        samples.put("MeetingJoinResponseDTO", new MeetingJoinResponseDTO("wss://plad.livekit.cloud", "jwt"));
+        samples.put("MeetingParticipantResponseDTO", new MeetingParticipantResponseDTO("q3ZxK9mR1v0nT7bY",
+                "Morcego Sereno", "Maria Silva", Instant.now()));
         samples.put("MeetingResponseDTO", new MeetingResponseDTO(1L, "Grupo de apoio", "Roda semanal", Instant.now(),
                 Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true, 7, false));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));

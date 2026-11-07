@@ -43,6 +43,10 @@ public interface MeetingRegistrationRepository extends JpaRepository<MeetingRegi
             + "order by r.registeredAt, r.id.dependentId")
     List<MeetingRegistration> findParticipants(@Param("meetingId") Long meetingId);
 
+    // moderation: only the ids, so no name or nickname is loaded just to match an identity
+    @Query("select r.id.dependentId from MeetingRegistration r where r.id.meetingId = :meetingId")
+    List<Long> findDependentIds(@Param("meetingId") Long meetingId);
+
     // the data subject's own export
     @EntityGraph(attributePaths = "meeting")
     @Query("select r from MeetingRegistration r where r.id.dependentId = :dependentId "

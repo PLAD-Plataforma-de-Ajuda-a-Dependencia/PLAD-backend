@@ -18,8 +18,17 @@ final class MeetingRules {
     static final int MIN_CAPACITY = 2;
     static final int MAX_CAPACITY = 30;
     static final Duration MAX_LIST_WINDOW = Duration.ofDays(62);
+    // live room: people can come in this long before the start, and until the end
+    static final Duration JOIN_LEAD_TIME = Duration.ofMinutes(10);
+    // a join token outlives the meeting by this much (a late reconnection, an overrun)
+    static final Duration TOKEN_GRACE = Duration.ofMinutes(15);
 
     private MeetingRules() {
+    }
+
+    // [starts_at - 10 min, ends_at)
+    static boolean joinWindowOpen(Instant startsAt, Instant endsAt, Instant now) {
+        return !now.isBefore(startsAt.minus(JOIN_LEAD_TIME)) && now.isBefore(endsAt);
     }
 
     // checkLeadTime: true when creating, and when an edit moves the start (an untouched start may already be close)

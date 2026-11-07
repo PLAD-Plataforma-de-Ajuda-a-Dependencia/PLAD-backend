@@ -22,6 +22,24 @@ class ProdProfilePropertiesTest {
         assertThat(prod.getProperty("spring.datasource.password")).isEqualTo("${DB_PASSWORD}");
     }
 
+    // the live room: no default for the address, the credentials or the key of the participant identities
+    @Test
+    void liveRoomSettingsAreRequiredPlaceholdersWithoutDefault() {
+        assertThat(prod.getProperty("livekit.url")).isEqualTo("${LIVEKIT_URL}");
+        assertThat(prod.getProperty("livekit.api-key")).isEqualTo("${LIVEKIT_API_KEY}");
+        assertThat(prod.getProperty("livekit.api-secret")).isEqualTo("${LIVEKIT_API_SECRET}");
+        assertThat(prod.getProperty("meeting.identity-secret")).isEqualTo("${MEETING_IDENTITY_SECRET}");
+    }
+
+    // and the shared file has no default for the secrets either (only the local address of livekit-server --dev)
+    @Test
+    void sharedFileGivesNoDefaultToTheLiveRoomCredentials() {
+        Properties shared = load("application.properties");
+        assertThat(shared.getProperty("livekit.api-key")).isEqualTo("${LIVEKIT_API_KEY}");
+        assertThat(shared.getProperty("livekit.api-secret")).isEqualTo("${LIVEKIT_API_SECRET}");
+        assertThat(shared.getProperty("meeting.identity-secret")).isEqualTo("${MEETING_IDENTITY_SECRET}");
+    }
+
     @Test
     void apiDocsAreOff() {
         assertThat(prod.getProperty("springdoc.api-docs.enabled")).isEqualTo("false");

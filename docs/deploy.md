@@ -10,12 +10,24 @@ Como subir a API em contêiner. O perfil `prod` não tem valor padrão para banc
 | `DB_USER` | sim (prod) | usuário do banco |
 | `DB_PASSWORD` | sim (prod) | senha do banco |
 | `JWT_SECRET` | sim | segredo do JWT, no mínimo 32 bytes (`openssl rand -base64 48`). Vazio, curto demais ou o valor de exemplo antigo (`troque-por-...`) abortam a subida com `JWT_SECRET ausente ou com menos de 32 bytes`, sem imprimir o valor |
+| `LIVEKIT_URL` | sim (prod) | endereço WebSocket do LiveKit que o navegador abre, `wss://...`. Em prod `ws://` é recusado (uma página https não abre `ws://`). Fora de prod o padrão é `ws://localhost:7880` (`livekit-server --dev`) |
+| `LIVEKIT_API_KEY` | sim | chave de API do LiveKit. Vazia ou o valor de exemplo (`troque-por-...`) abortam a subida |
+| `LIVEKIT_API_SECRET` | sim | segredo de API do LiveKit, no mínimo 32 bytes. Assina o token de entrada na sala e autentica as chamadas ao LiveKit |
+| `MEETING_IDENTITY_SECRET` | sim | chave **só da PLAD**, no mínimo 32 bytes (`openssl rand -base64 48`), que gera a identidade opaca de cada pessoa em cada sala. Nunca sai do backend: o LiveKit não a conhece. Trocá-la muda as identidades de todas as salas abertas |
 | `CORS_ALLOWED_ORIGINS` | não, mas defina em prod | origens do front, separadas por vírgula, sem `*`. O padrão é `http://localhost:5173` |
 | `ADMIN_EMAIL` + `ADMIN_PASSWORD` | não | criam o primeiro admin na subida. As duas ou nenhuma |
 | `TRUSTED_PROXIES` | não | proxies em que a API confia para ler o IP do cliente (seção abaixo) |
 | `JAVA_OPTS` | não | opções da JVM. Padrão da imagem: `-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError` |
 
-Se `DB_URL`, `DB_USER` ou `DB_PASSWORD` faltarem com o perfil `prod`, `ProdEnvironmentCheck` aborta a subida listando os nomes que faltam.
+Se `DB_URL`, `DB_USER`, `DB_PASSWORD`, `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` ou `MEETING_IDENTITY_SECRET` faltarem com o perfil `prod`, `ProdEnvironmentCheck` aborta a subida listando os nomes que faltam. `LIVEKIT_API_SECRET` e `MEETING_IDENTITY_SECRET` curtos demais ou com o valor de exemplo abortam com o nome da variável, sem imprimir o valor.
+
+## Sala de reunião ao vivo (LiveKit)
+
+O vídeo roda no LiveKit (Cloud ou próprio); a API só decide quem entra e quem fala. `POST /meetings/{id}/join` assina, localmente, um token para a sala `plad-meeting-{id}` e devolve com o endereço `LIVEKIT_URL`. A moderação (liberar ou cortar microfone e câmera, remover) e o fechamento da sala ao cancelar ou encerrar a reunião chamam a API do LiveKit, com prazo de 6 s por chamada; se ele não responde, a rota dá 503 `ROOM_UNAVAILABLE` com `Retry-After` e nada muda do lado da PLAD.
+
+- A API precisa alcançar o LiveKit pela rede (saída HTTPS para o host de `LIVEKIT_URL`: o SDK troca `wss://` por `https://` sozinho). O navegador precisa alcançar o mesmo endereço por WebSocket.
+- Em desenvolvimento: `livekit-server --dev` (chave `devkey`, segredo `secret`) serve de LiveKit local, mas o segredo de 6 caracteres é recusado pela API; gere um par próprio com `livekit-server --keys "chave: segredo-com-32-bytes-ou-mais"`.
+- A janela de entrada vai de 10 minutos antes do início até o fim da reunião; o token vale até 15 minutos depois do fim.
 
 **Extensão do banco:** a migração V25 (reuniões) executa `CREATE EXTENSION IF NOT EXISTS btree_gist`, que impede duas reuniões agendadas do mesmo psicólogo de se cruzarem. O usuário de `DB_USER` precisa poder criá-la: `btree_gist` é extensão confiável desde o PostgreSQL 13, então o dono do banco basta; em serviços gerenciados que bloqueiam isso, crie a extensão antes com um superusuário (`CREATE EXTENSION btree_gist;`) e a migração só confere que ela existe.
 

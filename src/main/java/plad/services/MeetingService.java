@@ -13,6 +13,8 @@ import plad.exception.MeetingConflictException;
 import plad.exception.MeetingNotFoundException;
 import plad.repositories.MeetingRegistrationRepository;
 import plad.repositories.MeetingRepository;
+import plad.services.room.MeetingRoomGateway;
+import plad.services.room.MeetingRooms;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -30,13 +32,15 @@ public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final MeetingRegistrationRepository registrationRepository;
     private final PsychologistService psychologistService;
+    private final MeetingRoomGateway roomGateway;
     private final Clock clock;
 
     public MeetingService(MeetingRepository meetingRepository, MeetingRegistrationRepository registrationRepository,
-                          PsychologistService psychologistService, Clock clock) {
+                          PsychologistService psychologistService, MeetingRoomGateway roomGateway, Clock clock) {
         this.meetingRepository = meetingRepository;
         this.registrationRepository = registrationRepository;
         this.psychologistService = psychologistService;
+        this.roomGateway = roomGateway;
         this.clock = clock;
     }
 
@@ -95,7 +99,13 @@ public class MeetingService {
         }
         meeting.setStatus(MeetingStatus.cancelled);
         meeting.setCancelledAt(now);
-        return describe(meetingRepository.saveAndFlush(meeting), userId);
+        Meeting saved = meetingRepository.saveAndFlush(meeting);
+        // a meeting cancelled while people may already be inside must not leave them there; before the join window
+        // nobody can be in the room, so the provider is not called (and cancelling does not depend on it)
+        if (MeetingRules.joinWindowOpen(saved.getStartsAt(), saved.getEndsAt(), now)) {
+            closeRoom(saved);
+        }
+        return describe(saved, userId);
     }
 
     // only the host, only while scheduled and once it has started
@@ -112,7 +122,16 @@ public class MeetingService {
         }
         meeting.setStatus(MeetingStatus.ended);
         meeting.setEndedAt(now);
-        return describe(meetingRepository.saveAndFlush(meeting), userId);
+        Meeting saved = meetingRepository.saveAndFlush(meeting);
+        closeRoom(saved);
+        return describe(saved, userId);
+    }
+
+    // Inside this transaction on purpose: if the provider cannot be reached the answer is 503 and the meeting stays
+    // scheduled, so the host tries again. Closing quietly in the background could leave dependents in a room with no
+    // host and nobody the wiser.
+    private void closeRoom(Meeting meeting) {
+        roomGateway.closeRoom(MeetingRooms.name(meeting.getId()));
     }
 
     // meetings are public to every authenticated role; cancelled and ended ones are listed too (the calendar shows them)

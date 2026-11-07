@@ -22,6 +22,7 @@ import plad.repositories.DependentRepository;
 import plad.repositories.PsychologistRepository;
 import plad.repositories.UserRepository;
 import plad.services.JwtService;
+import plad.services.room.MeetingIdentity;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -65,6 +66,8 @@ class MeetingParticipantsTest {
     private PsychologistRepository psychologistRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private MeetingIdentity meetingIdentity;
 
     private User host;
     private User otherPsychologist;
@@ -103,11 +106,17 @@ class MeetingParticipantsTest {
                 .andExpect(jsonPath("$[0].registered_at").isNotEmpty())
                 .andExpect(jsonPath("$[1].nickname").value(brunoNickname))
                 .andExpect(jsonPath("$[1].real_name").value("Bruno Souza Real"))
-                // only these three keys: no id, no e-mail
-                .andExpect(jsonPath("$[0].length()").value(3))
+                // the identity each one has in this meeting's video room, so the host can match the person on screen
+                .andExpect(jsonPath("$[0].identity").value(meetingIdentity.of(meeting, ana.getId())))
+                .andExpect(jsonPath("$[1].identity").value(meetingIdentity.of(meeting, bruno.getId())))
+                // only these four keys: no user id, no e-mail
+                .andExpect(jsonPath("$[0].length()").value(4))
                 .andReturn().getResponse().getContentAsString();
         assertThat(response).doesNotContain(ana.getEmail()).doesNotContain(bruno.getEmail())
-                .doesNotContain("Carla Fora Real");
+                .doesNotContain("Carla Fora Real")
+                // the identity does not carry the user id
+                .doesNotContain("\"user_id\"")
+                .doesNotContain(meetingIdentity.of(meeting, outsider.getId()));
 
         List<Map<String, Object>> entries = jdbcTemplate.queryForList(AUDIT_SQL, meeting);
         assertThat(entries).hasSize(2);

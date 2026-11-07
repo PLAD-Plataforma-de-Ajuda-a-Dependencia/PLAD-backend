@@ -834,8 +834,30 @@
           "type_user"
         ]
       },
+      "MeetingJoinResponseDTO": {
+        "properties": {
+          "server_url": {
+            "description": "WebSocket address of the video room (wss://...)",
+            "example": "wss://plad.livekit.cloud",
+            "type": "string"
+          },
+          "token": {
+            "description": "Signed token that lets this person into this meeting's room only. Valid until 15 minutes after the meeting ends; it carries the nickname (or the host's name), an opaque identity and the role, and no e-mail, id or real name of a dependent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "server_url",
+          "token"
+        ]
+      },
       "MeetingParticipantResponseDTO": {
         "properties": {
+          "identity": {
+            "description": "The opaque identity this dependent has in the meeting's video room (the same one the room shows), so the host can match a person on screen to the nickname and real name below, and use it in the speak and remove routes. Different in every meeting; it holds no user id",
+            "example": "q3ZxK9mR1v0nT7bYw2cF8dJ4hA6sLpUe5oGiXkNcVtM",
+            "type": "string"
+          },
           "nickname": {
             "description": "Anonymous nickname, the name every other user sees",
             "example": "Morcego Sereno",
@@ -854,6 +876,7 @@
           }
         },
         "required": [
+          "identity",
           "nickname",
           "real_name",
           "registered_at"
@@ -1336,6 +1359,18 @@
           "password",
           "real_name",
           "type_user"
+        ]
+      },
+      "SpeakPermissionRequestDTO": {
+        "properties": {
+          "allowed": {
+            "description": "true lets the participant publish audio and video; false takes it away (and cuts what they are publishing)",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allowed"
         ]
       },
       "TriageReadResponseDTO": {
@@ -3203,7 +3238,7 @@
     },
     "/meetings/{id}/cancel": {
       "post": {
-        "description": "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled",
+        "description": "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled. From 10 minutes before the start the live room is closed too (people inside are disconnected); if the video provider cannot be reached then, the answer is 503 ROOM_UNAVAILABLE and the meeting stays scheduled",
         "operationId": "cancelMeeting",
         "parameters": [
           {
@@ -3285,14 +3320,14 @@
                 }
               }
             },
-            "description": "Database unavailable, try again after Retry-After",
+            "description": "ROOM_UNAVAILABLE: the meeting was already in its join window, the video provider did not answer and the meeting is still scheduled",
             "headers": {
               "Retry-After": {
                 "description": "Seconds until the next attempt",
                 "schema": {
-                  "format": "int32",
                   "type": "integer"
-                }
+                },
+                "style": "simple"
               }
             }
           }
@@ -3305,7 +3340,7 @@
     },
     "/meetings/{id}/end": {
       "post": {
-        "description": "Host only, while scheduled and once it has started",
+        "description": "Host only, while scheduled and once it has started. Also closes the live room: everyone inside is disconnected. If the video provider cannot be reached the answer is 503 ROOM_UNAVAILABLE and the meeting stays scheduled, so the host can try again",
         "operationId": "endMeeting",
         "parameters": [
           {
@@ -3387,6 +3422,108 @@
                 }
               }
             },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer, the room was not closed and the meeting is still scheduled",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "End a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/join": {
+      "post": {
+        "description": "The host psychologist or a dependent registered in the meeting, while it is scheduled, from 10 minutes before it starts until it ends. Answers the server address and a token for this meeting's room only, valid until 15 minutes after the meeting ends. The token carries the dependent's nickname (the host's name for the psychologist), an opaque identity that is different in every meeting, and the role; nothing else. A dependent comes in without microphone or camera until the host allows them to speak. Ask for a new token on each entry",
+        "operationId": "joinMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingJoinResponseDTO"
+                }
+              }
+            },
+            "description": "Where and how to connect"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not the host and not registered in this meeting (another psychologist, an admin, a dependent who is not in it, or one who was removed)"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: not scheduled (cancelled or ended), too early (more than 10 minutes before the start) or already over"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
             "description": "Database unavailable, try again after Retry-After",
             "headers": {
               "Retry-After": {
@@ -3399,15 +3536,15 @@
             }
           }
         },
-        "summary": "End a meeting",
+        "summary": "Enter the live room of a meeting",
         "tags": [
-          "Meetings"
+          "Meeting room"
         ]
       }
     },
     "/meetings/{id}/participants": {
       "get": {
-        "description": "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname and real name (the only place besides the triage where a psychologist sees it). Every call writes one MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. Everyone else only gets registered_count in the meeting",
+        "description": "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname and real name (the only place besides the triage where a psychologist sees it) and with the opaque identity they have in the live room, which matches the person on screen to the nickname and name and names them in the speak and remove routes. Every call writes one MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. Everyone else only gets registered_count in the meeting",
         "operationId": "listMeetingParticipants",
         "parameters": [
           {
@@ -3497,6 +3634,232 @@
         "summary": "Who is registered in a meeting",
         "tags": [
           "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/participants/{identity}/remove": {
+      "post": {
+        "description": "Host only. Drops the dependent from the room, invalidates the token they hold and takes their registration away: they cannot come back by asking for a new token (POST /join answers 403) and the seat is free. Works also for someone registered who is not connected. The identity is checked like in the speak route",
+        "operationId": "removeMeetingParticipant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dependent is out of the room and of the meeting"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND, or MEETING_PARTICIPANT_NOT_FOUND (the identity is not a dependent registered in this meeting)"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: the meeting is not scheduled"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer (with Retry-After). Nothing changed",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "Remove a participant from the meeting",
+        "tags": [
+          "Meeting room"
+        ]
+      }
+    },
+    "/meetings/{id}/participants/{identity}/speak": {
+      "post": {
+        "description": "Host only. The participant is named by the identity from GET /meetings/{id}/participants; it must belong to a dependent registered in this meeting, otherwise 404 and nothing is sent to the video provider. Allowing lets them publish audio and video (not the screen); taking it away cuts what they are publishing at once. Chat and the raised hand are not affected",
+        "operationId": "setParticipantSpeech",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeakPermissionRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Done"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "VALIDATION_ERROR: allowed is missing"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND, or MEETING_PARTICIPANT_NOT_FOUND (the identity is not a dependent registered in this meeting, or is not connected to the room)"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: the meeting is not scheduled"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer (with Retry-After). Nothing changed",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "Allow or take away a participant's microphone and camera",
+        "tags": [
+          "Meeting room"
         ]
       }
     },
@@ -4188,6 +4551,10 @@
     {
       "description": "Data about the logged-in user's own data; requires a Bearer token",
       "name": "Me"
+    },
+    {
+      "description": "Enter the live room of a meeting (host or registered dependent) and moderate it (host)",
+      "name": "Meeting room"
     },
     {
       "description": "Create and manage meetings (psychologist), read the calendar (any role) and register for a meeting (dependent)",
