@@ -36,6 +36,55 @@
           "occurred_at"
         ]
       },
+      "AdminPsychologistResponseDTO": {
+        "description": "A psychologist in the admin's list",
+        "properties": {
+          "created_at": {
+            "description": "When the account was created (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "credential_type": {
+            "description": "CRM or CRP",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": "string"
+          },
+          "crm_crp_number": {
+            "description": "Normalized credential number",
+            "example": "06123456",
+            "type": "string"
+          },
+          "id": {
+            "description": "User id of the psychologist",
+            "example": 7,
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_validated": {
+            "description": "Whether the credential was validated",
+            "example": false,
+            "type": "boolean"
+          },
+          "real_name": {
+            "description": "Full name given at registration",
+            "example": "Maria Silva",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "credential_type",
+          "crm_crp_number",
+          "id",
+          "is_validated",
+          "real_name"
+        ]
+      },
       "AdminTriageReadResponseDTO": {
         "description": "A triage as read by an admin; the dependent is identified by id and nickname, never by real name or e-mail",
         "properties": {
@@ -834,8 +883,42 @@
           "type_user"
         ]
       },
+      "MeetingJoinResponseDTO": {
+        "properties": {
+          "host_identity": {
+            "description": "The host psychologist's identity in the room. Whoever has this identity is the psychologist: decide it by this value, never by the name or the metadata of a participant. A dependent sends the raised hand to it as a data message",
+            "example": "Xk2Lp8QwR5tYu1OaXk2Lp8QwR5tYu1Oa",
+            "type": "string"
+          },
+          "identity": {
+            "description": "This person's identity in the room (the same as the token's subject): opaque, different in every meeting",
+            "example": "q3ZxK9mR1v0nT7bYq3ZxK9mR1v0nT7bY",
+            "type": "string"
+          },
+          "server_url": {
+            "description": "WebSocket address of the video room (wss://...)",
+            "example": "wss://plad.livekit.cloud",
+            "type": "string"
+          },
+          "token": {
+            "description": "Signed token that lets this person into this meeting's room only. Valid for 2 minutes from now: LiveKit checks it only on the first connection, so ask for a new one on every entry (also after a lost connection or a reload) and never store it. It carries the nickname (or the host's name), an opaque identity and the role, and no e-mail, id or real name of a dependent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host_identity",
+          "identity",
+          "server_url",
+          "token"
+        ]
+      },
       "MeetingParticipantResponseDTO": {
         "properties": {
+          "identity": {
+            "description": "The opaque identity this dependent has in the meeting's video room (the same one the room shows), so the host can match a person on screen to the nickname and real name below, and use it in the speak and remove routes. Different in every meeting; it holds no user id",
+            "example": "q3ZxK9mR1v0nT7bYw2cF8dJ4hA6sLpUe5oGiXkNcVtM",
+            "type": "string"
+          },
           "nickname": {
             "description": "Anonymous nickname, the name every other user sees",
             "example": "Morcego Sereno",
@@ -854,6 +937,7 @@
           }
         },
         "required": [
+          "identity",
           "nickname",
           "real_name",
           "registered_at"
@@ -1021,6 +1105,49 @@
             "description": "Items of this page",
             "items": {
               "$ref": "#/components/schemas/AccessLogEntryDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
+        ]
+      },
+      "PageResponseDTOAdminPsychologistResponseDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/AdminPsychologistResponseDTO"
             },
             "type": "array"
           },
@@ -1338,6 +1465,18 @@
           "type_user"
         ]
       },
+      "SpeakPermissionRequestDTO": {
+        "properties": {
+          "allowed": {
+            "description": "true lets the participant publish audio and video; false takes it away (and cuts what they are publishing)",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allowed"
+        ]
+      },
       "TriageReadResponseDTO": {
         "description": "A triage as read by a psychologist; the dependent is identified by id, nickname and real name (never e-mail)",
         "properties": {
@@ -1594,6 +1733,114 @@
         "summary": "List audit entries, newest first",
         "tags": [
           "Audit"
+        ]
+      }
+    },
+    "/admin/psychologists": {
+      "get": {
+        "description": "Real name, credential type and number, validation state and sign-up date. The e-mail is never sent, and no data of any dependent is in the list",
+        "operationId": "listAdminPsychologists",
+        "parameters": [
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOAdminPsychologistResponseDTO"
+                }
+              }
+            },
+            "description": "One page of psychologists"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List psychologists as an admin, newest first",
+        "tags": [
+          "Admin psychologists"
         ]
       }
     },
@@ -3203,7 +3450,7 @@
     },
     "/meetings/{id}/cancel": {
       "post": {
-        "description": "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled",
+        "description": "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled. From 10 minutes before the start the live room is closed too (people inside are disconnected); if the video provider cannot be reached then, the answer is 503 ROOM_UNAVAILABLE and the meeting stays scheduled",
         "operationId": "cancelMeeting",
         "parameters": [
           {
@@ -3285,14 +3532,14 @@
                 }
               }
             },
-            "description": "Database unavailable, try again after Retry-After",
+            "description": "ROOM_UNAVAILABLE: the meeting was already in its join window, the video provider did not answer and the meeting is still scheduled",
             "headers": {
               "Retry-After": {
                 "description": "Seconds until the next attempt",
                 "schema": {
-                  "format": "int32",
                   "type": "integer"
-                }
+                },
+                "style": "simple"
               }
             }
           }
@@ -3305,7 +3552,7 @@
     },
     "/meetings/{id}/end": {
       "post": {
-        "description": "Host only, while scheduled and once it has started",
+        "description": "Host only, while scheduled and once it has started. Also closes the live room: everyone inside is disconnected. If the video provider cannot be reached the answer is 503 ROOM_UNAVAILABLE and the meeting stays scheduled, so the host can try again",
         "operationId": "endMeeting",
         "parameters": [
           {
@@ -3387,6 +3634,108 @@
                 }
               }
             },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer, the room was not closed and the meeting is still scheduled",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "End a meeting",
+        "tags": [
+          "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/join": {
+      "post": {
+        "description": "The host psychologist or a dependent registered in the meeting, while it is scheduled, from 10 minutes before it starts until it ends. Answers the server address, a token for this meeting's room only, this person's identity and the host's identity. The token is valid for 2 minutes: LiveKit checks it only on the first connection, and removing someone from the room does not invalidate the token they hold, so ask for a new token on every entry (also after a lost connection or a reload) and never store it. The token carries the dependent's nickname (the host's name for the psychologist), an opaque identity that is different in every meeting, and the role; nothing else. A dependent comes in without microphone or camera until the host allows them to speak, and cannot change their own name or metadata in the room: the raised hand is a data message to the host_identity, who keeps its state",
+        "operationId": "joinMeeting",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingJoinResponseDTO"
+                }
+              }
+            },
+            "description": "Where and how to connect"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not the host and not registered in this meeting (another psychologist, an admin, a dependent who is not in it, or one who was removed)"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: not scheduled (cancelled or ended), too early (more than 10 minutes before the start) or already over"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
             "description": "Database unavailable, try again after Retry-After",
             "headers": {
               "Retry-After": {
@@ -3399,15 +3748,15 @@
             }
           }
         },
-        "summary": "End a meeting",
+        "summary": "Enter the live room of a meeting",
         "tags": [
-          "Meetings"
+          "Meeting room"
         ]
       }
     },
     "/meetings/{id}/participants": {
       "get": {
-        "description": "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname and real name (the only place besides the triage where a psychologist sees it). Every call writes one MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. Everyone else only gets registered_count in the meeting",
+        "description": "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname and real name (the only place besides the triage where a psychologist sees it) and with the opaque identity they have in the live room, which matches the person on screen to the nickname and name and names them in the speak and remove routes. Every call writes one MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. Everyone else only gets registered_count in the meeting",
         "operationId": "listMeetingParticipants",
         "parameters": [
           {
@@ -3497,6 +3846,232 @@
         "summary": "Who is registered in a meeting",
         "tags": [
           "Meetings"
+        ]
+      }
+    },
+    "/meetings/{id}/participants/{identity}/remove": {
+      "post": {
+        "description": "Host only. Drops the dependent from the room and takes their registration away: they cannot come back by asking for a new token (POST /join answers 403) and the seat is free. The token they already hold is not invalidated (LiveKit has no such call); it expires 2 minutes after it was issued. Works also for someone registered who is not connected. The identity is checked like in the speak route",
+        "operationId": "removeMeetingParticipant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dependent is out of the room and of the meeting"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND, or MEETING_PARTICIPANT_NOT_FOUND (the identity is not a dependent registered in this meeting)"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: the meeting is not scheduled"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer (with Retry-After). Nothing changed",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "Remove a participant from the meeting",
+        "tags": [
+          "Meeting room"
+        ]
+      }
+    },
+    "/meetings/{id}/participants/{identity}/speak": {
+      "post": {
+        "description": "Host only. The participant is named by the identity from GET /meetings/{id}/participants; it must belong to a dependent registered in this meeting, otherwise 404 and nothing is sent to the video provider. Allowing lets them publish audio and video (not the screen); taking it away cuts what they are publishing at once. Listening and the chat (data messages, which carry the raised hand) are not affected",
+        "operationId": "setParticipantSpeech",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeakPermissionRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Done"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "VALIDATION_ERROR: allowed is missing"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Not a psychologist, or not the host of this meeting"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_FOUND, or MEETING_PARTICIPANT_NOT_FOUND (the identity is not a dependent registered in this meeting, or is not connected to the room)"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "MEETING_NOT_OPEN: the meeting is not scheduled"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "ROOM_UNAVAILABLE: the video provider did not answer (with Retry-After). Nothing changed",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "type": "integer"
+                },
+                "style": "simple"
+              }
+            }
+          }
+        },
+        "summary": "Allow or take away a participant's microphone and camera",
+        "tags": [
+          "Meeting room"
         ]
       }
     },
@@ -4174,6 +4749,10 @@
   ],
   "tags": [
     {
+      "description": "Listing psychologists as an admin; no e-mail and no dependent data",
+      "name": "Admin psychologists"
+    },
+    {
       "description": "Reading triages as an admin; the dependent is shown by nickname only",
       "name": "Admin triage"
     },
@@ -4188,6 +4767,10 @@
     {
       "description": "Data about the logged-in user's own data; requires a Bearer token",
       "name": "Me"
+    },
+    {
+      "description": "Enter the live room of a meeting (host or registered dependent) and moderate it (host)",
+      "name": "Meeting room"
     },
     {
       "description": "Create and manage meetings (psychologist), read the calendar (any role) and register for a meeting (dependent)",

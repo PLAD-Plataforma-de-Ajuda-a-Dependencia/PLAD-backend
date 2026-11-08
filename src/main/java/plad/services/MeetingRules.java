@@ -18,8 +18,20 @@ final class MeetingRules {
     static final int MIN_CAPACITY = 2;
     static final int MAX_CAPACITY = 30;
     static final Duration MAX_LIST_WINDOW = Duration.ofDays(62);
+    // live room: people can come in this long before the start, and until the end
+    static final Duration JOIN_LEAD_TIME = Duration.ofMinutes(10);
+    // How long a join token is valid. LiveKit only checks it on the first connection (it renews the token of whoever
+    // is connected), and it does not invalidate the token of someone removed from the room, so this short life is what
+    // bounds a removed person (or anyone, after an early end) coming back straight to LiveKit. The front asks
+    // POST /join for a new token on every entry and never keeps one.
+    static final Duration TOKEN_TTL = Duration.ofMinutes(2);
 
     private MeetingRules() {
+    }
+
+    // [starts_at - 10 min, ends_at)
+    static boolean joinWindowOpen(Instant startsAt, Instant endsAt, Instant now) {
+        return !now.isBefore(startsAt.minus(JOIN_LEAD_TIME)) && now.isBefore(endsAt);
     }
 
     // checkLeadTime: true when creating, and when an edit moves the start (an untouched start may already be close)

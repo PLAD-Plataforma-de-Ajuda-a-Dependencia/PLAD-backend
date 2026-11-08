@@ -113,6 +113,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.CONFLICT, ex);
     }
 
+    @ExceptionHandler(MeetingNotOpenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingNotOpen(MeetingNotOpenException ex) {
+        return error(HttpStatus.CONFLICT, ex);
+    }
+
+    @ExceptionHandler(MeetingParticipantNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMeetingParticipantNotFound(MeetingParticipantNotFoundException ex) {
+        return error(HttpStatus.NOT_FOUND, ex);
+    }
+
+    // the video provider is out of reach or refused: nothing was changed on our side, try again shortly
+    @ExceptionHandler(RoomUnavailableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRoomUnavailable(RoomUnavailableException ex) {
+        log.warn("Video provider unavailable: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE) // 503
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(DB_RETRY_AFTER_SECONDS))
+                .body(new ErrorResponseDTO(ex.getCode().name(), ex.getMessage(), Instant.now()));
+    }
+
     @ExceptionHandler(TriageAlreadyExistException.class)
     public ResponseEntity<ErrorResponseDTO> handleTriageExists(TriageAlreadyExistException ex) {
         return error(HttpStatus.CONFLICT, ex);

@@ -8,13 +8,15 @@ import org.springframework.core.env.Profiles;
 
 import java.util.List;
 
-// application-prod.properties has no defaults for the database (${DB_URL}, ${DB_USER}, ${DB_PASSWORD}), but Spring Boot
+// application-prod.properties has no defaults for the database (${DB_URL}, ${DB_USER}, ${DB_PASSWORD}) nor for the live
+// room (${LIVEKIT_URL}, ${LIVEKIT_API_KEY}, ${LIVEKIT_API_SECRET}, ${MEETING_IDENTITY_SECRET}), but Spring Boot
 // leaves an unresolved placeholder as literal text when it binds spring.datasource.*, so a missing variable would only
 // show up later as "'url' must start with jdbc". This stops the start with the names of the missing variables.
 // Registered in META-INF/spring.factories.
 public class ProdEnvironmentCheck implements EnvironmentPostProcessor, Ordered {
 
-    static final List<String> REQUIRED = List.of("DB_URL", "DB_USER", "DB_PASSWORD");
+    static final List<String> REQUIRED = List.of("DB_URL", "DB_USER", "DB_PASSWORD",
+            "LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET", "MEETING_IDENTITY_SECRET");
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {

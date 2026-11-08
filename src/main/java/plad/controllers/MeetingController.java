@@ -2,6 +2,7 @@ package plad.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -109,7 +110,10 @@ public class MeetingController {
     }
 
     @Operation(operationId = "cancelMeeting", summary = "Cancel a meeting",
-            description = "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled")
+            description = "Host only, while scheduled and before it ends. The meeting stays in the calendar as cancelled. "
+                    + "From 10 minutes before the start the live room is closed too (people inside are disconnected); "
+                    + "if the video provider cannot be reached then, the answer is 503 ROOM_UNAVAILABLE and the meeting "
+                    + "stays scheduled")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The meeting, now cancelled",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -125,6 +129,12 @@ public class MeetingController {
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "409", description = "MEETING_CONFLICT: not scheduled or already ended",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "503", headers = @Header(name = "Retry-After",
+                    description = "Seconds until the next attempt", schema = @Schema(type = "integer")),
+                    description = "ROOM_UNAVAILABLE: the meeting was already in its join window, the video provider did "
+                            + "not answer and the meeting is still scheduled",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/{id}/cancel")
@@ -134,7 +144,9 @@ public class MeetingController {
     }
 
     @Operation(operationId = "endMeeting", summary = "End a meeting",
-            description = "Host only, while scheduled and once it has started")
+            description = "Host only, while scheduled and once it has started. Also closes the live room: everyone inside "
+                    + "is disconnected. If the video provider cannot be reached the answer is 503 ROOM_UNAVAILABLE and the "
+                    + "meeting stays scheduled, so the host can try again")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The meeting, now ended",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -149,6 +161,12 @@ public class MeetingController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "409", description = "MEETING_CONFLICT: not scheduled or not started yet",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "503", headers = @Header(name = "Retry-After",
+                    description = "Seconds until the next attempt", schema = @Schema(type = "integer")),
+                    description = "ROOM_UNAVAILABLE: the video provider did not answer, the room was not closed and the "
+                            + "meeting is still scheduled",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -253,7 +271,9 @@ public class MeetingController {
 
     @Operation(operationId = "listMeetingParticipants", summary = "Who is registered in a meeting",
             description = "Only the psychologist who hosts the meeting, whatever its state. Each dependent comes with nickname "
-                    + "and real name (the only place besides the triage where a psychologist sees it). Every call writes one "
+                    + "and real name (the only place besides the triage where a psychologist sees it) and with the opaque "
+                    + "identity they have in the live room, which matches the person on screen to the nickname and name "
+                    + "and names them in the speak and remove routes. Every call writes one "
                     + "MEETING_PARTICIPANTS_VIEWED entry per dependent listed, which each of them sees in GET /me/access-log. "
                     + "Everyone else only gets registered_count in the meeting")
     @ApiResponses({

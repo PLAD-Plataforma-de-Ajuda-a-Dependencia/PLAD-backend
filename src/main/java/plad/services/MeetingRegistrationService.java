@@ -16,6 +16,7 @@ import plad.exception.MeetingNotFoundException;
 import plad.repositories.MeetingRegistrationRepository;
 import plad.repositories.MeetingRepository;
 import plad.repositories.UserRepository;
+import plad.services.room.MeetingIdentity;
 
 import java.time.Clock;
 import java.util.List;
@@ -34,18 +35,21 @@ public class MeetingRegistrationService {
     private final PsychologistService psychologistService;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final MeetingIdentity meetingIdentity;
     private final Clock clock;
 
     public MeetingRegistrationService(MeetingRepository meetingRepository,
                                       MeetingRegistrationRepository registrationRepository,
                                       MeetingService meetingService, PsychologistService psychologistService,
-                                      UserRepository userRepository, AuditService auditService, Clock clock) {
+                                      UserRepository userRepository, AuditService auditService,
+                                      MeetingIdentity meetingIdentity, Clock clock) {
         this.meetingRepository = meetingRepository;
         this.registrationRepository = registrationRepository;
         this.meetingService = meetingService;
         this.psychologistService = psychologistService;
         this.userRepository = userRepository;
         this.auditService = auditService;
+        this.meetingIdentity = meetingIdentity;
         this.clock = clock;
     }
 
@@ -98,7 +102,9 @@ public class MeetingRegistrationService {
                 psychologistId, actorRole, registration.getDependent().getUserId(), AUDIT_ENTITY, meetingId,
                 Map.of("meeting_id", meetingId)));
         return registrations.stream()
-                .map(registration -> new MeetingParticipantResponseDTO(registration.getDependent().getNickname(),
+                .map(registration -> new MeetingParticipantResponseDTO(
+                        meetingIdentity.of(meetingId, registration.getDependent().getUserId()),
+                        registration.getDependent().getNickname(),
                         registration.getDependent().getUser().getRealName(), registration.getRegisteredAt()))
                 .toList();
     }

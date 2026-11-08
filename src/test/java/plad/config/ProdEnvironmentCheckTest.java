@@ -24,10 +24,7 @@ class ProdEnvironmentCheckTest {
 
     @Test
     void prodTreatsABlankVariableAsMissing() {
-        MockEnvironment env = new MockEnvironment()
-                .withProperty("DB_URL", "jdbc:postgresql://db/x")
-                .withProperty("DB_USER", "app")
-                .withProperty("DB_PASSWORD", "  ");
+        MockEnvironment env = withEveryVariable().withProperty("DB_PASSWORD", "  ");
         env.setActiveProfiles("prod");
 
         assertThatThrownBy(() -> check.postProcessEnvironment(env, null))
@@ -36,13 +33,49 @@ class ProdEnvironmentCheckTest {
 
     @Test
     void prodWithAllVariablesStarts() {
-        MockEnvironment env = new MockEnvironment()
-                .withProperty("DB_URL", "jdbc:postgresql://db/x")
-                .withProperty("DB_USER", "app")
-                .withProperty("DB_PASSWORD", "secret");
+        MockEnvironment env = withEveryVariable();
         env.setActiveProfiles("prod");
 
         assertThatCode(() -> check.postProcessEnvironment(env, null)).doesNotThrowAnyException();
+    }
+
+    // the live room has no default in prod: LiveKit's address and credentials, and the key of the participant identities
+    @Test
+    void prodWithoutTheLiveRoomVariablesStopsAndNamesEveryOne() {
+        MockEnvironment env = new MockEnvironment()
+                .withProperty("DB_URL", "jdbc:postgresql://db/x")
+                .withProperty("DB_USER", "app")
+                .withProperty("DB_PASSWORD", "secret")
+                .withProperty("LIVEKIT_API_KEY", "key");
+        env.setActiveProfiles("prod");
+
+        assertThatThrownBy(() -> check.postProcessEnvironment(env, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("LIVEKIT_URL")
+                .hasMessageContaining("LIVEKIT_API_SECRET")
+                .hasMessageContaining("MEETING_IDENTITY_SECRET")
+                .hasMessageNotContaining("LIVEKIT_API_KEY")
+                .hasMessageNotContaining("DB_URL");
+    }
+
+    @Test
+    void prodTreatsABlankIdentitySecretAsMissing() {
+        MockEnvironment env = withEveryVariable().withProperty("MEETING_IDENTITY_SECRET", " ");
+        env.setActiveProfiles("prod");
+
+        assertThatThrownBy(() -> check.postProcessEnvironment(env, null))
+                .hasMessageContaining("MEETING_IDENTITY_SECRET");
+    }
+
+    private static MockEnvironment withEveryVariable() {
+        return new MockEnvironment()
+                .withProperty("DB_URL", "jdbc:postgresql://db/x")
+                .withProperty("DB_USER", "app")
+                .withProperty("DB_PASSWORD", "secret")
+                .withProperty("LIVEKIT_URL", "wss://plad.livekit.cloud")
+                .withProperty("LIVEKIT_API_KEY", "key")
+                .withProperty("LIVEKIT_API_SECRET", "secret")
+                .withProperty("MEETING_IDENTITY_SECRET", "identity");
     }
 
     @Test

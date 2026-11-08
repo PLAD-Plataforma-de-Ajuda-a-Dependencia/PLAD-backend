@@ -19,7 +19,23 @@
 		<bucket4j.version>8.20.0</bucket4j.version>
 		<springdoc.version>3.1.1</springdoc.version>
 		<jacoco.version>0.8.16</jacoco.version>
+		<livekit.version>0.17.0</livekit.version>
+		<okhttp.version>5.3.2</okhttp.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- retrofit 3.0.0 still asks for okhttp 4.12 while the LiveKit SDK is built against 5.x (its logging-interceptor
+			     brings okhttp-jvm 5.3.2), and two OkHttp majors on one classpath share the okhttp3 package. The SDK imports
+			     this BOM in its own POM, which Maven does not pass on to us, so it is repeated here -->
+			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp-bom</artifactId>
+				<version>${okhttp.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -125,6 +141,12 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
 		</dependency>
+		<!-- live meeting room: token signing and the room service (speak permission, remove, close) -->
+		<dependency>
+			<groupId>io.livekit</groupId>
+			<artifactId>livekit-server</artifactId>
+			<version>${livekit.version}</version>
+		</dependency>
 
 
 	</dependencies>
@@ -167,6 +189,11 @@
 					<systemPropertyVariables>
 						<!-- tests only: the app itself refuses to start without the JWT_SECRET env var -->
 						<jwt.secret>test-only-not-a-real-secret-0123456789-0123456789-0123456789</jwt.secret>
+						<!-- tests only: the live room settings have no default either. The tests never call LiveKit (a fake
+						     MeetingRoomGateway replaces the real one); the key and secret only sign the tokens they decode -->
+						<livekit.api-key>test-only-livekit-key</livekit.api-key>
+						<livekit.api-secret>test-only-livekit-secret-0123456789-0123456789</livekit.api-secret>
+						<meeting.identity-secret>test-only-identity-secret-0123456789-0123456789</meeting.identity-secret>
 						<!-- tests only: the API docs are closed by default (see application.properties) -->
 						<springdoc.api-docs.enabled>true</springdoc.api-docs.enabled>
 						<!-- tests only: never read a developer's .env (see application.properties) -->
@@ -213,6 +240,9 @@
 							<jvmArgs>
 								<value>-Duser.timezone=America/Sao_Paulo</value>
 								<value>-Djwt.secret=test-only-not-a-real-secret-0123456789-0123456789-0123456789</value>
+								<value>-Dlivekit.api-key=test-only-livekit-key</value>
+								<value>-Dlivekit.api-secret=test-only-livekit-secret-0123456789-0123456789</value>
+								<value>-Dmeeting.identity-secret=test-only-identity-secret-0123456789-0123456789</value>
 								<value>-Dspringdoc.api-docs.enabled=true</value>
 							</jvmArgs>
 						</configuration>

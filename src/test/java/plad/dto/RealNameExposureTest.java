@@ -25,7 +25,8 @@ class RealNameExposureTest {
             "MeResponseDTO",        // GET /me: only filled for psychologists; a dependent gets null
             "DependentIdentityDTO", // triage as read by a psychologist: the only place another person sees it
             "MeExportPsychologistDTO", // GET /me/export: a psychologist's own name, to that psychologist; the dependent block has none
-            "MeetingParticipantResponseDTO" // GET /meetings/{id}/participants: the host psychologist only (decision 26), audited (27)
+            "MeetingParticipantResponseDTO", // GET /meetings/{id}/participants: the host psychologist only (decision 26), audited (27)
+            "AdminPsychologistResponseDTO" // GET /admin/psychologists: a psychologist's name, to the admin only (decision 32); no e-mail, no dependent
     );
 
     @Test
@@ -55,6 +56,15 @@ class RealNameExposureTest {
                     .noneMatch(name -> name.toLowerCase().contains("realname"))
                     .noneMatch(name -> name.toLowerCase().contains("email"));
         }
+    }
+
+    // the admin's list of psychologists shows a psychologist's name (decision 32) but never an e-mail or anything of a dependent
+    @Test
+    void adminPsychologistListHasNoEmailAndNoDependentData() {
+        assertThat(Arrays.stream(AdminPsychologistResponseDTO.class.getRecordComponents()).map(RecordComponent::getName))
+                .noneMatch(name -> name.toLowerCase().contains("email"))
+                .noneMatch(name -> name.toLowerCase().contains("nickname"))
+                .noneMatch(name -> name.toLowerCase().contains("dependent"));
     }
 
     // the identity DTO is the psychologist's: the psychologist-side triage DTO is the only one that embeds it

@@ -73,4 +73,18 @@ class MeetingRulesTest {
                 .isInstanceOf(InvalidMeetingException.class);
         assertThatThrownBy(() -> MeetingRules.validateWindow(NOW, NOW)).isInstanceOf(InvalidMeetingException.class);
     }
+
+    // live room door: [starts_at - 10 min, ends_at)
+    @Test
+    void theJoinWindowOpensExactly10MinutesBeforeTheStartAndClosesExactlyAtTheEnd() {
+        Instant start = NOW.plus(1, ChronoUnit.HOURS);
+        Instant end = start.plus(1, ChronoUnit.HOURS);
+        Instant opens = start.minus(10, ChronoUnit.MINUTES);
+
+        assertThat(MeetingRules.joinWindowOpen(start, end, opens.minusSeconds(1))).isFalse();
+        assertThat(MeetingRules.joinWindowOpen(start, end, opens)).isTrue();
+        assertThat(MeetingRules.joinWindowOpen(start, end, start)).isTrue();
+        assertThat(MeetingRules.joinWindowOpen(start, end, end.minusSeconds(1))).isTrue();
+        assertThat(MeetingRules.joinWindowOpen(start, end, end)).isFalse();
+    }
 }
