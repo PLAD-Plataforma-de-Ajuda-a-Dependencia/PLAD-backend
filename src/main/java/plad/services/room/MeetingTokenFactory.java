@@ -5,7 +5,6 @@ import io.livekit.server.CanPublish;
 import io.livekit.server.CanPublishData;
 import io.livekit.server.CanPublishSources;
 import io.livekit.server.CanSubscribe;
-import io.livekit.server.CanUpdateOwnMetadata;
 import io.livekit.server.RoomAdmin;
 import io.livekit.server.RoomJoin;
 import io.livekit.server.RoomName;
@@ -46,10 +45,11 @@ public class MeetingTokenFactory {
         if (role == Role.psicologo) {
             token.addGrants(new CanPublish(true), new CanPublishSources(HOST_SOURCES), new RoomAdmin(true));
         } else {
-            // no canPublish: neither microphone nor camera until the host allows it. canUpdateOwnMetadata is for the
-            // raised hand (a participant attribute); LiveKit has no narrower permission, so a dependent could also
-            // rename themselves in the room: nothing here trusts the name or the metadata of a participant
-            token.addGrants(new CanPublish(false), new CanUpdateOwnMetadata(true));
+            // no canPublish: neither microphone nor camera until the host allows it. No canUpdateOwnMetadata either: the
+            // dependent cannot change their name or metadata in the room. The raised hand is a data message
+            // (canPublishData, already granted) addressed to the host, who keeps the state; nothing here trusts the
+            // name or the metadata of a participant
+            token.addGrants(new CanPublish(false));
         }
         return token.toJwt();
     }

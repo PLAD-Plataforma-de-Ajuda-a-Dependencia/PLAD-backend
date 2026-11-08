@@ -57,8 +57,10 @@ public class LiveKitMeetingRoomGateway implements MeetingRoomGateway {
 
     @Override
     public void removeParticipant(String room, String identity) {
-        // no revokeTokenTs: the server then invalidates every token it issued up to now (plus a minute of leeway),
-        // so the token the person already holds cannot bring them back
+        // RemoveParticipant only disconnects the person: LiveKit does NOT invalidate the token they hold, so they could
+        // connect again with it until it expires. What keeps them out is (a) the short life of our tokens
+        // (MeetingRules#TOKEN_TTL, 2 min, which LiveKit checks only on a first connection) and (b) POST /join, the only
+        // way to a new token, answering 403 once their registration is gone (MeetingModerationService#remove).
         execute("remove participant", client.removeParticipant(room, identity), false);
     }
 

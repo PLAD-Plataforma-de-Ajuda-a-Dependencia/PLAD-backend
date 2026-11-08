@@ -222,6 +222,22 @@ class MeetingModerationTest {
         remove(live, identity, host).andExpect(status().isNotFound());
     }
 
+    // LiveKit does not invalidate the token of someone removed, so the only door to a new one must be shut: POST /join
+    // is the one place that issues tokens, and it answers 403 once the registration is gone
+    @Test
+    void aRemovedDependentGetsNoNewTokenFromJoin() throws Exception {
+        join(live, ana).andExpect(status().isOk());      // before: they could ask for a token
+        join(live, bruno).andExpect(status().isOk());
+
+        remove(live, meetingIdentity.of(live, ana.getId()), host).andExpect(status().isNoContent());
+
+        join(live, ana).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.token").doesNotExist());
+        join(live, ana).andExpect(status().isForbidden()); // asking again changes nothing
+        join(live, bruno).andExpect(status().isOk());      // only that one
+    }
+
     @Test
     void aRegisteredDependentWhoIsNotConnectedIsStillRemoved() throws Exception {
         fake.failWith(new MeetingParticipantNotFoundException("That participant is not in the room"));

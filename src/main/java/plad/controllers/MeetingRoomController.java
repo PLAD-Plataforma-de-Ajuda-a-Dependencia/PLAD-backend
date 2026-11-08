@@ -42,11 +42,15 @@ public class MeetingRoomController {
 
     @Operation(operationId = "joinMeeting", summary = "Enter the live room of a meeting",
             description = "The host psychologist or a dependent registered in the meeting, while it is scheduled, from "
-                    + "10 minutes before it starts until it ends. Answers the server address and a token for this "
-                    + "meeting's room only, valid until 15 minutes after the meeting ends. The token carries the "
-                    + "dependent's nickname (the host's name for the psychologist), an opaque identity that is "
-                    + "different in every meeting, and the role; nothing else. A dependent comes in without "
-                    + "microphone or camera until the host allows them to speak. Ask for a new token on each entry")
+                    + "10 minutes before it starts until it ends. Answers the server address, a token for this "
+                    + "meeting's room only, this person's identity and the host's identity. The token is valid for 2 "
+                    + "minutes: LiveKit checks it only on the first connection, and removing someone from the room does "
+                    + "not invalidate the token they hold, so ask for a new token on every entry (also after a lost "
+                    + "connection or a reload) and never store it. The token carries the dependent's nickname (the "
+                    + "host's name for the psychologist), an opaque identity that is different in every meeting, and "
+                    + "the role; nothing else. A dependent comes in without microphone or camera until the host allows "
+                    + "them to speak, and cannot change their own name or metadata in the room: the raised hand is a "
+                    + "data message to the host_identity, who keeps its state")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Where and how to connect",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -75,7 +79,8 @@ public class MeetingRoomController {
             description = "Host only. The participant is named by the identity from GET /meetings/{id}/participants; it "
                     + "must belong to a dependent registered in this meeting, otherwise 404 and nothing is sent to the "
                     + "video provider. Allowing lets them publish audio and video (not the screen); taking it away cuts "
-                    + "what they are publishing at once. Chat and the raised hand are not affected")
+                    + "what they are publishing at once. Listening and the chat (data messages, which carry the raised "
+                    + "hand) are not affected")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Done"),
             @ApiResponse(responseCode = "400", description = "VALIDATION_ERROR: allowed is missing",
@@ -111,10 +116,11 @@ public class MeetingRoomController {
     }
 
     @Operation(operationId = "removeMeetingParticipant", summary = "Remove a participant from the meeting",
-            description = "Host only. Drops the dependent from the room, invalidates the token they hold and takes their "
-                    + "registration away: they cannot come back by asking for a new token (POST /join answers 403) and "
-                    + "the seat is free. Works also for someone registered who is not connected. The identity is checked "
-                    + "like in the speak route")
+            description = "Host only. Drops the dependent from the room and takes their registration away: they cannot "
+                    + "come back by asking for a new token (POST /join answers 403) and the seat is free. The token they "
+                    + "already hold is not invalidated (LiveKit has no such call); it expires 2 minutes after it was "
+                    + "issued. Works also for someone registered who is not connected. The identity is checked like in "
+                    + "the speak route")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "The dependent is out of the room and of the meeting"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",

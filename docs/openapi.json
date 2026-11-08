@@ -885,17 +885,29 @@
       },
       "MeetingJoinResponseDTO": {
         "properties": {
+          "host_identity": {
+            "description": "The host psychologist's identity in the room. Whoever has this identity is the psychologist: decide it by this value, never by the name or the metadata of a participant. A dependent sends the raised hand to it as a data message",
+            "example": "Xk2Lp8QwR5tYu1OaXk2Lp8QwR5tYu1Oa",
+            "type": "string"
+          },
+          "identity": {
+            "description": "This person's identity in the room (the same as the token's subject): opaque, different in every meeting",
+            "example": "q3ZxK9mR1v0nT7bYq3ZxK9mR1v0nT7bY",
+            "type": "string"
+          },
           "server_url": {
             "description": "WebSocket address of the video room (wss://...)",
             "example": "wss://plad.livekit.cloud",
             "type": "string"
           },
           "token": {
-            "description": "Signed token that lets this person into this meeting's room only. Valid until 15 minutes after the meeting ends; it carries the nickname (or the host's name), an opaque identity and the role, and no e-mail, id or real name of a dependent",
+            "description": "Signed token that lets this person into this meeting's room only. Valid for 2 minutes from now: LiveKit checks it only on the first connection, so ask for a new one on every entry (also after a lost connection or a reload) and never store it. It carries the nickname (or the host's name), an opaque identity and the role, and no e-mail, id or real name of a dependent",
             "type": "string"
           }
         },
         "required": [
+          "host_identity",
+          "identity",
           "server_url",
           "token"
         ]
@@ -3642,7 +3654,7 @@
     },
     "/meetings/{id}/join": {
       "post": {
-        "description": "The host psychologist or a dependent registered in the meeting, while it is scheduled, from 10 minutes before it starts until it ends. Answers the server address and a token for this meeting's room only, valid until 15 minutes after the meeting ends. The token carries the dependent's nickname (the host's name for the psychologist), an opaque identity that is different in every meeting, and the role; nothing else. A dependent comes in without microphone or camera until the host allows them to speak. Ask for a new token on each entry",
+        "description": "The host psychologist or a dependent registered in the meeting, while it is scheduled, from 10 minutes before it starts until it ends. Answers the server address, a token for this meeting's room only, this person's identity and the host's identity. The token is valid for 2 minutes: LiveKit checks it only on the first connection, and removing someone from the room does not invalidate the token they hold, so ask for a new token on every entry (also after a lost connection or a reload) and never store it. The token carries the dependent's nickname (the host's name for the psychologist), an opaque identity that is different in every meeting, and the role; nothing else. A dependent comes in without microphone or camera until the host allows them to speak, and cannot change their own name or metadata in the room: the raised hand is a data message to the host_identity, who keeps its state",
         "operationId": "joinMeeting",
         "parameters": [
           {
@@ -3839,7 +3851,7 @@
     },
     "/meetings/{id}/participants/{identity}/remove": {
       "post": {
-        "description": "Host only. Drops the dependent from the room, invalidates the token they hold and takes their registration away: they cannot come back by asking for a new token (POST /join answers 403) and the seat is free. Works also for someone registered who is not connected. The identity is checked like in the speak route",
+        "description": "Host only. Drops the dependent from the room and takes their registration away: they cannot come back by asking for a new token (POST /join answers 403) and the seat is free. The token they already hold is not invalidated (LiveKit has no such call); it expires 2 minutes after it was issued. Works also for someone registered who is not connected. The identity is checked like in the speak route",
         "operationId": "removeMeetingParticipant",
         "parameters": [
           {
@@ -3942,7 +3954,7 @@
     },
     "/meetings/{id}/participants/{identity}/speak": {
       "post": {
-        "description": "Host only. The participant is named by the identity from GET /meetings/{id}/participants; it must belong to a dependent registered in this meeting, otherwise 404 and nothing is sent to the video provider. Allowing lets them publish audio and video (not the screen); taking it away cuts what they are publishing at once. Chat and the raised hand are not affected",
+        "description": "Host only. The participant is named by the identity from GET /meetings/{id}/participants; it must belong to a dependent registered in this meeting, otherwise 404 and nothing is sent to the video provider. Allowing lets them publish audio and video (not the screen); taking it away cuts what they are publishing at once. Listening and the chat (data messages, which carry the raised hand) are not affected",
         "operationId": "setParticipantSpeech",
         "parameters": [
           {

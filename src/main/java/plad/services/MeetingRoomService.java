@@ -18,7 +18,6 @@ import plad.services.room.MeetingTokenFactory;
 import plad.services.room.MeetingTokenFactory.Role;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 
 // Entering the live room: the host psychologist or a registered dependent, with the meeting scheduled, from 10 minutes
@@ -78,8 +77,10 @@ public class MeetingRoomService {
                     + "before it starts until it ends");
         }
 
-        Duration validFor = Duration.between(now, meeting.getEndsAt().plus(MeetingRules.TOKEN_GRACE));
-        String token = tokenFactory.create(meetingId, meetingIdentity.of(meetingId, userId), displayName, role, validFor);
-        return new MeetingJoinResponseDTO(liveKitProperties.url(), token);
+        // short on purpose (MeetingRules#TOKEN_TTL): LiveKit does not invalidate the token of someone removed
+        String identity = meetingIdentity.of(meetingId, userId);
+        String token = tokenFactory.create(meetingId, identity, displayName, role, MeetingRules.TOKEN_TTL);
+        String hostIdentity = meetingIdentity.of(meetingId, meeting.getPsychologist().getUserId());
+        return new MeetingJoinResponseDTO(liveKitProperties.url(), token, identity, hostIdentity);
     }
 }

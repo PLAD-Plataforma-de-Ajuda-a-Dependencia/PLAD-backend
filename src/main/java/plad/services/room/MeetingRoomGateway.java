@@ -18,7 +18,8 @@ public interface MeetingRoomGateway {
     void setSpeakPermission(String room, String identity, boolean allowed);
 
     /**
-     * Drops one participant from the room and invalidates the tokens already issued to them.
+     * Drops one participant from the room. It does not invalidate the token they hold (LiveKit has no such call): the
+     * short token life and the refusal of a new one at POST /join keep them out.
      *
      * @throws MeetingParticipantNotFoundException the identity is not in the room (not connected)
      * @throws RoomUnavailableException            the provider did not answer or refused the call

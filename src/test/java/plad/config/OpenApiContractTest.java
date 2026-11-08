@@ -219,7 +219,8 @@ class OpenApiContractTest {
         samples.put("MeExportTriageDTO", exportTriage);
         samples.put("DependentIdentityDTO", new DependentIdentityDTO("Morcego Sereno", "Maria Silva"));
         samples.put("DependentNicknameDTO", new DependentNicknameDTO("Morcego Sereno"));
-        samples.put("MeetingJoinResponseDTO", new MeetingJoinResponseDTO("wss://plad.livekit.cloud", "jwt"));
+        samples.put("MeetingJoinResponseDTO", new MeetingJoinResponseDTO("wss://plad.livekit.cloud", "jwt",
+                "q3ZxK9mR1v0nT7bYq3ZxK9mR1v0nT7bY", "Xk2Lp8QwR5tYu1OaXk2Lp8QwR5tYu1Oa"));
         samples.put("MeetingParticipantResponseDTO", new MeetingParticipantResponseDTO("q3ZxK9mR1v0nT7bY",
                 "Morcego Sereno", "Maria Silva", Instant.now()));
         samples.put("MeetingResponseDTO", new MeetingResponseDTO(1L, "Grupo de apoio", "Roda semanal", Instant.now(),

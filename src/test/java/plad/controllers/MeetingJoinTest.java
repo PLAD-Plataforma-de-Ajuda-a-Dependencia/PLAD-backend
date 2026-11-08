@@ -118,6 +118,7 @@ class MeetingJoinTest {
         assertThat(video.get("canSubscribe")).isEqualTo(true);
         assertThat(video.get("canPublishData")).isEqualTo(true);
         assertThat(video.get("canPublish")).isEqualTo(true);
+        assertThat(video.get("canUpdateOwnMetadata")).isNull();
         assertThat(video.get("roomAdmin")).isEqualTo(true);
         assertThat(((List<?>) video.get("canPublishSources")).stream().map(String::valueOf).toList())
                 .containsExactlyInAnyOrder("camera", "microphone", "screen_share", "screen_share_audio");
@@ -135,8 +136,9 @@ class MeetingJoinTest {
         assertThat(video.get("room")).isEqualTo("plad-meeting-" + live);
         assertThat(video.get("roomJoin")).isEqualTo(true);
         assertThat(video.get("canSubscribe")).isEqualTo(true);
-        assertThat(video.get("canPublishData")).isEqualTo(true);          // the chat
-        assertThat(video.get("canUpdateOwnMetadata")).isEqualTo(true);    // the raised hand
+        assertThat(video.get("canPublishData")).isEqualTo(true);          // the chat, and the raised hand (a data message)
+        // no way to rename themselves or change their metadata in the room
+        assertThat(video.get("canUpdateOwnMetadata")).isNull();
         // no audio, no video, no screen, and no power over the room
         assertThat(video.get("canPublish")).isEqualTo(false);
         assertThat(video.get("canPublishSources")).isNull();
@@ -185,16 +187,42 @@ class MeetingJoinTest {
         assertThat(first).hasSizeGreaterThanOrEqualTo(32).matches("[A-Za-z0-9_-]+");
     }
 
+    // LiveKit only checks the token on a first connection and does not invalidate the token of someone removed, so a
+    // short life is what bounds a removed person: 2 minutes from the moment it is issued, not tied to the meeting's end
     @Test
-    void theTokenIsValidUntil15MinutesAfterTheMeetingEnds() throws Exception {
+    void theTokenExpiresTwoMinutesAfterItIsIssued() throws Exception {
         Instant end = jdbcTemplate.queryForObject("select ends_at from meetings where id = ?", java.sql.Timestamp.class, live)
                 .toInstant();
 
-        Instant expiry = decode(JsonPath.read(join(live, ana).andReturn().getResponse().getContentAsString(), "$.token"))
-                .getExpiration().toInstant();
+        for (User caller : new User[]{host, ana}) {
+            Instant before = Instant.now();
+            String body = join(live, caller).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            Instant after = Instant.now();
+            Instant expiry = decode(JsonPath.read(body, "$.token")).getExpiration().toInstant();
 
-        assertThat(expiry).isBetween(end.plus(Duration.ofMinutes(15)).minusSeconds(5),
-                end.plus(Duration.ofMinutes(15)).plusSeconds(5));
+            assertThat(expiry).isBetween(before.plus(Duration.ofMinutes(2)).minusSeconds(5),
+                    after.plus(Duration.ofMinutes(2)).plusSeconds(5));
+            assertThat(expiry).isBefore(end); // the meeting ends in 55 minutes: the token does not follow it
+        }
+    }
+
+    // what the front needs to tell the host apart and to address the raised hand: both come from the backend, never
+    // from the name or the metadata of a participant
+    @Test
+    void theAnswerCarriesTheCallersIdentityAndTheHostsIdentity() throws Exception {
+        String hostIdentity = meetingIdentity.of(live, host.getId());
+
+        for (User caller : new User[]{host, ana, bruno}) {
+            String body = join(live, caller).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.identity").value(meetingIdentity.of(live, caller.getId())))
+                    .andExpect(jsonPath("$.host_identity").value(hostIdentity))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(decode(JsonPath.read(body, "$.token")).getSubject()).isEqualTo(JsonPath.read(body, "$.identity"));
+        }
+        // the host is the only one whose identity is the host's
+        assertThat(meetingIdentity.of(live, ana.getId())).isNotEqualTo(hostIdentity);
+        assertThat(meetingIdentity.of(live, bruno.getId())).isNotEqualTo(hostIdentity);
     }
 
     // ---- when -----------------------------------------------------------------------------------------------------
