@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -259,6 +261,116 @@ class MeetingRegistrationControllerTest {
         assertThat(rowsOf(started)).isEqualTo(1);
     }
 
+    // ---- consents (decisions 35 and 36) -------------------------------------------------------------------------
+
+    @Test
+    void withoutTheHealthConsentTheRegistrationIsRefusedAndRecordsNothing() throws Exception {
+        User noConsent = newDependentWithoutConsent("Sem Consentimento");
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+
+        // even with the participation term accepted: the health data consent is a separate step
+        registerWith(noConsent, meeting, TestConsents.participationBody())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        assertThat(rowsOf(meeting)).isZero();
+        assertThat(consentsOf(noConsent)).isEmpty();
+    }
+
+    @Test
+    void aHealthConsentOfAnOlderVersionIsNotEnough() throws Exception {
+        User old = newDependentWithoutConsent("Versao Antiga");
+        jdbcTemplate.update("insert into consents (user_id, document, version) values (?, 'health', '0.9')", old.getId());
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+
+        registerWith(old, meeting, TestConsents.participationBody())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+        assertThat(rowsOf(meeting)).isZero();
+    }
+
+    @Test
+    void withoutTheParticipationTermTheRegistrationIsRefusedAndRecordsNothing() throws Exception {
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+
+        // no body, an empty object, a null version and a version that is not the one in force
+        for (String json : new String[]{null, "{}", "{\"accepted_participation_version\": null}",
+                TestConsents.participationBody("0.9")}) {
+            registerWith(first, meeting, json)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+        }
+
+        assertThat(rowsOf(meeting)).isZero();
+        assertThat(consentsOf(first)).containsExactly("health:" + TestConsents.HEALTH_VERSION);
+    }
+
+    @Test
+    void theRegistrationRecordsTheParticipationTermWithItsVersionTimeAndIp() throws Exception {
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+
+        mockMvc.perform(request(HttpMethod.POST, "/meetings/" + meeting + "/registration")
+                        .with(r -> {
+                            r.setRemoteAddr("198.51.100.7");
+                            return r;
+                        })
+                        .header("Authorization", "Bearer " + jwtService.generateToken(first))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestConsents.participationBody()))
+                .andExpect(status().isOk());
+
+        var stored = jdbcTemplate.queryForList(
+                "select version, ip, accepted_at from consents where user_id = ? and document = 'participation'", first.getId());
+        assertThat(stored).hasSize(1);
+        assertThat(stored.get(0).get("version")).isEqualTo(TestConsents.PARTICIPATION_VERSION);
+        assertThat(stored.get(0).get("ip")).isEqualTo("198.51.100.7");
+        assertThat(stored.get(0).get("accepted_at")).isNotNull();
+        // it does not count as the terms and privacy of the sign-up, nor as the health data consent
+        send(HttpMethod.GET, "/me", first).andExpect(jsonPath("$.consent_pending").value(true));
+    }
+
+    @Test
+    void registeringAgainOrInAnotherMeetingKeepsASingleParticipationRowPerVersion() throws Exception {
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+        long another = seed(host, day.plus(3, ChronoUnit.HOURS), day.plus(4, ChronoUnit.HOURS), "scheduled", 5);
+
+        send(HttpMethod.POST, "/meetings/" + meeting + "/registration", first).andExpect(status().isOk());
+        send(HttpMethod.POST, "/meetings/" + meeting + "/registration", first).andExpect(status().isOk());
+        send(HttpMethod.POST, "/meetings/" + another + "/registration", first).andExpect(status().isOk());
+
+        assertThat(consentsOf(first)).containsExactly("health:" + TestConsents.HEALTH_VERSION,
+                "participation:" + TestConsents.PARTICIPATION_VERSION);
+    }
+
+    @Test
+    void aRefusedRegistrationRecordsNoParticipationTerm() throws Exception {
+        long full = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 2);
+        register(full, first);
+        register(full, second);
+        long started = seed(host, Instant.now().minus(30, ChronoUnit.MINUTES), Instant.now().plus(30, ChronoUnit.MINUTES),
+                "scheduled", 5);
+
+        send(HttpMethod.POST, "/meetings/" + full + "/registration", third)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("MEETING_FULL"));
+        send(HttpMethod.POST, "/meetings/" + started + "/registration", third)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("MEETING_CONFLICT"));
+
+        assertThat(consentsOf(third)).containsExactly("health:" + TestConsents.HEALTH_VERSION);
+    }
+
+    @Test
+    void cancellingAndReadingNeedNoConsent() throws Exception {
+        User noConsent = newDependentWithoutConsent("Sem Consentimento");
+        long meeting = seed(host, day, day.plus(1, ChronoUnit.HOURS), "scheduled", 5);
+        register(meeting, noConsent);
+
+        send(HttpMethod.GET, "/meetings/" + meeting, noConsent).andExpect(status().isOk());
+        send(HttpMethod.DELETE, "/meetings/" + meeting + "/registration", noConsent).andExpect(status().isNoContent());
+        assertThat(rowsOf(meeting)).isZero();
+    }
+
     // ---- who may and may not ------------------------------------------------------------------------------------
 
     @Test
@@ -392,7 +504,12 @@ class MeetingRegistrationControllerTest {
         return ((Number) JsonPath.read(created.andReturn().getResponse().getContentAsString(), "$.id")).longValue();
     }
 
+    // a registration carries the participation term in force (decision 36): the plain calls of this class get it, and the
+    // tests about the consents build the request by hand
     private ResultActions send(HttpMethod method, String path, User user) throws Exception {
+        if (method == HttpMethod.POST && path.endsWith("/registration")) {
+            return send(method, path, user, TestConsents.participationBody());
+        }
         return send(method, path, user, null);
     }
 
@@ -414,13 +531,31 @@ class MeetingRegistrationControllerTest {
         return user;
     }
 
+    // with the health data consent, which a registration needs (decision 35)
     private User newDependent(String realName) {
+        User user = newDependentWithoutConsent(realName);
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
+        return user;
+    }
+
+    private User newDependentWithoutConsent(String realName) {
         User user = newUser(UserType.dependente, realName);
         Dependent row = new Dependent();
         row.setNickname(plad.TestNicknames.unique());
         row.setUser(user);
-        dependentRepository.save(row);
+        // flushed: the tests that put the registration straight into the table need the dependents row to be there
+        dependentRepository.saveAndFlush(row);
         return user;
+    }
+
+    private List<String> consentsOf(User user) {
+        return jdbcTemplate.queryForList("select document || ':' || version from consents where user_id = ? order by id",
+                String.class, user.getId());
+    }
+
+    // a POST to the registration with an arbitrary body (null: no body at all)
+    private ResultActions registerWith(User user, long meeting, String json) throws Exception {
+        return send(HttpMethod.POST, "/meetings/" + meeting + "/registration", user, json);
     }
 
     private User newUser(UserType type, String realName) {

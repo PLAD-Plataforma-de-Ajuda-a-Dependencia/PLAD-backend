@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.CrmCrpType;
@@ -99,6 +100,8 @@ class AccountDeletionTest {
         assertThat(nonEmpty(user)).as("the fixture has a row in every table of a dependent").containsExactlyInAnyOrder(
                 "users", "dependents", "triages", "result_questions_triages", "consents",
                 "dependent_nickname_history", "refresh_tokens", "meeting_registrations");
+        assertThat(count("SELECT count(*) FROM consents WHERE user_id = ?", user.getId()))
+                .as("terms, privacy, health and participation").isEqualTo(4L);
 
         delete(token, PASSWORD).andExpect(status().isNoContent());
 
@@ -315,6 +318,9 @@ class AccountDeletionTest {
         dependent = dependentRepository.save(dependent);
         dependentRepository.openNicknameHistory(user.getId(), dependent.getNickname());
         consentService.record(user, "198.51.100.7");
+        // a dependent also has the health data consent (needed to send the triage) and a participation term: four rows
+        consentService.acceptHealth(user.getId(), TestConsents.HEALTH_VERSION, "198.51.100.7");
+        consentService.recordParticipation(user.getId(), "198.51.100.7");
         return dependent;
     }
 

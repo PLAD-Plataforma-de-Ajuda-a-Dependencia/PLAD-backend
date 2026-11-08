@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -149,7 +151,9 @@ class MeetingRegistrationConcurrencyTest {
                     ready.countDown();
                     go.await();
                     var response = mockMvc.perform(post("/meetings/" + meeting + "/registration")
-                            .header("Authorization", "Bearer " + token)).andReturn().getResponse();
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(TestConsents.participationBody())).andReturn().getResponse();
                     return new Answer(response.getStatus(), response.getContentAsString());
                 }));
             }
@@ -194,6 +198,7 @@ class MeetingRegistrationConcurrencyTest {
         row.setNickname(plad.TestNicknames.unique());
         row.setUser(user);
         dependentRepository.save(row);
+        TestConsents.grantHealth(jdbcTemplate, user.getId()); // committed; removed with the user (consents cascade)
         return user;
     }
 

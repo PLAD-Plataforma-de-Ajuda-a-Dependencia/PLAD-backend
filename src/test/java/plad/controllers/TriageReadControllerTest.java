@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.AuditLog;
@@ -593,6 +594,8 @@ class TriageReadControllerTest {
         dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.saveAndFlush(dependent);
+        // the dependents here send their triage through POST /triage, which needs the health data consent
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
         return user;
     }
 

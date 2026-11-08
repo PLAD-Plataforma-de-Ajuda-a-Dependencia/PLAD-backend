@@ -13,6 +13,8 @@ import plad.dto.AnswerResponseDTO;
 import plad.dto.AuditLogResponseDTO;
 import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
+import plad.dto.HealthConsentRequestDTO;
+import plad.dto.MeetingRegistrationRequestDTO;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.FieldErrorDTO;
 import plad.dto.LoginRequestDTO;
@@ -170,6 +172,8 @@ class OpenApiContractTest {
         samples.put("ChangePasswordRequestDTO", new ChangePasswordRequestDTO("password-123", "password-456"));
         samples.put("ConsentRequestDTO", new ConsentRequestDTO("1.0", "1.0"));
         samples.put("DeleteAccountRequestDTO", new DeleteAccountRequestDTO("password-123"));
+        samples.put("HealthConsentRequestDTO", new HealthConsentRequestDTO("1.0"));
+        samples.put("MeetingRegistrationRequestDTO", new MeetingRegistrationRequestDTO("1.0"));
         samples.put("MeetingRequestDTO", new MeetingRequestDTO("Grupo de apoio", "Roda semanal",
                 Instant.now(), Instant.now(), 12));
         samples.put("SpeakPermissionRequestDTO", new SpeakPermissionRequestDTO(true));
@@ -197,7 +201,7 @@ class OpenApiContractTest {
         samples.put("FieldErrorDTO", new FieldErrorDTO("field", "message"));
         samples.put("LoginResponseDTO", new LoginResponseDTO("token"));
         samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false, null,
-                "name", CrmCrpType.CRP, "06123456", false, false));
+                "name", CrmCrpType.CRP, "06123456", false, false, false));
         MeExportNicknameDTO exportNickname = new MeExportNicknameDTO("Morcego Sereno", Instant.now(), Instant.now());
         MeExportConsentDTO exportConsent = new MeExportConsentDTO("terms", "1.0", Instant.now(), "203.0.113.7");
         MeExportAccountDTO exportAccount = new MeExportAccountDTO(1L, "a@b.com", UserType.dependente,

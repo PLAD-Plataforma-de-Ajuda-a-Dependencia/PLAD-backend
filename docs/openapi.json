@@ -430,6 +430,17 @@
           "message"
         ]
       },
+      "HealthConsentRequestDTO": {
+        "properties": {
+          "accepted_health_version": {
+            "description": "Version of the health data consent being accepted; must be the one in force, otherwise 400 CONSENT_REQUIRED",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "LoginRequestDTO": {
         "properties": {
           "email": {
@@ -531,7 +542,7 @@
             "type": "string"
           },
           "document": {
-            "description": "Which document was accepted: terms or privacy",
+            "description": "Which document was accepted: terms, privacy, health (dependents) or participation (dependents, at a registration for a meeting)",
             "example": "terms",
             "type": "string"
           },
@@ -828,6 +839,14 @@
               "null"
             ]
           },
+          "health_consent_pending": {
+            "description": "Dependents only: true while the consent to process health data, in the version in force, is not on file (accept with POST /me/consents/health). Without it POST /triage, PUT /triage and the registration for a meeting answer 400 CONSENT_REQUIRED. Null for other types",
+            "example": false,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "id": {
             "description": "User id",
             "example": 1,
@@ -876,6 +895,7 @@
           "crm_crp_number",
           "email",
           "has_triage",
+          "health_consent_pending",
           "id",
           "is_validated",
           "nickname",
@@ -971,6 +991,17 @@
           "real_name",
           "registered_at"
         ]
+      },
+      "MeetingRegistrationRequestDTO": {
+        "properties": {
+          "accepted_participation_version": {
+            "description": "Version of the participation term shown at the registration; must be the one in force, otherwise 400 CONSENT_REQUIRED and nothing is recorded",
+            "example": "1.0",
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
       },
       "MeetingRequestDTO": {
         "properties": {
@@ -2576,7 +2607,7 @@
         ]
       },
       "get": {
-        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists. consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents)",
+        "description": "Data of the logged-in user, for the front to pick the first screen after login. The user comes from the token, never from the request. Fields that do not apply to the user's type are null: has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists. consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents). health_consent_pending is for dependents only: true until the health data consent in force is accepted (POST /me/consents/health)",
         "operationId": "me",
         "responses": {
           "200": {
@@ -2812,6 +2843,90 @@
           }
         },
         "summary": "Accept the terms and privacy policy in force",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/me/consents/health": {
+      "post": {
+        "description": "Dependents only (LGPD art. 11, I). Records the acceptance of the health data consent in the version in force, with the time and the client IP. It is its own step, taken before the first triage and not at sign-up. Without it POST /triage, PUT /triage and the registration for a meeting answer 400 CONSENT_REQUIRED. Use it when GET /me says health_consent_pending. Accepting a version that is already on file changes nothing",
+        "operationId": "acceptHealthConsent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthConsentRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Accepted (or already on file)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, or (CONSENT_REQUIRED) the version is missing or is not the one in force"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token, or the user no longer exists"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accept the consent to process my health data",
         "tags": [
           "Me"
         ]
@@ -4197,7 +4312,7 @@
         ]
       },
       "post": {
-        "description": "Dependents only. The meeting must be scheduled and not started. Idempotent: registering again changes nothing and answers 200 with the same meeting, even when it is full. The triage is not required. The capacity holds even when requests for the last seat arrive at the same time",
+        "description": "Dependents only. The meeting must be scheduled and not started. Idempotent: registering again changes nothing and answers 200 with the same meeting, even when it is full. The triage is not required. The capacity holds even when requests for the last seat arrive at the same time. Two consents are required first: the health data consent (POST /me/consents/health) and the participation term of the meeting, whose version in force goes in the body (accepted_participation_version) and is recorded together with the seat, with the time and the client IP. Without either, 400 CONSENT_REQUIRED and nothing is recorded",
         "operationId": "registerForMeeting",
         "parameters": [
           {
@@ -4210,6 +4325,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeetingRegistrationRequestDTO"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -4220,6 +4344,16 @@
               }
             },
             "description": "The meeting, with registered_count and registered_by_me up to date"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid body, or (CONSENT_REQUIRED) the health data consent is not on file, or the participation term version is missing (or there is no body) or is not the one in force"
           },
           "401": {
             "content": {
@@ -4333,7 +4467,7 @@
                 }
               }
             },
-            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option"
+            "description": "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option, or (CONSENT_REQUIRED) the health data consent in force is not on file (POST /me/consents/health)"
           },
           "401": {
             "content": {
@@ -4431,7 +4565,7 @@
                 }
               }
             },
-            "description": "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option"
+            "description": "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option, or (CONSENT_REQUIRED) the health data consent in force is not on file (POST /me/consents/health)"
           },
           "401": {
             "content": {

@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
 public record MeExportConsentDTO(
-        @Schema(description = "Which document was accepted: terms or privacy", example = "terms")
+        @Schema(description = "Which document was accepted: terms, privacy, health (dependents) or participation (dependents, "
+                + "at a registration for a meeting)", example = "terms")
         String document,
         @Schema(description = "Version accepted", example = "1.0")
         String version,

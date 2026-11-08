@@ -36,22 +36,27 @@ public record MeResponseDTO(
         Boolean isValidated,
         @Schema(description = "True while the user has not accepted the terms and the privacy policy in the versions in force "
                 + "(accept with POST /me/consents). Set for every account type", example = "false")
-        boolean consentPending
+        boolean consentPending,
+        @Schema(description = "Dependents only: true while the consent to process health data, in the version in force, is not on "
+                + "file (accept with POST /me/consents/health). Without it POST /triage, PUT /triage and the registration for a "
+                + "meeting answer 400 CONSENT_REQUIRED. Null for other types", example = "false", nullable = true)
+        Boolean healthConsentPending
 ) {
 
-    public static MeResponseDTO ofDependent(User user, boolean hasTriage, String nickname, boolean consentPending) {
+    public static MeResponseDTO ofDependent(User user, boolean hasTriage, String nickname, boolean consentPending,
+                                            boolean healthConsentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                hasTriage, nickname, null, null, null, null, consentPending);
+                hasTriage, nickname, null, null, null, null, consentPending, healthConsentPending);
     }
 
     public static MeResponseDTO ofPsychologist(User user, Psychologist psychologist, boolean consentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
                 null, null, user.getRealName(), psychologist.getCredentialType(), psychologist.getCrmCrpNumber(),
-                psychologist.isValidate(), consentPending);
+                psychologist.isValidate(), consentPending, null);
     }
 
     public static MeResponseDTO ofAdmin(User user, boolean consentPending) {
         return new MeResponseDTO(user.getId(), user.getEmail(), user.getTypeUser(), user.getCreatedAt(),
-                null, null, null, null, null, null, consentPending);
+                null, null, null, null, null, null, consentPending, null);
     }
 }

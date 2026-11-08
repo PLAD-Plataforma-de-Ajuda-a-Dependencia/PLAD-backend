@@ -8,9 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -67,6 +69,8 @@ class TriageControllerTest {
     private TriageRepository triageRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private List<QuestionTriage> questions;
     private Long singleChoiceId;
@@ -432,11 +436,7 @@ class TriageControllerTest {
 
     @Test
     void resubmitMovesUpdatedAtForwardAndLeavesCreatedAtAlone() throws Exception {
-        User user = newUser(UserType.dependente);
-        Dependent dependent = new Dependent();
-        dependent.setNickname(plad.TestNicknames.unique());
-        dependent.setUser(user);
-        dependentRepository.save(dependent);
+        User user = newDependent(true);
         String token = jwtService.generateToken(user);
 
         submit(token, body()).andExpect(status().isCreated());
@@ -453,6 +453,70 @@ class TriageControllerTest {
         assertThat(stored.getCreatedAt()).isEqualTo(createdAt);
         assertThat(stored.getUpdatedAt()).isAfter(createdAt);
     }
+
+    // health data consent (decision 35): nothing is stored before it is on file
+
+    @Test
+    void submitWithoutTheHealthConsentIsBadRequestAndStoresNothing() throws Exception {
+        User user = newDependent(false);
+
+        submit(jwtService.generateToken(user), body())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        assertThat(triageRepository.existsByDependentUserId(user.getId())).isFalse();
+    }
+
+    @Test
+    void submitWithoutAnswersAlsoNeedsTheHealthConsent() throws Exception {
+        submit(jwtService.generateToken(newDependent(false)), "{\"answers\": []}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+    }
+
+    @Test
+    void resubmitWithoutTheHealthConsentIsBadRequestAndKeepsTheAnswers() throws Exception {
+        // an account from before the consent existed: it has a triage and never accepted the health data consent
+        User user = newDependent(true);
+        String token = jwtService.generateToken(user);
+        submit(token, body()).andExpect(status().isCreated());
+        jdbcTemplate.update("DELETE FROM consents WHERE user_id = ?", user.getId());
+
+        resubmit(token, bodyByCode(Map.of("AGE_RANGE", "\"AGE_60_PLUS\"")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+
+        Long triageId = triageRepository.findForUpdateByDependentUserId(user.getId()).orElseThrow().getId();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM result_questions_triages WHERE triage_id = ? "
+                + "AND value_result = 'AGE_60_PLUS'", Integer.class, triageId)).isZero();
+    }
+
+    @Test
+    void acceptingOnlyTheTermsAndThePrivacyPolicyDoesNotOpenTheTriage() throws Exception {
+        User user = newDependent(false);
+        jdbcTemplate.update("INSERT INTO consents (user_id, document, version) VALUES (?, 'terms', ?), (?, 'privacy', ?)",
+                user.getId(), "1.0", user.getId(), "1.0");
+
+        submit(jwtService.generateToken(user), body())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+    }
+
+    @Test
+    void anOlderHealthConsentVersionIsNotEnough() throws Exception {
+        User user = newDependent(false);
+        jdbcTemplate.update("INSERT INTO consents (user_id, document, version) VALUES (?, 'health', '0.9')", user.getId());
+
+        submit(jwtService.generateToken(user), body())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CONSENT_REQUIRED"));
+    }
+
+    @Test
+    void thePsychologistIsStillForbiddenNotAskedForAConsent() throws Exception {
+        resubmit(newPsychologistToken(), body()).andExpect(status().isForbidden());
+    }
+
     // helpers
 
     // varied emojis (one supplementary code point, two UTF-16 units each) so the value is not one repeated character
@@ -538,13 +602,21 @@ class TriageControllerTest {
                 .getId();
     }
 
+    // a dependent who accepted the health data consent, as the other tests of this class need
     private String newDependentToken() {
+        return jwtService.generateToken(newDependent(true));
+    }
+
+    private User newDependent(boolean withHealthConsent) {
         User user = newUser(UserType.dependente);
         Dependent dependent = new Dependent();
         dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
-        return jwtService.generateToken(user);
+        if (withHealthConsent) {
+            TestConsents.grantHealth(jdbcTemplate, user.getId());
+        }
+        return user;
     }
 
     private String newPsychologistToken() {

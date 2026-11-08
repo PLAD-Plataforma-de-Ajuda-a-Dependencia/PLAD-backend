@@ -36,13 +36,14 @@ public class MeetingRegistrationService {
     private final UserRepository userRepository;
     private final AuditService auditService;
     private final MeetingIdentity meetingIdentity;
+    private final ConsentService consentService;
     private final Clock clock;
 
     public MeetingRegistrationService(MeetingRepository meetingRepository,
                                       MeetingRegistrationRepository registrationRepository,
                                       MeetingService meetingService, PsychologistService psychologistService,
                                       UserRepository userRepository, AuditService auditService,
-                                      MeetingIdentity meetingIdentity, Clock clock) {
+                                      MeetingIdentity meetingIdentity, ConsentService consentService, Clock clock) {
         this.meetingRepository = meetingRepository;
         this.registrationRepository = registrationRepository;
         this.meetingService = meetingService;
@@ -50,14 +51,20 @@ public class MeetingRegistrationService {
         this.userRepository = userRepository;
         this.auditService = auditService;
         this.meetingIdentity = meetingIdentity;
+        this.consentService = consentService;
         this.clock = clock;
     }
 
     // Idempotent: registering again changes nothing and answers the same. The meeting row is locked first, so two
     // requests for the last seat run one after the other: the second one counts the seat as taken and gets
     // MEETING_FULL. A dependent who is already in never gets MEETING_FULL, even when the meeting is full.
+    // Two consents come before anything else (decisions 35 and 36): the health data one (a registration puts the
+    // dependent's name in front of the host, who may then read the triage) and the participation term, whose version
+    // the request carries and which is recorded in this same transaction, so a refused registration records nothing.
     @Transactional
-    public MeetingResponseDTO register(Long dependentId, Long meetingId) {
+    public MeetingResponseDTO register(Long dependentId, Long meetingId, String acceptedParticipationVersion, String ip) {
+        consentService.requireHealth(dependentId);
+        consentService.requireParticipation(acceptedParticipationVersion);
         Meeting meeting = meetingRepository.findForUpdateById(meetingId)
                 .orElseThrow(() -> new MeetingNotFoundException("Meeting not found"));
         if (meeting.getStatus() != MeetingStatus.scheduled) {
@@ -72,6 +79,7 @@ public class MeetingRegistrationService {
             }
             registrationRepository.insertIfAbsent(meetingId, dependentId);
         }
+        consentService.recordParticipation(dependentId, ip);
         return meetingService.describe(meeting, dependentId);
     }
 

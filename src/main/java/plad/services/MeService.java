@@ -41,7 +41,8 @@ public class MeService {
             case dependente -> {
                 Dependent dependent = dependentRepository.findById(userId)
                         .orElseThrow(() -> new IllegalStateException("Dependent " + userId + " has no dependents row"));
-                yield MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId), dependent.getNickname(), consentPending);
+                yield MeResponseDTO.ofDependent(user, triageRepository.existsByDependentUserId(userId), dependent.getNickname(),
+                        consentPending, consentService.isHealthPending(userId));
             }
             case psicologo -> {
                 Psychologist psychologist = psychologistRepository.findById(userId)

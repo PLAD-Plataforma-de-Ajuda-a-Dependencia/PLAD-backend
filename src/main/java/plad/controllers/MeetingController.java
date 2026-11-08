@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import plad.dto.ErrorResponseDTO;
 import plad.dto.MeetingParticipantResponseDTO;
+import plad.dto.MeetingRegistrationRequestDTO;
 import plad.dto.MeetingRequestDTO;
 import plad.dto.MeetingResponseDTO;
 import plad.services.MeetingRegistrationService;
@@ -220,11 +222,20 @@ public class MeetingController {
     @Operation(operationId = "registerForMeeting", summary = "Register for a meeting",
             description = "Dependents only. The meeting must be scheduled and not started. Idempotent: registering again "
                     + "changes nothing and answers 200 with the same meeting, even when it is full. The triage is not required. "
-                    + "The capacity holds even when requests for the last seat arrive at the same time")
+                    + "The capacity holds even when requests for the last seat arrive at the same time. "
+                    + "Two consents are required first: the health data consent (POST /me/consents/health) and the participation "
+                    + "term of the meeting, whose version in force goes in the body (accepted_participation_version) and is "
+                    + "recorded together with the seat, with the time and the client IP. Without either, 400 CONSENT_REQUIRED "
+                    + "and nothing is recorded")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The meeting, with registered_count and registered_by_me up to date",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = MeetingResponseDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid body, or (CONSENT_REQUIRED) the health data consent is not on file, or the participation "
+                            + "term version is missing (or there is no body) or is not the one in force",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
@@ -241,8 +252,12 @@ public class MeetingController {
     })
     @PostMapping("/{id}/registration")
     @PreAuthorize("hasRole('DEPENDENTE')")
-    public ResponseEntity<MeetingResponseDTO> register(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return ResponseEntity.ok(meetingRegistrationService.register(userId, id));
+    public ResponseEntity<MeetingResponseDTO> register(@AuthenticationPrincipal Long userId, @PathVariable Long id,
+                                                       @Valid @RequestBody(required = false) MeetingRegistrationRequestDTO request,
+                                                       HttpServletRequest httpRequest) {
+        // no body is the same as no version: the service answers 400 CONSENT_REQUIRED
+        String acceptedVersion = request == null ? null : request.acceptedParticipationVersion();
+        return ResponseEntity.ok(meetingRegistrationService.register(userId, id, acceptedVersion, httpRequest.getRemoteAddr()));
     }
 
     @Operation(operationId = "cancelMeetingRegistration", summary = "Cancel the registration in a meeting",

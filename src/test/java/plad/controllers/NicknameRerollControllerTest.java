@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.AuditLog;
@@ -168,6 +169,7 @@ class NicknameRerollControllerTest {
         dependent.setNickname(nickname);
         dependentRepository.saveAndFlush(dependent);
         jdbcTemplate.update("INSERT INTO dependent_nickname_history (dependent_id, nickname) VALUES (?, ?)", user.getId(), nickname);
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
         return user;
     }
 

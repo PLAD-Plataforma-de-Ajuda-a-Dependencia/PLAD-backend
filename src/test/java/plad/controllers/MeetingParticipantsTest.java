@@ -7,10 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -217,7 +219,9 @@ class MeetingParticipantsTest {
         long fresh = seed(host, day.plus(3, ChronoUnit.HOURS), day.plus(4, ChronoUnit.HOURS), "scheduled");
 
         mockMvc.perform(request(HttpMethod.POST, "/meetings/" + fresh + "/registration")
-                        .header("Authorization", "Bearer " + jwtService.generateToken(outsider)))
+                        .header("Authorization", "Bearer " + jwtService.generateToken(outsider))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestConsents.participationBody()))
                 .andExpect(status().isOk());
 
         get("/meetings/" + fresh + "/participants", host)
@@ -275,6 +279,8 @@ class MeetingParticipantsTest {
         row.setNickname(plad.TestNicknames.unique());
         row.setUser(user);
         dependentRepository.save(row);
+        // the registration made through the endpoint in one of the tests needs the health data consent
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
         return user;
     }
 

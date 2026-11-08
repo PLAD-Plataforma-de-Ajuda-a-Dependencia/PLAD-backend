@@ -21,6 +21,7 @@ import plad.entity.QuestionType;
 import plad.entity.ResultQuestionTriage;
 import plad.entity.Triage;
 import plad.entity.UserType;
+import plad.exception.ConsentRequiredException;
 import plad.exception.ForbiddenActionException;
 import plad.exception.InvalidTriageException;
 import plad.exception.TriageAlreadyExistException;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,6 +63,8 @@ class TriageServiceTest {
     private DependentRepository dependentRepository;
     @Mock
     private AuditService auditService;
+    @Mock
+    private ConsentService consentService;
 
     @InjectMocks
     private TriageService triageService;
@@ -89,6 +93,40 @@ class TriageServiceTest {
         assertThat(first.options()).extracting("label").containsExactly("label AGE_18_24", "label AGE_25_39");
         assertThat(questions.get(1).options()).isEmpty();
         assertThat(questions).extracting(QuestionResponseDTO::required).containsOnly(false);
+    }
+
+    // health data consent (decision 35): the gate comes before the duplicate check, the validation and any write
+
+    @Test
+    void submitWithoutTheHealthConsentStopsBeforeAnythingIsReadOrStored() {
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
+        doThrow(new ConsentRequiredException("health")).when(consentService).requireHealth(USER_ID);
+
+        assertThatThrownBy(() -> triageService.submit(USER_ID, request(answer(age, "AGE_18_24"))))
+                .isInstanceOf(ConsentRequiredException.class);
+
+        verifyNoInteractions(triageRepository, resultQuestionTriageRepository, questionCatalog, auditService);
+    }
+
+    @Test
+    void resubmitWithoutTheHealthConsentStopsBeforeTheTriageIsLockedOrChanged() {
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.of(dependent()));
+        doThrow(new ConsentRequiredException("health")).when(consentService).requireHealth(USER_ID);
+
+        assertThatThrownBy(() -> triageService.resubmit(USER_ID, request(answer(age, "AGE_18_24"))))
+                .isInstanceOf(ConsentRequiredException.class);
+
+        verifyNoInteractions(triageRepository, resultQuestionTriageRepository, questionCatalog, auditService);
+    }
+
+    @Test
+    void aNonDependentIsForbiddenBeforeTheConsentIsEvenChecked() {
+        when(dependentRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> triageService.submit(USER_ID, request(answer(age, "AGE_18_24"))))
+                .isInstanceOf(ForbiddenActionException.class);
+
+        verifyNoInteractions(consentService);
     }
 
     // submit: success

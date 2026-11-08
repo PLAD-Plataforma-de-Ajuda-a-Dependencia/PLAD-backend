@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -56,6 +57,8 @@ class AdminPsychologistControllerTest {
     private PsychologistRepository psychologistRepository;
     @Autowired
     private QuestionTriageRepository questionTriageRepository;
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @Test
     void adminListsPsychologistsNewestFirstWithExactlyTheDocumentedKeys() throws Exception {
@@ -197,6 +200,7 @@ class AdminPsychologistControllerTest {
         dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
         return user;
     }
 

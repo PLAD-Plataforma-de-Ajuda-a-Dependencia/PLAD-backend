@@ -31,6 +31,7 @@ import plad.dto.ChangePasswordRequestDTO;
 import plad.dto.ConsentRequestDTO;
 import plad.dto.DeleteAccountRequestDTO;
 import plad.dto.ErrorResponseDTO;
+import plad.dto.HealthConsentRequestDTO;
 import plad.dto.LoginResponseDTO;
 import plad.dto.MeExportResponseDTO;
 import plad.dto.MeResponseDTO;
@@ -77,7 +78,8 @@ public class MeController {
             description = "Data of the logged-in user, for the front to pick the first screen after login. "
                     + "The user comes from the token, never from the request. Fields that do not apply to the user's type are null: "
                     + "has_triage and nickname for dependents; real_name, credential_type, crm_crp_number and is_validated for psychologists. "
-                    + "consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents)")
+                    + "consent_pending is set for every type: true until the terms and privacy policy in force are accepted (POST /me/consents). "
+                    + "health_consent_pending is for dependents only: true until the health data consent in force is accepted (POST /me/consents/health)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The user's own data",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -136,6 +138,33 @@ public class MeController {
                                                HttpServletRequest httpRequest) {
         consentService.accept(userId, request.acceptedTermsVersion(), request.acceptedPrivacyVersion(),
                 httpRequest.getRemoteAddr());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(operationId = "acceptHealthConsent", summary = "Accept the consent to process my health data",
+            description = "Dependents only (LGPD art. 11, I). Records the acceptance of the health data consent in the version "
+                    + "in force, with the time and the client IP. It is its own step, taken before the first triage and not at "
+                    + "sign-up. Without it POST /triage, PUT /triage and the registration for a meeting answer 400 CONSENT_REQUIRED. "
+                    + "Use it when GET /me says health_consent_pending. Accepting a version that is already on file changes nothing")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Accepted (or already on file)"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid body, or (CONSENT_REQUIRED) the version is missing or is not the one in force",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token, or the user no longer exists",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "The user is not a dependent",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PreAuthorize("hasRole('DEPENDENTE')")
+    @PostMapping("/consents/health")
+    public ResponseEntity<Void> acceptHealthConsent(@AuthenticationPrincipal Long userId,
+                                                    @Valid @RequestBody HealthConsentRequestDTO request,
+                                                    HttpServletRequest httpRequest) {
+        consentService.acceptHealth(userId, request.acceptedHealthVersion(), httpRequest.getRemoteAddr());
         return ResponseEntity.noContent().build();
     }
 

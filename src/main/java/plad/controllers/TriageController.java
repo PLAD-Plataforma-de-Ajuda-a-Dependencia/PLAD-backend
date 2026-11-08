@@ -59,7 +59,8 @@ public class TriageController {
                             schema = @Schema(implementation = TriageResponseDTO.class))),
             @ApiResponse(responseCode = "204", description = "No question answered, nothing stored", content = @Content),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option",
+                    description = "Invalid body, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option, "
+                            + "or (CONSENT_REQUIRED) the health data consent in force is not on file (POST /me/consents/health)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",
@@ -86,7 +87,8 @@ public class TriageController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TriageResponseDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option",
+                    description = "Invalid body, no answers, answer without question_id or question_code (or with ones that disagree), unknown or repeated question or invalid option, "
+                            + "or (CONSENT_REQUIRED) the health data consent in force is not on file (POST /me/consents/health)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token",

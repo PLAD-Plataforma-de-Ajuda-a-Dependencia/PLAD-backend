@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -78,6 +79,9 @@ class MeExportTest {
         dependentRepository.updateNicknameIfFree(user.getId(), newNickname);
         dependentRepository.openNicknameHistory(user.getId(), newNickname);
         consentService.record(user, "198.51.100.7");
+        // the health data consent (needed to submit the triage) and a participation term accepted at a registration
+        consentService.acceptHealth(user.getId(), TestConsents.HEALTH_VERSION, "198.51.100.7");
+        consentService.recordParticipation(user.getId(), "198.51.100.7");
         QuestionTriage single = question(QuestionType.single_choice);
         QuestionTriage free = question(QuestionType.free_text);
         submitTriage(user, single, free);
@@ -97,10 +101,17 @@ class MeExportTest {
                 .andExpect(jsonPath("$.dependent.nickname_history[1].nickname").value(newNickname))
                 .andExpect(jsonPath("$.dependent.nickname_history[1].replaced_at").doesNotExist())
                 .andExpect(jsonPath("$.psychologist").doesNotExist())
-                .andExpect(jsonPath("$.consents", hasSize(2)))
+                .andExpect(jsonPath("$.consents", hasSize(4)))
                 .andExpect(jsonPath("$.consents[0].document").value("terms"))
                 .andExpect(jsonPath("$.consents[0].ip").value("198.51.100.7"))
                 .andExpect(jsonPath("$.consents[1].document").value("privacy"))
+                // the health data consent and the participation term are part of what the platform holds about the person
+                .andExpect(jsonPath("$.consents[2].document").value("health"))
+                .andExpect(jsonPath("$.consents[2].version").value(TestConsents.HEALTH_VERSION))
+                .andExpect(jsonPath("$.consents[2].accepted_at").isNotEmpty())
+                .andExpect(jsonPath("$.consents[2].ip").value("198.51.100.7"))
+                .andExpect(jsonPath("$.consents[3].document").value("participation"))
+                .andExpect(jsonPath("$.consents[3].version").value(TestConsents.PARTICIPATION_VERSION))
                 .andExpect(jsonPath("$.triage.id").isNotEmpty())
                 .andExpect(jsonPath("$.triage.created_at").isNotEmpty())
                 .andExpect(jsonPath("$.triage.updated_at").isNotEmpty())
@@ -181,6 +192,7 @@ class MeExportTest {
         User other = newUser(UserType.dependente);
         Dependent otherDependent = newDependent(other);
         consentService.record(other, "203.0.113.99");
+        consentService.acceptHealth(other.getId(), TestConsents.HEALTH_VERSION, "203.0.113.99");
         QuestionTriage single = question(QuestionType.single_choice);
         QuestionTriage free = question(QuestionType.free_text);
         submitTriage(other, single, free);

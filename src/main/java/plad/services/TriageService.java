@@ -45,14 +45,16 @@ public class TriageService {
     private final ResultQuestionTriageRepository resultQuestionTriageRepository;
     private final DependentRepository dependentRepository;
     private final AuditService auditService;
+    private final ConsentService consentService;
 
     //constructor injection
-    public TriageService(TriageQuestionCatalog questionCatalog, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService) {
+    public TriageService(TriageQuestionCatalog questionCatalog, TriageRepository triageRepository, ResultQuestionTriageRepository resultQuestionTriageRepository, DependentRepository dependentRepository, AuditService auditService, ConsentService consentService) {
         this.questionCatalog = questionCatalog;
         this.triageRepository = triageRepository;
         this.resultQuestionTriageRepository = resultQuestionTriageRepository;
         this.dependentRepository = dependentRepository;
         this.auditService = auditService;
+        this.consentService = consentService;
     }
 
     // a question that passed validation, with the values to persist
@@ -70,6 +72,8 @@ public class TriageService {
     @Transactional
     public Optional<TriageResponseDTO> submit(Long userId, TriageRequestDTO request) {
         Dependent dependent = findDependent(userId);
+        // health data (LGPD art. 11, I): nothing is read, validated or stored before the consent is on file
+        consentService.requireHealth(userId);
 
         if (triageRepository.existsByDependentUserId(userId)) {
             throw new TriageAlreadyExistException("Triage already submitted");
@@ -97,6 +101,8 @@ public class TriageService {
     @Transactional
     public TriageResponseDTO resubmit(Long userId, TriageRequestDTO request) {
         findDependent(userId);
+        // the same gate as submit: replacing the answers is processing health data again
+        consentService.requireHealth(userId);
 
         Triage triage = triageRepository.findForUpdateByDependentUserId(userId)
                 .orElseThrow(() -> new TriageNotFoundException("Triage not found"));

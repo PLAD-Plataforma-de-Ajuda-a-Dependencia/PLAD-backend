@@ -6,8 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
@@ -47,6 +49,8 @@ class MeControllerTest {
     private DependentRepository dependentRepository;
     @Autowired
     private PsychologistRepository psychologistRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void dependentWithoutTriageSeesHasTriageFalseAndNoPsychologistFields() throws Exception {
@@ -67,6 +71,8 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.is_validated").value(org.hamcrest.Matchers.nullValue()))
                 // no consent on file for a user built straight in the database
                 .andExpect(jsonPath("$.consent_pending").value(true))
+                // nor the health data consent
+                .andExpect(jsonPath("$.health_consent_pending").value(true))
                 // every key is always sent
                 .andExpect(jsonPath("$", hasKey("real_name")))
                 .andExpect(jsonPath("$", hasKey("is_validated")))
@@ -76,6 +82,7 @@ class MeControllerTest {
     @Test
     void dependentWhoSubmittedTheTriageSeesHasTriageTrue() throws Exception {
         User user = newDependent();
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
 
         mockMvc.perform(post("/triage")
                         .header("Authorization", bearer(user))
@@ -110,7 +117,10 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.has_triage").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$", hasKey("has_triage")))
                 .andExpect(jsonPath("$.nickname").value(org.hamcrest.Matchers.nullValue()))
-                .andExpect(jsonPath("$", hasKey("nickname")));
+                .andExpect(jsonPath("$", hasKey("nickname")))
+                // the health data consent is a dependent's: the key is there and null
+                .andExpect(jsonPath("$", hasKey("health_consent_pending")))
+                .andExpect(jsonPath("$.health_consent_pending").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -141,7 +151,9 @@ class MeControllerTest {
                 .andExpect(jsonPath("$.real_name").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.credential_type").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.crm_crp_number").value(org.hamcrest.Matchers.nullValue()))
-                .andExpect(jsonPath("$.is_validated").value(org.hamcrest.Matchers.nullValue()));
+                .andExpect(jsonPath("$.is_validated").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$", hasKey("health_consent_pending")))
+                .andExpect(jsonPath("$.health_consent_pending").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test

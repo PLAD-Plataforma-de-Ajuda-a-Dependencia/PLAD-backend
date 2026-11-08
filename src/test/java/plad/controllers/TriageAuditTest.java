@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import plad.config.TestConsents;
 import plad.config.TestcontainersConfig;
 import plad.entity.AuditAction;
 import plad.entity.AuditLog;
@@ -83,6 +84,7 @@ class TriageAuditTest {
         dependent.setNickname(plad.TestNicknames.unique());
         dependent.setUser(user);
         dependentRepository.save(dependent);
+        TestConsents.grantHealth(jdbcTemplate, user.getId());
         token = jwtService.generateToken(user);
 
         List<QuestionTriage> questions = questionTriageRepository.findAllByOrderByDisplayOrderAsc();
