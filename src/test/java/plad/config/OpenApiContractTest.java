@@ -7,6 +7,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import plad.dto.AccessLogEntryDTO;
+import plad.dto.AdminPsychologistResponseDTO;
 import plad.dto.AnswerRequestDTO;
 import plad.dto.AnswerResponseDTO;
 import plad.dto.AuditLogResponseDTO;
@@ -183,7 +184,10 @@ class OpenApiContractTest {
         AccessLogEntryDTO accessLogEntry = new AccessLogEntryDTO(Instant.now(), AuditAction.TRIAGE_VIEWED, "psicologo");
         AuditLogResponseDTO auditEntry = new AuditLogResponseDTO(1L, Instant.now(), 2L, AuditAction.TRIAGE_SUBMITTED, 2L, "TRIAGE", 3L,
                 Map.of("actor_role", "dependente"));
+        AdminPsychologistResponseDTO adminPsychologist = new AdminPsychologistResponseDTO(
+                7L, "Maria Silva", CrmCrpType.CRP, "06123456", false, Instant.now());
         samples.put("AccessLogEntryDTO", accessLogEntry);
+        samples.put("AdminPsychologistResponseDTO", adminPsychologist);
         samples.put("AdminTriageReadResponseDTO", adminTriageRead);
         samples.put("AnswerResponseDTO", answer);
         samples.put("AuditLogResponseDTO", auditEntry);
@@ -222,6 +226,7 @@ class OpenApiContractTest {
                 Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true, 7, false));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
+        samples.put("PageResponseDTOAdminPsychologistResponseDTO", new PageResponseDTO<>(List.of(adminPsychologist), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAdminTriageReadResponseDTO", new PageResponseDTO<>(List.of(adminTriageRead), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAccessLogEntryDTO", new PageResponseDTO<>(List.of(accessLogEntry), 0, 20, 1L, 1));
         samples.put("PageResponseDTOAuditLogResponseDTO", new PageResponseDTO<>(List.of(auditEntry), 0, 20, 1L, 1));

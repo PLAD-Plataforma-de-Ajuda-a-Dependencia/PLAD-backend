@@ -36,6 +36,55 @@
           "occurred_at"
         ]
       },
+      "AdminPsychologistResponseDTO": {
+        "description": "A psychologist in the admin's list",
+        "properties": {
+          "created_at": {
+            "description": "When the account was created (UTC)",
+            "example": "2026-10-27T21:15:30Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "credential_type": {
+            "description": "CRM or CRP",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": "string"
+          },
+          "crm_crp_number": {
+            "description": "Normalized credential number",
+            "example": "06123456",
+            "type": "string"
+          },
+          "id": {
+            "description": "User id of the psychologist",
+            "example": 7,
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_validated": {
+            "description": "Whether the credential was validated",
+            "example": false,
+            "type": "boolean"
+          },
+          "real_name": {
+            "description": "Full name given at registration",
+            "example": "Maria Silva",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "credential_type",
+          "crm_crp_number",
+          "id",
+          "is_validated",
+          "real_name"
+        ]
+      },
       "AdminTriageReadResponseDTO": {
         "description": "A triage as read by an admin; the dependent is identified by id and nickname, never by real name or e-mail",
         "properties": {
@@ -1080,6 +1129,49 @@
           "total_pages"
         ]
       },
+      "PageResponseDTOAdminPsychologistResponseDTO": {
+        "description": "One page of results",
+        "properties": {
+          "items": {
+            "description": "Items of this page",
+            "items": {
+              "$ref": "#/components/schemas/AdminPsychologistResponseDTO"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "Zero-based page number",
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Requested page size",
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_elements": {
+            "description": "Total items across all pages",
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pages": {
+            "description": "Total number of pages",
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages"
+        ]
+      },
       "PageResponseDTOAdminTriageReadResponseDTO": {
         "description": "One page of results",
         "properties": {
@@ -1629,6 +1721,114 @@
         "summary": "List audit entries, newest first",
         "tags": [
           "Audit"
+        ]
+      }
+    },
+    "/admin/psychologists": {
+      "get": {
+        "description": "Real name, credential type and number, validation state and sign-up date. The e-mail is never sent, and no data of any dependent is in the list",
+        "operationId": "listAdminPsychologists",
+        "parameters": [
+          {
+            "description": "Zero-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size, 1 to 100",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDTOAdminPsychologistResponseDTO"
+                }
+              }
+            },
+            "description": "One page of psychologists"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Invalid page/size"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not an admin"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List psychologists as an admin, newest first",
+        "tags": [
+          "Admin psychologists"
         ]
       }
     },
@@ -4536,6 +4736,10 @@
     }
   ],
   "tags": [
+    {
+      "description": "Listing psychologists as an admin; no e-mail and no dependent data",
+      "name": "Admin psychologists"
+    },
     {
       "description": "Reading triages as an admin; the dependent is shown by nickname only",
       "name": "Admin triage"
