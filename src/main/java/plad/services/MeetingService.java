@@ -2,6 +2,7 @@ package plad.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import plad.dto.MeetingHostDTO;
 import plad.dto.MeetingRequestDTO;
 import plad.dto.MeetingResponseDTO;
 import plad.entity.Meeting;
@@ -197,8 +198,10 @@ public class MeetingService {
 
     private static MeetingResponseDTO toDto(Meeting meeting, Long userId, int registeredCount, boolean registeredByMe) {
         Psychologist host = meeting.getPsychologist();
+        MeetingHostDTO hostDto = new MeetingHostDTO(host.getUser().getRealName(), host.getCredentialType(),
+                host.getCrmCrpNumber());
         return new MeetingResponseDTO(meeting.getId(), meeting.getTitle(), meeting.getDescription(),
                 meeting.getStartsAt(), meeting.getEndsAt(), meeting.getCapacity(), meeting.getStatus(),
-                host.getUser().getRealName(), host.getUserId().equals(userId), registeredCount, registeredByMe);
+                hostDto, host.getUserId().equals(userId), registeredCount, registeredByMe);
     }
 }

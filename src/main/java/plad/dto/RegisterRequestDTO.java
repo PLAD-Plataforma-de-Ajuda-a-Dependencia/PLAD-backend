@@ -30,7 +30,9 @@ public record RegisterRequestDTO(
         @Schema(description = "Account type; psicologo also requires credential_type and crm_crp_number. "
                 + "admin is never accepted here (400 INVALID_REGISTRATION): the first admin is created at startup")
         @NotNull UserType typeUser,
-        @Schema(description = "Professional council; required when type_user is psicologo", example = "CRP")
+        @Schema(description = "Professional council; required when type_user is psicologo. Only CRP is accepted: CRM "
+                + "answers 400 INVALID_REGISTRATION (the CRM label stays so older accounts are still read)",
+                example = "CRP")
         CrmCrpType credentialType,
         @Schema(description = "Council registration number, unique; required when type_user is psicologo", example = "06/123456")
         @Size(max = 30) String crmCrpNumber,

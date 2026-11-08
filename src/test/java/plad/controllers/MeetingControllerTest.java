@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -98,7 +99,9 @@ class MeetingControllerTest {
                 .andExpect(jsonPath("$.description").value("Roda semanal"))
                 .andExpect(jsonPath("$.capacity").value(12))
                 .andExpect(jsonPath("$.status").value("scheduled"))
-                .andExpect(jsonPath("$.host").value(HOST_NAME))
+                .andExpect(jsonPath("$.host.name").value(HOST_NAME))
+                .andExpect(jsonPath("$.host.credential_type").value("CRP"))
+                .andExpect(jsonPath("$.host.crm_crp_number").value(numberOf(host)))
                 .andExpect(jsonPath("$.owned_by_me").value(true))
                 .andExpect(jsonPath("$.starts_at", matchesPattern(ISO_UTC)))
                 .andExpect(jsonPath("$.ends_at", matchesPattern(ISO_UTC)))
@@ -425,10 +428,13 @@ class MeetingControllerTest {
         listAs(host, from, to)
                 .andExpect(jsonPath("$[?(@.id == %d)].owned_by_me".formatted(late)).value(true))
                 .andExpect(jsonPath("$[?(@.id == %d)].owned_by_me".formatted(early)).value(false))
-                .andExpect(jsonPath("$[?(@.id == %d)].host".formatted(early)).value("Colega Anfitriao"));
+                .andExpect(jsonPath("$[?(@.id == %d)].host.name".formatted(early)).value("Colega Anfitriao"));
         listAs(dependent, from, to)
                 .andExpect(jsonPath("$[?(@.id == %d)].owned_by_me".formatted(late)).value(false))
-                .andExpect(jsonPath("$[?(@.id == %d)].host".formatted(late)).value(HOST_NAME));
+                .andExpect(jsonPath("$[?(@.id == %d)].host.name".formatted(late)).value(HOST_NAME))
+                .andExpect(jsonPath("$[?(@.id == %d)].host.credential_type".formatted(late)).value("CRP"))
+                .andExpect(jsonPath("$[?(@.id == %d)].host.crm_crp_number".formatted(late)).value(numberOf(host)))
+                .andExpect(jsonPath("$[?(@.id == %d)].host.crm_crp_number".formatted(early)).value(numberOf(colleague)));
     }
 
     @Test
@@ -467,11 +473,27 @@ class MeetingControllerTest {
         long id = idOf(createAs(host, day, day.plus(1, ChronoUnit.HOURS), 5).andExpect(status().isCreated()));
 
         String body = send(HttpMethod.GET, "/meetings/" + id, dependent, null).andExpect(status().isOk())
-                .andExpect(jsonPath("$.host").value(HOST_NAME))
+                .andExpect(jsonPath("$.host.name").value(HOST_NAME))
                 .andExpect(jsonPath("$.owned_by_me").value(false))
                 .andExpect(jsonPath("$", not(hasKey("email"))))
+                .andExpect(jsonPath("$.host", not(hasKey("email"))))
+                .andExpect(jsonPath("$.host", not(hasKey("real_name"))))
                 .andReturn().getResponse().getContentAsString();
         assertThat(body).doesNotContain(host.getEmail());
+    }
+
+    // decision 23: the dependent checks who leads the meeting. The registration is the one stored (normalized), and an
+    // account created before CRM was refused at sign-up (decision 33) still reads CRM
+    @Test
+    void theHostShowsTheCouncilRegistrationAndAnOlderCrmAccountIsStillRead() throws Exception {
+        User older = newPsychologist("Dr. Antigo", CrmCrpType.CRM);
+        long id = idOf(createAs(older, day, day.plus(1, ChronoUnit.HOURS), 5).andExpect(status().isCreated()));
+
+        send(HttpMethod.GET, "/meetings/" + id, dependent, null).andExpect(status().isOk())
+                .andExpect(jsonPath("$.host.name").value("Dr. Antigo"))
+                .andExpect(jsonPath("$.host.credential_type").value("CRM"))
+                .andExpect(jsonPath("$.host.crm_crp_number").value(numberOf(older)))
+                .andExpect(jsonPath("$.host", aMapWithSize(3))); // name, credential_type, crm_crp_number: nothing else
     }
 
     // ---- helpers -----------------------------------------------------------------------------------------------
@@ -522,13 +544,22 @@ class MeetingControllerTest {
     }
 
     private User newPsychologist(String realName) {
+        return newPsychologist(realName, CrmCrpType.CRP);
+    }
+
+    private User newPsychologist(String realName, CrmCrpType credentialType) {
         User user = newUser(UserType.psicologo, realName);
         Psychologist row = new Psychologist();
         row.setUser(user);
-        row.setCredentialType(CrmCrpType.CRP);
+        row.setCredentialType(credentialType);
         row.setCrmCrpNumber(UUID.randomUUID().toString().substring(0, 20));
         psychologistRepository.save(row);
         return user;
+    }
+
+    // the council number stored for the psychologist, as the API must send it
+    private String numberOf(User psychologist) {
+        return psychologistRepository.findById(psychologist.getId()).orElseThrow().getCrmCrpNumber();
     }
 
     private User newDependent(String realName) {

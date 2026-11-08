@@ -117,6 +117,24 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("Psychologist must provide credentials"));
     }
 
+    // decision 33: new psychologists register with a CRP only; CRM stays in the enum so old accounts are still read
+    @Test
+    void psychologistRegisteringWithCrmIsBadRequestAndCreatesNothing() throws Exception {
+        String email = newEmail();
+        String number = newCredentialNumber();
+        String crmBody = psychologistBody(email, number).replace("\"CRP\"", "\"CRM\"");
+
+        register(nextClient(), crmBody)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REGISTRATION"))
+                .andExpect(jsonPath("$.message").value("CRM registrations are not accepted; register with a CRP"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM users WHERE email = ?", Long.class, email)).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM psychologists WHERE crm_crp_number = ?", Long.class,
+                number.replaceAll("[^A-Za-z0-9]", "").toUpperCase(Locale.ROOT))).isZero();
+    }
+
     @Test
     void sameEmailWithDifferentCaseIsConflict() throws Exception {
         String client = nextClient();

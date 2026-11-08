@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import plad.dto.RegisterRequestDTO;
 import plad.dto.UserResponseDTO;
+import plad.entity.CrmCrpType;
 import plad.entity.Psychologist;
 import plad.entity.User;
 import plad.entity.UserType;
@@ -41,6 +42,12 @@ public class AuthService {
         // the else branch below creates a psychologist, so admin must be turned away before anything is written
         if (request.typeUser() == UserType.admin) {
             throw new InvalidRegistrationException("Admin accounts cannot be self-registered");
+        }
+
+        // New psychologists register with a CRP only (decision 33). The CRM label stays in the enum so accounts created
+        // before this rule are still read; a static rule, so it is checked before anything touches the database
+        if (request.typeUser() == UserType.psicologo && request.credentialType() == CrmCrpType.CRM) {
+            throw new InvalidRegistrationException("CRM registrations are not accepted; register with a CRP");
         }
 
         // LGPD art. 11: no account without the acceptance of the terms and privacy policy in force

@@ -28,11 +28,17 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // Reading triages for admins and psychologists. Every triage returned writes one TRIAGE_VIEWED entry in the
 // same transaction, so reading the same triage twice leaves two entries. The route's @PreAuthorize decides who
 // gets here; the role recorded in the entry comes from the database.
+// A psychologist reads only the triage of a dependent registered in a meeting of theirs that was not cancelled (LGPD
+// art. 6, III): the filter is in the query (TriageRepository#findVisibleToPsychologist*), so a triage outside it is never
+// loaded, it answers 404 like an unknown id (it does not reveal that the triage exists) and it writes no audit entry.
+// The admin reads every triage.
 @Service
 public class TriageReadService {
 
@@ -55,40 +61,46 @@ public class TriageReadService {
     }
 
     // not readOnly: the audit entry is an INSERT and a read-only transaction would reject it
-    // Psychologist: the dependent comes with nickname and real name (the only reader who gets the real name).
+    // Psychologist: only the dependents registered in a non-cancelled meeting of theirs. The dependent comes with
+    // nickname and real name (the only reader who gets the real name).
     @Transactional
     public PageResponseDTO<TriageReadResponseDTO> list(Long actorId, int page, int size) {
-        return listAs(actorId, page, size, TriageReadService::toPsychologistResponse);
+        return listAs(actorId, page, size, TriageReadService::toPsychologistResponse,
+                pageable -> triageRepository.findVisibleToPsychologist(actorId, pageable));
     }
 
     @Transactional
     public TriageReadResponseDTO find(Long actorId, Long triageId) {
-        return findAs(actorId, triageId, TriageReadService::toPsychologistResponse);
+        return findAs(actorId, triageId, TriageReadService::toPsychologistResponse,
+                id -> triageRepository.findVisibleToPsychologistById(actorId, id));
     }
 
-    // Admin: same triages, but the dependent shows up by nickname only. A separate DTO, not a hidden field.
+    // Admin: every triage, but the dependent shows up by nickname only. A separate DTO, not a hidden field.
     @Transactional
     public PageResponseDTO<AdminTriageReadResponseDTO> listForAdmin(Long actorId, int page, int size) {
-        return listAs(actorId, page, size, TriageReadService::toAdminResponse);
+        return listAs(actorId, page, size, TriageReadService::toAdminResponse, triageRepository::findAllBy);
     }
 
     @Transactional
     public AdminTriageReadResponseDTO findForAdmin(Long actorId, Long triageId) {
-        return findAs(actorId, triageId, TriageReadService::toAdminResponse);
+        return findAs(actorId, triageId, TriageReadService::toAdminResponse, triageRepository::findWithDependentById);
     }
 
-    private <T> PageResponseDTO<T> listAs(Long actorId, int page, int size, TriageMapper<T> mapper) {
+    private <T> PageResponseDTO<T> listAs(Long actorId, int page, int size, TriageMapper<T> mapper,
+                                          Function<Pageable, Page<Triage>> fetch) {
         UserType actorRole = actorRole(actorId);
         Pageable pageable = PageRequest.of(page, size, NEWEST_FIRST);
-        Page<Triage> triages = triageRepository.findAllBy(pageable);
+        Page<Triage> triages = fetch.apply(pageable);
         Map<Long, List<AnswerResponseDTO>> answers = answersByTriage(triages.getContent());
         triages.forEach(triage -> auditView(actorId, actorRole, triage));
         return PageResponseDTO.of(triages, triage -> mapper.map(triage, answers.getOrDefault(triage.getId(), List.of())));
     }
 
-    private <T> T findAs(Long actorId, Long triageId, TriageMapper<T> mapper) {
+    // a triage the reader may not see is the same as one that does not exist: 404, before anything is audited
+    private <T> T findAs(Long actorId, Long triageId, TriageMapper<T> mapper,
+                         Function<Long, Optional<Triage>> fetch) {
         UserType actorRole = actorRole(actorId);
-        Triage triage = triageRepository.findWithDependentById(triageId)
+        Triage triage = fetch.apply(triageId)
                 .orElseThrow(() -> new TriageNotFoundException("Triage not found"));
         Map<Long, List<AnswerResponseDTO>> answers = answersByTriage(List.of(triage));
         auditView(actorId, actorRole, triage);

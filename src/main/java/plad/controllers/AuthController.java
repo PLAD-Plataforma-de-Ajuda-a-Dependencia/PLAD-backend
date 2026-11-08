@@ -41,8 +41,9 @@ public class AuthController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials "
-                            + "or with a credential number already registered, or (CONSENT_REQUIRED) the terms and the privacy policy "
+                    description = "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials, "
+                            + "with credential_type CRM (only CRP is accepted) or with a credential number already registered, "
+                            + "or (CONSENT_REQUIRED) the terms and the privacy policy "
                             + "in force were not accepted: accepted_terms_version and accepted_privacy_version missing or not the current ones",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),

@@ -28,6 +28,7 @@ import plad.dto.MeExportMeetingRegistrationDTO;
 import plad.dto.MeExportNicknameDTO;
 import plad.dto.MeExportPsychologistDTO;
 import plad.dto.MeExportResponseDTO;
+import plad.dto.MeetingHostDTO;
 import plad.dto.MeetingJoinResponseDTO;
 import plad.dto.MeetingParticipantResponseDTO;
 import plad.dto.MeetingRequestDTO;
@@ -223,8 +224,10 @@ class OpenApiContractTest {
                 "q3ZxK9mR1v0nT7bYq3ZxK9mR1v0nT7bY", "Xk2Lp8QwR5tYu1OaXk2Lp8QwR5tYu1Oa"));
         samples.put("MeetingParticipantResponseDTO", new MeetingParticipantResponseDTO("q3ZxK9mR1v0nT7bY",
                 "Morcego Sereno", "Maria Silva", Instant.now()));
+        MeetingHostDTO meetingHost = new MeetingHostDTO("Helena Duarte", CrmCrpType.CRP, "06123456");
+        samples.put("MeetingHostDTO", meetingHost);
         samples.put("MeetingResponseDTO", new MeetingResponseDTO(1L, "Grupo de apoio", "Roda semanal", Instant.now(),
-                Instant.now(), 12, MeetingStatus.scheduled, "Helena Duarte", true, 7, false));
+                Instant.now(), 12, MeetingStatus.scheduled, meetingHost, true, 7, false));
         samples.put("NicknameResponseDTO", new NicknameResponseDTO("Coruja Serena"));
         samples.put("OptionDTO", new OptionDTO("code", "label"));
         samples.put("PageResponseDTOAdminPsychologistResponseDTO", new PageResponseDTO<>(List.of(adminPsychologist), 0, 20, 1L, 1));

@@ -49,8 +49,9 @@ class RealNameExposureTest {
                 AccessLogEntryDTO.class, AuditLogResponseDTO.class, MeExportDependentDTO.class,
                 MeExportNicknameDTO.class, MeExportTriageDTO.class, MeExportConsentDTO.class,
                 MeExportMeetingRegistrationDTO.class,
-                // the host's name goes out as `host` (decision 23, covered by MeetingControllerTest), never a real_name/email key
-                MeetingRequestDTO.class, MeetingResponseDTO.class)) {
+                // the host's name goes out as `host.name` (decision 23, covered by MeetingControllerTest), never a
+                // real_name/email key
+                MeetingRequestDTO.class, MeetingResponseDTO.class, MeetingHostDTO.class)) {
             assertThat(Arrays.stream(dto.getRecordComponents()).map(RecordComponent::getName))
                     .as(dto.getSimpleName())
                     .noneMatch(name -> name.toLowerCase().contains("realname"))

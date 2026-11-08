@@ -23,10 +23,12 @@ import plad.dto.PageResponseDTO;
 import plad.dto.TriageReadResponseDTO;
 import plad.services.TriageReadService;
 
-// Psychologists read triages here, with the dependent's nickname and real name. Admins read them at /admin/triages
-// (nickname only, AdminTriageReadController). A dependent has no read route, not even for their own triage:
-// they get their answers in the POST/PUT response.
-@Tag(name = "Triage", description = "Reading triages; psychologist only (admins read at /admin/triages)")
+// Psychologists read triages here, with the dependent's nickname and real name, but only those of dependents registered
+// in a meeting of theirs that was not cancelled. Admins read every triage at /admin/triages (nickname only,
+// AdminTriageReadController). A dependent has no read route, not even for their own triage: they get their answers in
+// the POST/PUT response.
+@Tag(name = "Triage", description = "Reading triages; psychologist only, and only the dependents registered in a "
+        + "non-cancelled meeting of theirs (admins read every triage at /admin/triages)")
 @RestController
 @RequestMapping("/triages")
 @PreAuthorize("hasRole('PSICOLOGO')")
@@ -40,7 +42,9 @@ public class TriageReadController {
 
     // explicit operationIds: a second method called "list" would rename the one in /admin/audit in the contract
     @Operation(operationId = "listTriages", summary = "List triages, newest first",
-            description = "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. "
+            description = "Only the triages of dependents registered in a meeting of the caller that was not cancelled "
+                    + "(scheduled or ended); with no such dependent the page is empty and nothing is recorded. "
+                    + "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. "
                     + "The dependent is identified by id, nickname and real name")
     @ApiResponses({
             // no explicit schema: springdoc reads the generic return type, so the items keep their type
@@ -64,7 +68,9 @@ public class TriageReadController {
     }
 
     @Operation(operationId = "findTriage", summary = "Read one triage",
-            description = "Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read")
+            description = "Only for a dependent registered in a meeting of the caller that was not cancelled; any other "
+                    + "triage answers 404, as if it did not exist, and is not recorded. "
+                    + "Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The triage",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -75,7 +81,8 @@ public class TriageReadController {
             @ApiResponse(responseCode = "403", description = "The user is not a psychologist",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No triage with this id (TRIAGE_NOT_FOUND)",
+            @ApiResponse(responseCode = "404", description = "No triage with this id, or its dependent is not registered "
+                    + "in a non-cancelled meeting of the caller (TRIAGE_NOT_FOUND)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })

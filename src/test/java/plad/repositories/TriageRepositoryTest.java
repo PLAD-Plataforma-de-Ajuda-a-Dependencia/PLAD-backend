@@ -6,8 +6,14 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import plad.config.TestcontainersConfig;
+import plad.entity.CrmCrpType;
 import plad.entity.Dependent;
+import plad.entity.Psychologist;
 import plad.entity.QuestionTriage;
 import plad.entity.QuestionType;
 import plad.entity.ResultQuestionTriage;
@@ -16,7 +22,12 @@ import plad.entity.User;
 import plad.entity.Sex;
 import plad.entity.UserType;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -42,6 +53,10 @@ class TriageRepositoryTest {
     private QuestionTriageRepository questionTriageRepository;
     @Autowired
     private ResultQuestionTriageRepository resultQuestionTriageRepository;
+    @Autowired
+    private PsychologistRepository psychologistRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void seededQuestionsComeBackInDisplayOrderWithOptions() {
@@ -122,6 +137,114 @@ class TriageRepositoryTest {
 
         assertThatThrownBy(() -> newResult(triage, question, "AGE_18_24"))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    // ---- what a psychologist may read: registered in a non-cancelled meeting of theirs -------------------------------
+
+    @Test
+    void visibleToPsychologistMatchesOnlyRegisteredDependentsInNonCancelledMeetingsOfThatPsychologist() {
+        User psychologist = newPsychologist();
+        User other = newPsychologist();
+        Dependent inScheduled = newDependent();
+        Dependent inEndedAndTwoScheduled = newDependent();
+        Dependent onlyInCancelled = newDependent();
+        Dependent inAnothersMeeting = newDependent();
+        Dependent inNoMeeting = newDependent();
+        Triage visibleOne = newTriage(inScheduled);
+        Triage visibleTwo = newTriage(inEndedAndTwoScheduled);
+        Triage cancelledOnly = newTriage(onlyInCancelled);
+        Triage anothers = newTriage(inAnothersMeeting);
+        Triage nobodys = newTriage(inNoMeeting);
+
+        register(newMeeting(psychologist, 0, "scheduled"), inScheduled);
+        register(newMeeting(psychologist, 1, "ended"), inEndedAndTwoScheduled);
+        register(newMeeting(psychologist, 2, "scheduled"), inEndedAndTwoScheduled);
+        register(newMeeting(psychologist, 3, "scheduled"), inEndedAndTwoScheduled);
+        register(newMeeting(psychologist, 4, "cancelled"), onlyInCancelled);
+        register(newMeeting(other, 0, "scheduled"), inAnothersMeeting);
+
+        Page<Triage> page = triageRepository.findVisibleToPsychologist(psychologist.getId(),
+                PageRequest.of(0, 50, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))));
+
+        // the dependent in three meetings comes back once, and the page count agrees
+        assertThat(page.getContent()).extracting(Triage::getId).containsExactly(visibleTwo.getId(), visibleOne.getId());
+        assertThat(page.getTotalElements()).isEqualTo(2);
+
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), visibleOne.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), visibleTwo.getId())).isPresent();
+        for (Triage outside : List.of(cancelledOnly, anothers, nobodys)) {
+            assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), outside.getId()))
+                    .as("triage %d", outside.getId()).isEmpty();
+        }
+        // the other psychologist reads their own and nothing of the first one's
+        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), anothers.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), visibleOne.getId())).isEmpty();
+        assertThat(triageRepository.findVisibleToPsychologist(other.getId(), PageRequest.of(0, 50)).getContent())
+                .extracting(Triage::getId).containsExactly(anothers.getId());
+    }
+
+    @Test
+    void visibleToPsychologistPagesNewestFirstAndCountsOnlyWhatIsVisible() {
+        User psychologist = newPsychologist();
+        List<Triage> visible = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Dependent dependent = newDependent();
+            visible.add(newTriage(dependent));
+            register(newMeeting(psychologist, i, "scheduled"), dependent);
+            newTriage(newDependent()); // not in any meeting: never counted
+        }
+        Sort newestFirst = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+
+        Page<Triage> first = triageRepository.findVisibleToPsychologist(psychologist.getId(), PageRequest.of(0, 2, newestFirst));
+        Page<Triage> second = triageRepository.findVisibleToPsychologist(psychologist.getId(), PageRequest.of(1, 2, newestFirst));
+
+        assertThat(first.getTotalElements()).isEqualTo(3);
+        assertThat(first.getTotalPages()).isEqualTo(2);
+        assertThat(first.getContent()).extracting(Triage::getId).containsExactly(visible.get(2).getId(), visible.get(1).getId());
+        assertThat(second.getContent()).extracting(Triage::getId).containsExactly(visible.get(0).getId());
+    }
+
+    @Test
+    void visibleToPsychologistWithNoMeetingIsEmpty() {
+        newTriage(newDependent());
+
+        Page<Triage> page = triageRepository.findVisibleToPsychologist(newPsychologist().getId(), PageRequest.of(0, 20));
+
+        assertThat(page.getContent()).isEmpty();
+        assertThat(page.getTotalElements()).isZero();
+    }
+
+    private User newPsychologist() {
+        User user = new User();
+        user.setRealName("psychologist test");
+        user.setEmail(UUID.randomUUID() + "@example.com");
+        user.setPasswordHash("test-hash");
+        user.setBirthDate(LocalDate.of(1985, 1, 1));
+        user.setGender(Sex.outro);
+        user.setTypeUser(UserType.psicologo);
+        userRepository.save(user);
+
+        Psychologist psychologist = new Psychologist();
+        psychologist.setUser(user);
+        psychologist.setCredentialType(CrmCrpType.CRP);
+        psychologist.setCrmCrpNumber(UUID.randomUUID().toString().substring(0, 20));
+        psychologistRepository.saveAndFlush(psychologist);
+        return user;
+    }
+
+    // `offsetHours` spaces the scheduled meetings of one psychologist apart, so meetings_no_overlap never trips
+    private long newMeeting(User psychologist, int offsetHours, String status) {
+        Instant start = Instant.now().plus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.HOURS).plus(2L * offsetHours, ChronoUnit.HOURS);
+        return jdbcTemplate.queryForObject("""
+                        insert into meetings (psychologist_id, title, starts_at, ends_at, capacity, status)
+                        values (?, 'Sala', ?, ?, 10, ?) returning id""",
+                Long.class, psychologist.getId(), OffsetDateTime.ofInstant(start, ZoneOffset.UTC),
+                OffsetDateTime.ofInstant(start.plus(1, ChronoUnit.HOURS), ZoneOffset.UTC), status);
+    }
+
+    private void register(long meetingId, Dependent dependent) {
+        jdbcTemplate.update("insert into meeting_registrations (meeting_id, dependent_id) values (?, ?)",
+                meetingId, dependent.getUserId());
     }
 
     private Dependent newDependent() {

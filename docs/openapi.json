@@ -883,6 +883,35 @@
           "type_user"
         ]
       },
+      "MeetingHostDTO": {
+        "description": "The psychologist who hosts the meeting",
+        "properties": {
+          "credential_type": {
+            "description": "Professional council of the host: CRP. Accounts created before CRM was refused at sign-up may still show CRM",
+            "enum": [
+              "CRM",
+              "CRP"
+            ],
+            "example": "CRP",
+            "type": "string"
+          },
+          "crm_crp_number": {
+            "description": "Normalized council registration number (letters and digits only)",
+            "example": "06123456",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the psychologist",
+            "example": "Dra. Helena Duarte",
+            "type": "string"
+          }
+        },
+        "required": [
+          "credential_type",
+          "crm_crp_number",
+          "name"
+        ]
+      },
       "MeetingJoinResponseDTO": {
         "properties": {
           "host_identity": {
@@ -1007,9 +1036,7 @@
             "type": "string"
           },
           "host": {
-            "description": "Name of the psychologist who hosts the meeting",
-            "example": "Dra. Helena Duarte",
-            "type": "string"
+            "$ref": "#/components/schemas/MeetingHostDTO"
           },
           "id": {
             "description": "Meeting id",
@@ -1392,7 +1419,7 @@
             "type": "string"
           },
           "credential_type": {
-            "description": "Professional council; required when type_user is psicologo",
+            "description": "Professional council; required when type_user is psicologo. Only CRP is accepted: CRM answers 400 INVALID_REGISTRATION (the CRM label stays so older accounts are still read)",
             "enum": [
               "CRM",
               "CRP"
@@ -2369,7 +2396,7 @@
                 }
               }
             },
-            "description": "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials or with a credential number already registered, or (CONSENT_REQUIRED) the terms and the privacy policy in force were not accepted: accepted_terms_version and accepted_privacy_version missing or not the current ones"
+            "description": "Invalid body (including a birth date under 18 years old), type_user admin, a psychologist without credentials, with credential_type CRM (only CRP is accepted) or with a credential number already registered, or (CONSENT_REQUIRED) the terms and the privacy policy in force were not accepted: accepted_terms_version and accepted_privacy_version missing or not the current ones"
           },
           "409": {
             "content": {
@@ -4537,7 +4564,7 @@
     },
     "/triages": {
       "get": {
-        "description": "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id, nickname and real name",
+        "description": "Only the triages of dependents registered in a meeting of the caller that was not cancelled (scheduled or ended); with no such dependent the page is empty and nothing is recorded. Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id, nickname and real name",
         "operationId": "listTriages",
         "parameters": [
           {
@@ -4645,7 +4672,7 @@
     },
     "/triages/{id}": {
       "get": {
-        "description": "Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read",
+        "description": "Only for a dependent registered in a meeting of the caller that was not cancelled; any other triage answers 404, as if it did not exist, and is not recorded. Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read",
         "operationId": "findTriage",
         "parameters": [
           {
@@ -4697,7 +4724,7 @@
                 }
               }
             },
-            "description": "No triage with this id (TRIAGE_NOT_FOUND)"
+            "description": "No triage with this id, or its dependent is not registered in a non-cancelled meeting of the caller (TRIAGE_NOT_FOUND)"
           },
           "500": {
             "content": {
@@ -4781,7 +4808,7 @@
       "name": "Triage"
     },
     {
-      "description": "Reading triages; psychologist only (admins read at /admin/triages)",
+      "description": "Reading triages; psychologist only, and only the dependents registered in a non-cancelled meeting of theirs (admins read every triage at /admin/triages)",
       "name": "Triage"
     }
   ]
