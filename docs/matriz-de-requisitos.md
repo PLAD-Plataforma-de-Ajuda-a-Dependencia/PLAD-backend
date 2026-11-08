@@ -1,6 +1,6 @@
 # Matriz de requisitos
 
-Conferida em 2026-11-07, no commit `b59faf1` (branch `feat/livekit-reuniao-ao-vivo`).
+Conferida em 2026-11-08, no commit `7e5b323` (branch `feat/livekit-reuniao-ao-vivo`).
 
 **Regra de manutenção:** todo PR que muda a situação de um requisito atualiza este arquivo (situação, código, teste e o quadro abaixo).
 
