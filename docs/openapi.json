@@ -554,6 +554,15 @@
               "null"
             ]
           },
+          "revoked_at": {
+            "description": "When the acceptance was withdrawn (UTC); null while it is in force. Only the health data consent can be withdrawn (DELETE /me/consents/health); the row stays as proof",
+            "example": "2026-11-12T14:05:00Z",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "version": {
             "description": "Version accepted",
             "example": "1.0",
@@ -564,6 +573,7 @@
           "accepted_at",
           "document",
           "ip",
+          "revoked_at",
           "version"
         ]
       },
@@ -2849,6 +2859,68 @@
       }
     },
     "/me/consents/health": {
+      "delete": {
+        "description": "Dependents only (LGPD art. 8, § 5 and art. 18, IX). In one transaction: the acceptance in force is marked as revoked (the record stays, with the time of the withdrawal, and shows in GET /me/export), the triage and its answers are deleted and the registrations for meetings that have not started are cancelled; the registrations for meetings that already started stay. Psychologists stop reading the triage. Afterwards GET /me says health_consent_pending, and POST /triage and the registration for a meeting answer 400 CONSENT_REQUIRED until POST /me/consents/health accepts it again. Idempotent: with nothing to withdraw it changes nothing",
+        "operationId": "revokeHealthConsent",
+        "responses": {
+          "204": {
+            "description": "Withdrawn (or there was nothing to withdraw)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "The user is not a dependent"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDTO"
+                }
+              }
+            },
+            "description": "Database unavailable, try again after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the next attempt",
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Withdraw my consent to process my health data",
+        "tags": [
+          "Me"
+        ]
+      },
       "post": {
         "description": "Dependents only (LGPD art. 11, I). Records the acceptance of the health data consent in the version in force, with the time and the client IP. It is its own step, taken before the first triage and not at sign-up. Without it POST /triage, PUT /triage and the registration for a meeting answer 400 CONSENT_REQUIRED. Use it when GET /me says health_consent_pending. Accepting a version that is already on file changes nothing",
         "operationId": "acceptHealthConsent",
@@ -4698,7 +4770,7 @@
     },
     "/triages": {
       "get": {
-        "description": "Only the triages of dependents registered in a meeting of the caller that was not cancelled (scheduled or ended); with no such dependent the page is empty and nothing is recorded. Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id, nickname and real name",
+        "description": "Only the triages of dependents registered in a meeting of the caller that was not cancelled (scheduled or ended) and that did not end more than 30 calendar days ago (counted in America/Sao_Paulo: a meeting that ends on Nov 1 can be read through Dec 1); with no such dependent the page is empty and nothing is recorded. Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. The dependent is identified by id, nickname and real name",
         "operationId": "listTriages",
         "parameters": [
           {
@@ -4806,7 +4878,7 @@
     },
     "/triages/{id}": {
       "get": {
-        "description": "Only for a dependent registered in a meeting of the caller that was not cancelled; any other triage answers 404, as if it did not exist, and is not recorded. Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read",
+        "description": "Only for a dependent registered in a meeting of the caller that was not cancelled and that did not end more than 30 calendar days ago (America/Sao_Paulo); any other triage answers 404, as if it did not exist, and is not recorded. Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read",
         "operationId": "findTriage",
         "parameters": [
           {
@@ -4858,7 +4930,7 @@
                 }
               }
             },
-            "description": "No triage with this id, or its dependent is not registered in a non-cancelled meeting of the caller (TRIAGE_NOT_FOUND)"
+            "description": "No triage with this id, or its dependent is not registered in a non-cancelled meeting of the caller that did not end more than 30 days ago (TRIAGE_NOT_FOUND)"
           },
           "500": {
             "content": {
@@ -4942,7 +5014,7 @@
       "name": "Triage"
     },
     {
-      "description": "Reading triages; psychologist only, and only the dependents registered in a non-cancelled meeting of theirs (admins read every triage at /admin/triages)",
+      "description": "Reading triages; psychologist only, and only the dependents registered in a non-cancelled meeting of theirs, until 30 days after it ends (admins read every triage at /admin/triages)",
       "name": "Triage"
     }
   ]

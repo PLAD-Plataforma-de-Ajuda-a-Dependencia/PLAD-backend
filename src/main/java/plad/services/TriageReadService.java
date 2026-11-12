@@ -24,6 +24,8 @@ import plad.repositories.ResultQuestionTriageRepository;
 import plad.repositories.TriageRepository;
 import plad.repositories.UserRepository;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,9 +37,10 @@ import java.util.stream.Collectors;
 // Reading triages for admins and psychologists. Every triage returned writes one TRIAGE_VIEWED entry in the
 // same transaction, so reading the same triage twice leaves two entries. The route's @PreAuthorize decides who
 // gets here; the role recorded in the entry comes from the database.
-// A psychologist reads only the triage of a dependent registered in a meeting of theirs that was not cancelled (LGPD
-// art. 6, III): the filter is in the query (TriageRepository#findVisibleToPsychologist*), so a triage outside it is never
-// loaded, it answers 404 like an unknown id (it does not reveal that the triage exists) and it writes no audit entry.
+// A psychologist reads only the triage of a dependent registered in a meeting of theirs that was not cancelled, until
+// 30 calendar days after the meeting's end (LGPD art. 6, III; decision 13, MeetingRules#triageAccessCutoff): the filter
+// is in the query (TriageRepository#findVisibleToPsychologist*), so a triage outside it is never loaded, it answers 404
+// like an unknown id (it does not reveal that the triage exists) and it writes no audit entry.
 // The admin reads every triage.
 @Service
 public class TriageReadService {
@@ -49,30 +52,33 @@ public class TriageReadService {
     private final ResultQuestionTriageRepository resultQuestionTriageRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final Clock clock;
 
     public TriageReadService(TriageRepository triageRepository,
                              ResultQuestionTriageRepository resultQuestionTriageRepository,
                              UserRepository userRepository,
-                             AuditService auditService) {
+                             AuditService auditService,
+                             Clock clock) {
         this.triageRepository = triageRepository;
         this.resultQuestionTriageRepository = resultQuestionTriageRepository;
         this.userRepository = userRepository;
         this.auditService = auditService;
+        this.clock = clock;
     }
 
     // not readOnly: the audit entry is an INSERT and a read-only transaction would reject it
-    // Psychologist: only the dependents registered in a non-cancelled meeting of theirs. The dependent comes with
-    // nickname and real name (the only reader who gets the real name).
+    // Psychologist: only the dependents registered in a non-cancelled meeting of theirs, within the access period. The
+    // dependent comes with nickname and real name (the only reader who gets the real name).
     @Transactional
     public PageResponseDTO<TriageReadResponseDTO> list(Long actorId, int page, int size) {
         return listAs(actorId, page, size, TriageReadService::toPsychologistResponse,
-                pageable -> triageRepository.findVisibleToPsychologist(actorId, pageable));
+                pageable -> triageRepository.findVisibleToPsychologist(actorId, accessCutoff(), pageable));
     }
 
     @Transactional
     public TriageReadResponseDTO find(Long actorId, Long triageId) {
         return findAs(actorId, triageId, TriageReadService::toPsychologistResponse,
-                id -> triageRepository.findVisibleToPsychologistById(actorId, id));
+                id -> triageRepository.findVisibleToPsychologistById(actorId, accessCutoff(), id));
     }
 
     // Admin: every triage, but the dependent shows up by nickname only. A separate DTO, not a hidden field.
@@ -84,6 +90,11 @@ public class TriageReadService {
     @Transactional
     public AdminTriageReadResponseDTO findForAdmin(Long actorId, Long triageId) {
         return findAs(actorId, triageId, TriageReadService::toAdminResponse, triageRepository::findWithDependentById);
+    }
+
+    // the meetings whose ends_at is before this no longer give access
+    private Instant accessCutoff() {
+        return MeetingRules.triageAccessCutoff(clock.instant());
     }
 
     private <T> PageResponseDTO<T> listAs(Long actorId, int page, int size, TriageMapper<T> mapper,

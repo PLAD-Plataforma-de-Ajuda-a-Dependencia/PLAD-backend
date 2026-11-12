@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import plad.entity.MeetingRegistration;
 import plad.entity.MeetingRegistrationId;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -63,4 +64,11 @@ public interface MeetingRegistrationRepository extends JpaRepository<MeetingRegi
     @Query(value = "DELETE FROM meeting_registrations WHERE meeting_id = :meetingId AND dependent_id = :dependentId",
             nativeQuery = true)
     int deleteRegistration(@Param("meetingId") Long meetingId, @Param("dependentId") Long dependentId);
+
+    // Revoking the health data consent (decision 35): the registrations for meetings that have not started go, whatever
+    // their status; the ones for meetings that already started stay. Same edge as unregistering, which closes at the start
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "DELETE FROM meeting_registrations r USING meetings m "
+            + "WHERE r.meeting_id = m.id AND r.dependent_id = :dependentId AND m.starts_at > :now", nativeQuery = true)
+    int deleteNotStartedByDependent(@Param("dependentId") Long dependentId, @Param("now") Instant now);
 }

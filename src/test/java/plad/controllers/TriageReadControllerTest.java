@@ -33,6 +33,7 @@ import plad.services.JwtService;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -47,8 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // GET /triages (psychologist, with the real name) and GET /admin/triages (admin, nickname only). The admin reads every
-// triage; a psychologist only reads the triage of a dependent registered in a meeting of theirs that was not cancelled
-// (decision 13, LGPD art. 6, III), as often as they want; a dependent never does (not even their own triage); every
+// triage; a psychologist only reads the triage of a dependent registered in a meeting of theirs that was not cancelled,
+// until 30 calendar days after it ends (decision 13, LGPD art. 6, III), as often as they want; a dependent never does
+// (not even their own triage); every
 // triage returned leaves a TRIAGE_VIEWED entry (RNF003) and a refused one leaves none
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -460,9 +462,9 @@ class TriageReadControllerTest {
         assertThat(viewsOf(dependent)).isEmpty();
     }
 
-    // "not cancelled" includes a meeting that already happened: scheduled and ended both give access
+    // "not cancelled" includes a meeting that already happened, within the period: scheduled and ended both give access
     @Test
-    void anEndedMeetingKeepsTheAccess() throws Exception {
+    void anEndedMeetingKeepsTheAccessWithinThirtyDays() throws Exception {
         User dependent = newDependent(REAL_NAME);
         long triageId = submit(dependent);
         Instant start = Instant.now().minus(3, ChronoUnit.DAYS).truncatedTo(ChronoUnit.HOURS);
@@ -473,6 +475,51 @@ class TriageReadControllerTest {
                 .andExpect(jsonPath("$.dependent_id").value(dependent.getId()));
         read("/triages?size=100", psychologist).andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(1));
+    }
+
+    // Decision 13: the access lasts until the end of the 30th calendar day (Sao Paulo) after the day of ends_at. The
+    // meetings end at noon in Sao Paulo, so the test does not depend on the time it runs (MeetingRulesTest has the edges)
+    @Test
+    void onTheThirtiethDayAfterTheEndThePsychologistStillReadsTheTriage() throws Exception {
+        User dependent = newDependent(REAL_NAME);
+        long triageId = submit(dependent);
+        enrollInMeetingEndedDaysAgo(dependent, 30, "ended");
+
+        read("/triages/" + triageId, psychologist).andExpect(status().isOk())
+                .andExpect(jsonPath("$.dependent_id").value(dependent.getId()));
+        read("/triages?size=100", psychologist).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(triageId));
+        assertThat(viewsOf(dependent)).hasSize(2);
+    }
+
+    @Test
+    void onTheThirtyFirstDayTheTriageIsNotFoundAndNothingIsRecorded() throws Exception {
+        User dependent = newDependent(REAL_NAME);
+        long triageId = submit(dependent);
+        enrollInMeetingEndedDaysAgo(dependent, 31, "ended");
+
+        read("/triages/" + triageId, psychologist).andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("TRIAGE_NOT_FOUND"));
+        read("/triages?size=100", psychologist).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(0))
+                .andExpect(jsonPath("$.total_elements").value(0));
+        assertThat(viewsOf(dependent)).isEmpty();
+    }
+
+    // the status does not flip by itself after ends_at: a meeting nobody ended stays scheduled and must not give access
+    // forever
+    @Test
+    void aScheduledMeetingNobodyEndedAlsoStopsGivingAccessAfterThirtyDays() throws Exception {
+        User dependent = newDependent(REAL_NAME);
+        long triageId = submit(dependent);
+        enrollInMeetingEndedDaysAgo(dependent, 31, "scheduled");
+
+        read("/triages/" + triageId, psychologist).andExpect(status().isNotFound());
+        assertThat(viewsOf(dependent)).isEmpty();
+
+        enrollInMeetingEndedDaysAgo(dependent, 30, "scheduled");
+        read("/triages/" + triageId, psychologist).andExpect(status().isOk());
     }
 
     @Test
@@ -560,6 +607,15 @@ class TriageReadControllerTest {
         long meetingId = fixtures.meeting(host, start, start.plus(1, ChronoUnit.HOURS), status);
         fixtures.register(meetingId, dependent);
         return meetingId;
+    }
+
+    // a one-hour meeting of the main psychologist that ended at noon (Sao Paulo) `daysAgo` calendar days ago, with the
+    // dependent registered in it
+    private void enrollInMeetingEndedDaysAgo(User dependent, int daysAgo, String status) {
+        ZoneId saoPaulo = ZoneId.of("America/Sao_Paulo");
+        Instant end = LocalDate.now(saoPaulo).minusDays(daysAgo).atTime(12, 0).atZone(saoPaulo).toInstant();
+        long meetingId = fixtures.meeting(psychologist, end.minus(1, ChronoUnit.HOURS), end, status);
+        fixtures.register(meetingId, dependent);
     }
 
     private long triageViews() {

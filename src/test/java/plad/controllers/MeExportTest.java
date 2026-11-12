@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
@@ -110,6 +111,9 @@ class MeExportTest {
                 .andExpect(jsonPath("$.consents[2].version").value(TestConsents.HEALTH_VERSION))
                 .andExpect(jsonPath("$.consents[2].accepted_at").isNotEmpty())
                 .andExpect(jsonPath("$.consents[2].ip").value("198.51.100.7"))
+                // in force: the key is there, empty (HealthConsentRevocationTest covers a withdrawn one)
+                .andExpect(jsonPath("$.consents[2]", hasKey("revoked_at")))
+                .andExpect(jsonPath("$.consents[2].revoked_at").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.consents[3].document").value("participation"))
                 .andExpect(jsonPath("$.consents[3].version").value(TestConsents.PARTICIPATION_VERSION))
                 .andExpect(jsonPath("$.triage.id").isNotEmpty())

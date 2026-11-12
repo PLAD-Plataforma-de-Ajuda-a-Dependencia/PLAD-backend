@@ -5,10 +5,12 @@ import plad.exception.InvalidMeetingException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-// The limits the team decided (decisions 20 and 22), in one place. The same numbers are CHECKs in V25.
+// The limits the team decided (decisions 13, 20 and 22), in one place. The meeting limits are CHECKs in V25 too.
 // Every broken rule is reported, so the form can mark all the fields at once.
 final class MeetingRules {
 
@@ -25,8 +27,21 @@ final class MeetingRules {
     // bounds a removed person (or anyone, after an early end) coming back straight to LiveKit. The front asks
     // POST /join for a new token on every entry and never keeps one.
     static final Duration TOKEN_TTL = Duration.ofMinutes(2);
+    // How long a psychologist keeps reading the triage of a dependent registered in a meeting of theirs (decision 13):
+    // until the end of the 30th calendar day after the day of the meeting's ends_at, counted in Sao Paulo. A meeting that
+    // ends on Nov 1 (any time) can be read through Dec 1 and not on Dec 2. Scheduled meetings follow the same rule, so a
+    // meeting nobody ended does not give access forever. TriageRepository#findVisibleToPsychologist* apply it in the query.
+    static final int TRIAGE_ACCESS_DAYS_AFTER_END = 30;
+    static final ZoneId CALENDAR_ZONE = ZoneId.of("America/Sao_Paulo");
 
     private MeetingRules() {
+    }
+
+    // The earliest ends_at a meeting may have and still give access now: the start (Sao Paulo) of the day that is
+    // TRIAGE_ACCESS_DAYS_AFTER_END days before today. A meeting gives access while ends_at >= this instant.
+    static Instant triageAccessCutoff(Instant now) {
+        LocalDate today = LocalDate.ofInstant(now, CALENDAR_ZONE);
+        return today.minusDays(TRIAGE_ACCESS_DAYS_AFTER_END).atStartOfDay(CALENDAR_ZONE).toInstant();
     }
 
     // [starts_at - 10 min, ends_at)

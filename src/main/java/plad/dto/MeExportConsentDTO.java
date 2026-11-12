@@ -12,6 +12,10 @@ public record MeExportConsentDTO(
         String version,
         @Schema(description = "When it was accepted (UTC)", example = "2026-10-27T21:15:30Z")
         Instant acceptedAt,
+        @Schema(description = "When the acceptance was withdrawn (UTC); null while it is in force. Only the health data "
+                + "consent can be withdrawn (DELETE /me/consents/health); the row stays as proof", example = "2026-11-12T14:05:00Z",
+                nullable = true)
+        Instant revokedAt,
         @Schema(description = "Client IP recorded at the acceptance", example = "203.0.113.7", nullable = true)
         String ip
 ) {

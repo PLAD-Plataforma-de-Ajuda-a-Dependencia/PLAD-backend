@@ -77,7 +77,8 @@ public class MeExportService {
         MeExportAccountDTO account = new MeExportAccountDTO(user.getId(), user.getEmail(), user.getTypeUser(),
                 user.getBirthDate(), user.getGender(), user.getCreatedAt());
         List<MeExportConsentDTO> consents = consentRepository.findByUserIdOrderByIdAsc(userId).stream()
-                .map(c -> new MeExportConsentDTO(c.getDocument(), c.getVersion(), c.getAcceptedAt(), c.getIp()))
+                .map(c -> new MeExportConsentDTO(c.getDocument(), c.getVersion(), c.getAcceptedAt(),
+                        c.getRevokedAt(), c.getIp()))
                 .toList();
 
         MeExportDependentDTO dependent = null;

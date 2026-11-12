@@ -203,7 +203,8 @@ class OpenApiContractTest {
         samples.put("MeResponseDTO", new MeResponseDTO(1L, "a@b.com", UserType.psicologo, Instant.now(), false, null,
                 "name", CrmCrpType.CRP, "06123456", false, false, false));
         MeExportNicknameDTO exportNickname = new MeExportNicknameDTO("Morcego Sereno", Instant.now(), Instant.now());
-        MeExportConsentDTO exportConsent = new MeExportConsentDTO("terms", "1.0", Instant.now(), "203.0.113.7");
+        MeExportConsentDTO exportConsent = new MeExportConsentDTO("health", "1.0", Instant.now(), Instant.now(),
+                "203.0.113.7");
         MeExportAccountDTO exportAccount = new MeExportAccountDTO(1L, "a@b.com", UserType.dependente,
                 LocalDate.of(1990, 5, 20), Sex.feminino, Instant.now());
         MeExportMeetingRegistrationDTO exportRegistration = new MeExportMeetingRegistrationDTO(

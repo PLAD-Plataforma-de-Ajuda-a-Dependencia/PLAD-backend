@@ -28,6 +28,10 @@ public class Consent {
     @Column(name = "ip", length = 45, updatable = false)
     private String ip;
 
+    // null while the acceptance is in force; set only by ConsentRepository#revokeActive (V27), never through the entity
+    @Column(name = "revoked_at", insertable = false, updatable = false)
+    private Instant revokedAt;
+
     @PrePersist
     public void prePersist() {
         this.acceptedAt = Instant.now();
@@ -81,6 +85,10 @@ public class Consent {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public Instant getRevokedAt() {
+        return revokedAt;
     }
 
     //empty constructor

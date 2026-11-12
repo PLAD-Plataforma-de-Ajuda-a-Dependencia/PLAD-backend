@@ -24,11 +24,12 @@ import plad.dto.TriageReadResponseDTO;
 import plad.services.TriageReadService;
 
 // Psychologists read triages here, with the dependent's nickname and real name, but only those of dependents registered
-// in a meeting of theirs that was not cancelled. Admins read every triage at /admin/triages (nickname only,
+// in a meeting of theirs that was not cancelled, until 30 calendar days (Sao Paulo) after the day the meeting ends
+// (decision 13). Admins read every triage at /admin/triages (nickname only,
 // AdminTriageReadController). A dependent has no read route, not even for their own triage: they get their answers in
 // the POST/PUT response.
 @Tag(name = "Triage", description = "Reading triages; psychologist only, and only the dependents registered in a "
-        + "non-cancelled meeting of theirs (admins read every triage at /admin/triages)")
+        + "non-cancelled meeting of theirs, until 30 days after it ends (admins read every triage at /admin/triages)")
 @RestController
 @RequestMapping("/triages")
 @PreAuthorize("hasRole('PSICOLOGO')")
@@ -43,7 +44,9 @@ public class TriageReadController {
     // explicit operationIds: a second method called "list" would rename the one in /admin/audit in the contract
     @Operation(operationId = "listTriages", summary = "List triages, newest first",
             description = "Only the triages of dependents registered in a meeting of the caller that was not cancelled "
-                    + "(scheduled or ended); with no such dependent the page is empty and nothing is recorded. "
+                    + "(scheduled or ended) and that did not end more than 30 calendar days ago (counted in America/Sao_Paulo: "
+                    + "a meeting that ends on Nov 1 can be read through Dec 1); with no such dependent the page is empty "
+                    + "and nothing is recorded. "
                     + "Each triage returned is recorded in the audit trail (TRIAGE_VIEWED) with the reader's role. "
                     + "The dependent is identified by id, nickname and real name")
     @ApiResponses({
@@ -68,8 +71,9 @@ public class TriageReadController {
     }
 
     @Operation(operationId = "findTriage", summary = "Read one triage",
-            description = "Only for a dependent registered in a meeting of the caller that was not cancelled; any other "
-                    + "triage answers 404, as if it did not exist, and is not recorded. "
+            description = "Only for a dependent registered in a meeting of the caller that was not cancelled and that "
+                    + "did not end more than 30 calendar days ago (America/Sao_Paulo); any other triage answers 404, as if it "
+                    + "did not exist, and is not recorded. "
                     + "Recorded in the audit trail (TRIAGE_VIEWED) with the reader's role, every time it is read")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The triage",
@@ -82,7 +86,7 @@ public class TriageReadController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "No triage with this id, or its dependent is not registered "
-                    + "in a non-cancelled meeting of the caller (TRIAGE_NOT_FOUND)",
+                    + "in a non-cancelled meeting of the caller that did not end more than 30 days ago (TRIAGE_NOT_FOUND)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponseDTO.class)))
     })

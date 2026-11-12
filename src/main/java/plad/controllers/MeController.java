@@ -40,6 +40,7 @@ import plad.dto.PageResponseDTO;
 import plad.services.AccountDeletionService;
 import plad.services.AuditService;
 import plad.services.ConsentService;
+import plad.services.HealthConsentRevocationService;
 import plad.services.MeExportService;
 import plad.services.MeService;
 import plad.services.NicknameService;
@@ -58,12 +59,15 @@ public class MeController {
     private final PasswordChangeService passwordChangeService;
     private final AccountDeletionService accountDeletionService;
     private final MeExportService meExportService;
+    private final HealthConsentRevocationService healthConsentRevocationService;
     private final RefreshCookieFactory cookies;
 
     public MeController(AuditService auditService, MeService meService, NicknameService nicknameService,
                         ConsentService consentService, PasswordChangeService passwordChangeService,
                         AccountDeletionService accountDeletionService, MeExportService meExportService,
+                        HealthConsentRevocationService healthConsentRevocationService,
                         RefreshCookieFactory cookies) {
+        this.healthConsentRevocationService = healthConsentRevocationService;
         this.passwordChangeService = passwordChangeService;
         this.accountDeletionService = accountDeletionService;
         this.meExportService = meExportService;
@@ -165,6 +169,30 @@ public class MeController {
                                                     @Valid @RequestBody HealthConsentRequestDTO request,
                                                     HttpServletRequest httpRequest) {
         consentService.acceptHealth(userId, request.acceptedHealthVersion(), httpRequest.getRemoteAddr());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(operationId = "revokeHealthConsent", summary = "Withdraw my consent to process my health data",
+            description = "Dependents only (LGPD art. 8, § 5 and art. 18, IX). In one transaction: the acceptance in force is "
+                    + "marked as revoked (the record stays, with the time of the withdrawal, and shows in GET /me/export), the "
+                    + "triage and its answers are deleted and the registrations for meetings that have not started are "
+                    + "cancelled; the registrations for meetings that already started stay. Psychologists stop reading the "
+                    + "triage. Afterwards GET /me says health_consent_pending, and POST /triage and the registration for a "
+                    + "meeting answer 400 CONSENT_REQUIRED until POST /me/consents/health accepts it again. "
+                    + "Idempotent: with nothing to withdraw it changes nothing")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Withdrawn (or there was nothing to withdraw)"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "The user is not a dependent",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PreAuthorize("hasRole('DEPENDENTE')")
+    @DeleteMapping("/consents/health")
+    public ResponseEntity<Void> revokeHealthConsent(@AuthenticationPrincipal Long userId) {
+        healthConsentRevocationService.revoke(userId);
         return ResponseEntity.noContent().build();
     }
 

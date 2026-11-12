@@ -139,7 +139,7 @@ class TriageRepositoryTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    // ---- what a psychologist may read: registered in a non-cancelled meeting of theirs -------------------------------
+    // ---- what a psychologist may read: registered in a non-cancelled meeting of theirs, within the period ----------
 
     @Test
     void visibleToPsychologistMatchesOnlyRegisteredDependentsInNonCancelledMeetingsOfThatPsychologist() {
@@ -163,23 +163,23 @@ class TriageRepositoryTest {
         register(newMeeting(psychologist, 4, "cancelled"), onlyInCancelled);
         register(newMeeting(other, 0, "scheduled"), inAnothersMeeting);
 
-        Page<Triage> page = triageRepository.findVisibleToPsychologist(psychologist.getId(),
+        Page<Triage> page = triageRepository.findVisibleToPsychologist(psychologist.getId(), anyRecentCutoff(),
                 PageRequest.of(0, 50, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))));
 
         // the dependent in three meetings comes back once, and the page count agrees
         assertThat(page.getContent()).extracting(Triage::getId).containsExactly(visibleTwo.getId(), visibleOne.getId());
         assertThat(page.getTotalElements()).isEqualTo(2);
 
-        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), visibleOne.getId())).isPresent();
-        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), visibleTwo.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), anyRecentCutoff(), visibleOne.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), anyRecentCutoff(), visibleTwo.getId())).isPresent();
         for (Triage outside : List.of(cancelledOnly, anothers, nobodys)) {
-            assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), outside.getId()))
+            assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), anyRecentCutoff(), outside.getId()))
                     .as("triage %d", outside.getId()).isEmpty();
         }
         // the other psychologist reads their own and nothing of the first one's
-        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), anothers.getId())).isPresent();
-        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), visibleOne.getId())).isEmpty();
-        assertThat(triageRepository.findVisibleToPsychologist(other.getId(), PageRequest.of(0, 50)).getContent())
+        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), anyRecentCutoff(), anothers.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(other.getId(), anyRecentCutoff(), visibleOne.getId())).isEmpty();
+        assertThat(triageRepository.findVisibleToPsychologist(other.getId(), anyRecentCutoff(), PageRequest.of(0, 50)).getContent())
                 .extracting(Triage::getId).containsExactly(anothers.getId());
     }
 
@@ -195,8 +195,8 @@ class TriageRepositoryTest {
         }
         Sort newestFirst = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
 
-        Page<Triage> first = triageRepository.findVisibleToPsychologist(psychologist.getId(), PageRequest.of(0, 2, newestFirst));
-        Page<Triage> second = triageRepository.findVisibleToPsychologist(psychologist.getId(), PageRequest.of(1, 2, newestFirst));
+        Page<Triage> first = triageRepository.findVisibleToPsychologist(psychologist.getId(), anyRecentCutoff(), PageRequest.of(0, 2, newestFirst));
+        Page<Triage> second = triageRepository.findVisibleToPsychologist(psychologist.getId(), anyRecentCutoff(), PageRequest.of(1, 2, newestFirst));
 
         assertThat(first.getTotalElements()).isEqualTo(3);
         assertThat(first.getTotalPages()).isEqualTo(2);
@@ -208,10 +208,55 @@ class TriageRepositoryTest {
     void visibleToPsychologistWithNoMeetingIsEmpty() {
         newTriage(newDependent());
 
-        Page<Triage> page = triageRepository.findVisibleToPsychologist(newPsychologist().getId(), PageRequest.of(0, 20));
+        Page<Triage> page = triageRepository.findVisibleToPsychologist(newPsychologist().getId(), anyRecentCutoff(), PageRequest.of(0, 20));
 
         assertThat(page.getContent()).isEmpty();
         assertThat(page.getTotalElements()).isZero();
+    }
+
+    // The access period (decision 13) is the cutoff the service computes (MeetingRules#triageAccessCutoff): a meeting
+    // gives access while its ends_at is not before it, whatever its status but cancelled. Exact edges, so a fixed cutoff.
+    @Test
+    void visibleToPsychologistKeepsOnlyMeetingsThatEndOnOrAfterTheCutoff() {
+        Instant cutoff = Instant.parse("2026-10-13T03:00:00Z"); // 2026-10-13 00:00 in Sao Paulo
+        User psychologist = newPsychologist();
+        Dependent endedAtTheCutoff = newDependent();
+        Dependent endedASecondBefore = newDependent();
+        Dependent neverEndedBefore = newDependent();
+        Dependent scheduledAfter = newDependent();
+        Triage atTheCutoff = newTriage(endedAtTheCutoff);
+        Triage secondBefore = newTriage(endedASecondBefore);
+        Triage neverEnded = newTriage(neverEndedBefore);
+        Triage after = newTriage(scheduledAfter);
+
+        register(newMeetingEndingAt(psychologist, cutoff, "ended"), endedAtTheCutoff);
+        register(newMeetingEndingAt(psychologist, cutoff.minusSeconds(1), "ended"), endedASecondBefore);
+        // a meeting nobody ended stays scheduled; past the period it gives no access either
+        register(newMeetingEndingAt(psychologist, cutoff.minus(2, ChronoUnit.DAYS), "scheduled"), neverEndedBefore);
+        register(newMeetingEndingAt(psychologist, cutoff.plus(1, ChronoUnit.DAYS), "scheduled"), scheduledAfter);
+
+        Page<Triage> page = triageRepository.findVisibleToPsychologist(psychologist.getId(), cutoff, PageRequest.of(0, 50));
+
+        assertThat(page.getContent()).extracting(Triage::getId)
+                .containsExactlyInAnyOrder(atTheCutoff.getId(), after.getId());
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), cutoff, atTheCutoff.getId())).isPresent();
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), cutoff, secondBefore.getId())).isEmpty();
+        assertThat(triageRepository.findVisibleToPsychologistById(psychologist.getId(), cutoff, neverEnded.getId())).isEmpty();
+    }
+
+    // a cutoff that every meeting of these tests (they start two days from now) is after
+    private static Instant anyRecentCutoff() {
+        return Instant.now().minus(30, ChronoUnit.DAYS);
+    }
+
+    // a one-hour meeting that ends at `end`
+    private long newMeetingEndingAt(User psychologist, Instant end, String status) {
+        return jdbcTemplate.queryForObject("""
+                        insert into meetings (psychologist_id, title, starts_at, ends_at, capacity, status)
+                        values (?, 'Sala', ?, ?, 10, ?) returning id""",
+                Long.class, psychologist.getId(), OffsetDateTime.ofInstant(end.minus(1, ChronoUnit.HOURS), ZoneOffset.UTC),
+                OffsetDateTime.ofInstant(end, ZoneOffset.UTC), status);
     }
 
     private User newPsychologist() {

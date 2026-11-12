@@ -10,10 +10,13 @@ import plad.exception.InvalidCredentialsException;
 import plad.repositories.ConsentRepository;
 import plad.repositories.UserRepository;
 
+import java.time.Instant;
+
 // LGPD art. 11: four documents, each accepted in the version currently in force.
 // - terms and privacy: accepted at sign-up and again on a new version; they block nothing (decision 16)
 // - health: dependents only, in its own step before the first triage; POST/PUT /triage and the registration for a
-//   meeting refuse without it (decision 35)
+//   meeting refuse without it; the dependent can revoke it (DELETE /me/consents/health), which also erases the triage
+//   and the registrations for meetings that have not started (decision 35)
 // - participation: the term shown at each registration for a meeting; the registration carries its version (decision 36)
 @Service
 public class ConsentService {
@@ -73,21 +76,25 @@ public class ConsentService {
 
     @Transactional(readOnly = true)
     public boolean isPending(Long userId) {
-        return !consentRepository.existsByUserIdAndDocumentAndVersion(userId, TERMS, termsVersion)
-                || !consentRepository.existsByUserIdAndDocumentAndVersion(userId, PRIVACY, privacyVersion);
+        return !consentRepository.existsByUserIdAndDocumentAndVersionAndRevokedAtIsNull(userId, TERMS, termsVersion)
+                || !consentRepository.existsByUserIdAndDocumentAndVersionAndRevokedAtIsNull(userId, PRIVACY, privacyVersion);
     }
 
     // ---- health (dependents only; the callers already know the user is a dependent) ----------------------------------
 
     @Transactional(readOnly = true)
     public boolean isHealthPending(Long userId) {
-        return !consentRepository.existsByUserIdAndDocumentAndVersion(userId, HEALTH, healthVersion);
+        return !consentRepository.existsByUserIdAndDocumentAndVersionAndRevokedAtIsNull(userId, HEALTH, healthVersion);
     }
 
-    // the gate of every write of health data: no row for the version in force, no write
-    @Transactional(readOnly = true)
+    // The gate of every write of health data: no active row for the version in force, no write. It joins the caller's
+    // transaction and reads the row FOR SHARE (not readOnly: Postgres refuses row locks in a read-only transaction), so a
+    // revocation running at the same time cannot leave behind what this write stores (decision 35).
+    @Transactional
     public void requireHealth(Long userId) {
-        if (isHealthPending(userId)) {
+        boolean onFile = !consentRepository
+                .findByUserIdAndDocumentAndVersionAndRevokedAtIsNull(userId, HEALTH, healthVersion).isEmpty();
+        if (!onFile) {
             throw new ConsentRequiredException("Consent to the processing of health data (version " + healthVersion
                     + ") must be accepted first");
         }
@@ -103,6 +110,13 @@ public class ConsentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidCredentialsException("User no longer exists"));
         recordOne(user, HEALTH, healthVersion, ip);
+    }
+
+    // DELETE /me/consents/health: marks the acceptances in force as revoked (they stay as proof). It runs first in the
+    // revocation's transaction, so it is the step that takes the row lock that requireHealth shares
+    @Transactional
+    public void revokeHealth(Long userId, Instant now) {
+        consentRepository.revokeActive(userId, HEALTH, now);
     }
 
     // ---- participation term (carried by the registration for a meeting) ----------------------------------------------
@@ -121,9 +135,10 @@ public class ConsentService {
         recordOne(userRepository.getReferenceById(userId), PARTICIPATION, participationVersion, ip);
     }
 
-    // accepting a version that is already on file adds nothing, so repeating the call is harmless
+    // accepting a version that is already on file (and not revoked) adds nothing, so repeating the call is harmless; after
+    // a revocation it adds a new row next to the revoked one (the unique index only covers active rows, V27)
     private void recordOne(User user, String document, String version, String ip) {
-        if (consentRepository.existsByUserIdAndDocumentAndVersion(user.getId(), document, version)) {
+        if (consentRepository.existsByUserIdAndDocumentAndVersionAndRevokedAtIsNull(user.getId(), document, version)) {
             return;
         }
         Consent consent = new Consent();
